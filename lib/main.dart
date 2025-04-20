@@ -20,6 +20,7 @@ class MyApp extends StatelessWidget {
             theme: ThemeData(
                 scaffoldBackgroundColor: Colors.white,
                 appBarTheme: AppBarTheme(
+                  scrolledUnderElevation: 0,
                   backgroundColor: Colors.white,
                   titleTextStyle: TextStyle(
                     color: Colors.black,

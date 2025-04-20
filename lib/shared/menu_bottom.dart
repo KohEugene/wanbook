@@ -36,7 +36,9 @@ class _MenuBottomState extends State<MenuBottom> {
       bottomNavigationBar: Theme(
         data: Theme.of(context).copyWith(
           splashColor: Colors.transparent,
-          highlightColor: Colors.transparent
+          highlightColor: Colors.transparent,
+          hoverColor: Colors.transparent,
+          splashFactory: NoSplash.splashFactory
         ),
         child: Container(
           decoration: BoxDecoration(
