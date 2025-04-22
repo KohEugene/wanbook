@@ -56,14 +56,13 @@ class _JoinScreenState extends State<JoinScreen> {
               SizedBox(
                   width: SizeConfig.screenWidth * 0.9,
                   height: 57,
-                  child: ElevatedButton(onPressed: (){
+                  child: TextButton(onPressed: (){
                     Navigator.push(context, MaterialPageRoute(builder: (context) {
                       return MenuBottom();
                     },));
                   },
-                      style: ElevatedButton.styleFrom(
+                      style: TextButton.styleFrom(
                           backgroundColor: Color(0xffE4E4E4),
-                          elevation: 0,
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16)
                           )
@@ -127,10 +126,9 @@ class _JoinScreenState extends State<JoinScreen> {
                 child: SizedBox(
                     width: 90,
                     height: 36,
-                    child: ElevatedButton(onPressed: (){},
-                        style: ElevatedButton.styleFrom(
+                    child: TextButton(onPressed: (){},
+                        style: TextButton.styleFrom(
                             backgroundColor: Color(0xffF8F8F8),
-                            elevation: 0,
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(32)
                             )

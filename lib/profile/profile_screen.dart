@@ -96,10 +96,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         SizedBox(
             width: 90,
             height: 36,
-            child: ElevatedButton(onPressed: (){},
-                style: ElevatedButton.styleFrom(
+            child: TextButton(onPressed: (){},
+                style: TextButton.styleFrom(
                     backgroundColor: Color(0xffF8F8F8),
-                    elevation: 0,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(32)
                     )

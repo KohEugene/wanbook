@@ -86,14 +86,13 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(
                 width: SizeConfig.screenWidth * 0.9,
                 height: 57,
-                child: ElevatedButton(onPressed: (){
+                child: TextButton(onPressed: (){
                   Navigator.push(context, MaterialPageRoute(builder: (context) {
                     return MenuBottom();
                   },));
                 },
-                    style: ElevatedButton.styleFrom(
+                    style: TextButton.styleFrom(
                         backgroundColor: Color(0xffCCE4FF),
-                        elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16)
                         )
@@ -133,14 +132,13 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(
                   width: SizeConfig.screenWidth * 0.9,
                   height: 57,
-                  child: ElevatedButton(onPressed: (){
+                  child: TextButton(onPressed: (){
                     Navigator.push(context, MaterialPageRoute(builder: (context) {
                       return JoinScreen();
                     },));
                   },
-                      style: ElevatedButton.styleFrom(
+                      style: TextButton.styleFrom(
                           backgroundColor: Color(0xffE4E4E4),
-                          elevation: 0,
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16)
                           )
