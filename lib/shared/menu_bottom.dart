@@ -77,9 +77,9 @@ class _MenuBottomState extends State<MenuBottom> {
             selectedItemColor: Color(0xff0077FF),
 
             items: [
-              BottomNavigationBarItem(icon: Icon(Icons.home), label: '홈'),
-              BottomNavigationBarItem(icon: Icon(Icons.search), label: '검색'),
-              BottomNavigationBarItem(icon: Icon(Icons.book), label: '서재'),
+              BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: '홈'),
+              BottomNavigationBarItem(icon: Icon(Icons.search_rounded), label: '검색'),
+              BottomNavigationBarItem(icon: Icon(Icons.book_rounded), label: '서재'),
               BottomNavigationBarItem(icon: Icon(Icons.perm_identity_rounded), label: '내 프로필')
             ],
           ),
