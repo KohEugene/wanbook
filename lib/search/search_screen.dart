@@ -1,6 +1,7 @@
 // 검색 메인 화면
 import 'package:flutter/material.dart';
 import 'package:wanbook/shared/menu_bottom.dart';
+import 'package:wanbook/search/search_result_screen.dart'; 
 
 import '../shared/size_config.dart';
 
@@ -19,6 +20,7 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   final recentSearches = ['데미안', '종의 기원', '소년이 온다', '책제목'];
   final recommendedSearches = ['데미안', '종의 기원', '소년이 온다', '싯다르타', '눈먼 자들의 도시'];
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -99,6 +101,7 @@ class _SearchScreenState extends State<SearchScreen> {
               children: [
                 Expanded(
                   child: TextField(
+                    controller: _searchController,
                     decoration: InputDecoration(
                       hintText: '검색어를 입력해 주세요',
                       border: InputBorder.none,
@@ -108,7 +111,16 @@ class _SearchScreenState extends State<SearchScreen> {
                 ),
                 IconButton(
                   icon: Icon(Icons.search, color: Color(0xff777777)),
-                onPressed: () {}
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SearchResultScreen(
+                          searchKeyword: _searchController.text,
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
