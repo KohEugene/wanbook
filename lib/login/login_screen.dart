@@ -91,7 +91,7 @@ class _LoginScreenState extends State<LoginScreen> {
             decoration: InputDecoration(
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.all(16),
-                hintText: '아이디를 입력해 주세요',
+                hintText: '아이디를 입력해 주세요!',
                 hintStyle: TextStyle(
                     color: Color(0xff777777),
                     fontWeight: FontWeight.w400,
@@ -139,7 +139,7 @@ class _LoginScreenState extends State<LoginScreen> {
             decoration: InputDecoration(
               border: InputBorder.none,
               contentPadding: EdgeInsets.all(16),
-              hintText: '비밀번호를 입력해 주세요',
+              hintText: '비밀번호를 입력해 주세요!',
               hintStyle: TextStyle(
                 color: Color(0xff777777),
                 fontWeight: FontWeight.w400,
