@@ -1,6 +1,4 @@
-
 // 검색 메인 화면
-
 import 'package:flutter/material.dart';
 import 'package:wanbook/shared/menu_bottom.dart';
 
@@ -26,9 +24,10 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
+        child: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.05),
-          child: SingleChildScrollView(
+          
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
