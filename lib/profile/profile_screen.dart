@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:wanbook/aichat/chatlist_screen.dart';
 import 'package:wanbook/profile/badge_screen.dart';
+import 'package:wanbook/shared/pop_up.dart';
 
 import '../shared/size_config.dart';
 
@@ -21,49 +22,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        centerTitle: true,
         title: Text('내 프로필'),
       ),
-      body: SafeArea(
+      body: SingleChildScrollView(
           child: Padding(
             // 양쪽 여백 넣기 (좌우, 상하 기준)
             padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth*0.05),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: 16,),
-                  userInfoSection(),
-                  SizedBox(height: 16,),
-                  readingStatus(),
-                  SizedBox(height: 16,),
-                  GestureDetector(
-                      onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) {
-                          return ChatlistScreen();
-                          },));
-                        },
-                      child: chatWithChackmeong()
-                  ),
-                  SizedBox(height: 16,),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(child: readingCard('가장 빨리 읽었어요', '3시간 독서')),
-                      SizedBox(width: 16,),
-                      Expanded(child: readingCard('가장 오래 읽었어요', '1개월 독서'))
-                    ],
-                  ),
-                  SizedBox(height: 16,),
-                  monthlyRecord(),
-                  SizedBox(height: 16,),
-                  achieveBadge(),
-                  SizedBox(height: 16,),
-                ],
-              ),
-            )
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: 16,),
+                userInfoSection(),
+                SizedBox(height: 16,),
+                readingStatus(),
+                SizedBox(height: 16,),
+                GestureDetector(
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) {
+                        return ChatlistScreen();
+                        },));
+                      },
+                    child: chatWithChackmeong()
+                ),
+                SizedBox(height: 16,),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(child: readingCard('가장 빨리 읽었어요', '3시간 독서')),
+                    SizedBox(width: 16,),
+                    Expanded(child: readingCard('가장 오래 읽었어요', '1개월 독서'))
+                  ],
+                ),
+                SizedBox(height: 16,),
+                monthlyRecord(),
+                SizedBox(height: 16,),
+                achieveBadge(),
+                SizedBox(height: 16,),
+              ],
+            ),
           )
-      ),
+      )
     );
   }
 
@@ -73,7 +71,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
       children: [
         Row(
           children: [
-            CircleAvatar(radius: 28, backgroundColor: Color(0xffD9D9D9),),
+            Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  CircleAvatar(
+                    radius: 28,
+                    backgroundColor: Color(0xffD9D9D9),
+                  ),
+                  Positioned(
+                    right: -2,
+                    bottom: -2,
+                    child: Container(
+                      width: 20,
+                      height: 20,
+                      decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Color(0xffBABABA)
+                      ),
+                      child: IconButton(
+                        padding: EdgeInsets.zero,
+                        onPressed: () {
+                          showDialog(
+                              context: context,
+                              barrierDismissible: true,
+                              builder: (context) {
+                                return PopUp();
+                              },
+                          );
+                        },
+                        icon: Icon(Icons.edit, color: Color(0xff777777), size: 12,),
+                      ),
+                    ),
+                  ),
+                ]
+            ),
             SizedBox(width: 16,),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -274,10 +305,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     return BadgeScreen();
                   },));
                 },
-                  child: Text('더보기', style: TextStyle(
-                      color: Color(0xff777777),
-                      fontWeight: FontWeight.w400,
-                      fontSize: 14),
+                  child: Row(
+                    children: [
+                      Text('더보기', style: TextStyle(
+                          color: Color(0xff777777),
+                          fontWeight: FontWeight.w400,
+                          fontSize: 14),
+                      ),
+                      Icon(Icons.chevron_right_rounded,
+                        color: Color(0xff777777),
+                        size: 14,
+                      )
+                    ],
                   ),
                 ),
               ]
@@ -325,10 +364,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   return BadgeScreen();
                 },));
                 },
-                child: Text('더보기', style: TextStyle(
-                    color: Color(0xff777777),
-                    fontWeight: FontWeight.w400,
-                    fontSize: 14),
+                child: Row(
+                  children: [
+                    Text('더보기', style: TextStyle(
+                        color: Color(0xff777777),
+                        fontWeight: FontWeight.w400,
+                        fontSize: 14),
+                    ),
+                    Icon(Icons.chevron_right_rounded,
+                      color: Color(0xff777777),
+                      size: 14,
+                    )
+                  ],
                 ),
               ),
             ]

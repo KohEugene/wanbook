@@ -22,7 +22,6 @@ class _BadgeScreenState extends State<BadgeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        centerTitle: true,
         title: Text('독서 배지'),
         leading: IconButton(onPressed: () {
           Navigator.pop(context);  // 전 화면으로 돌아가기 위해서는 Navigator.pop 사용

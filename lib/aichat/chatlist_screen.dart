@@ -18,7 +18,6 @@ class _ChatlistScreenState extends State<ChatlistScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        centerTitle: true,
         title: Text('채팅 목록'),
         leading: IconButton(onPressed: () {
           Navigator.pop(context);

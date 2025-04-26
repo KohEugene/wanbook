@@ -22,6 +22,7 @@ class MyApp extends StatelessWidget {
                 appBarTheme: AppBarTheme(
                   scrolledUnderElevation: 0,
                   backgroundColor: Colors.white,
+                  centerTitle: true,
                   titleTextStyle: TextStyle(
                     color: Colors.black,
                     fontSize: 20,
