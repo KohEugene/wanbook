@@ -25,9 +25,10 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
+        child: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.05),
-          child: SingleChildScrollView(
+          
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
