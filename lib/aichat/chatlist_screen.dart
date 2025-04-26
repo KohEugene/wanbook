@@ -46,6 +46,7 @@ class _ChatlistScreenState extends State<ChatlistScreen> {
     );
   }
 
+  // 책 당 채팅 목록
   Widget chatRecord(String title, String chat, String time) {
     return SizedBox(
       height: 80,

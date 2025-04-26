@@ -51,6 +51,7 @@ class _BadgeScreenState extends State<BadgeScreen> {
     );
   }
 
+  // 배지 위젯
   Widget recordBadge(String title, bool isLocked) {
     return SizedBox(
       width: 65,

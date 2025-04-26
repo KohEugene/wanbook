@@ -13,6 +13,8 @@ class PopUp extends StatefulWidget {
 }
 
 class _PopUpState extends State<PopUp> {
+
+  // 사용자 정보 수정 다이얼로그
   @override
   Widget build(BuildContext context) {
     return Dialog(

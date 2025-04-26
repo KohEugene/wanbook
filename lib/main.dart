@@ -17,6 +17,7 @@ class MyApp extends StatelessWidget {
           return MaterialApp(
             title: '완북',
             debugShowCheckedModeBanner: false,
+            // 테마 설정
             theme: ThemeData(
                 scaffoldBackgroundColor: Colors.white,
                 appBarTheme: AppBarTheme(
