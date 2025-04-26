@@ -31,11 +31,11 @@ class _BadgeScreenState extends State<BadgeScreen> {
         ),
       ),
       body: SafeArea(
+        child: SingleChildScrollView(
           child: Padding(
             padding: EdgeInsets.symmetric(
                 horizontal: SizeConfig.screenWidth*0.05,
             ),
-            child: SingleChildScrollView(
               child: Column(
                 children: [
                   SizedBox(height: 16,),

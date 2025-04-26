@@ -1,5 +1,4 @@
 // 검색 메인 화면
-
 import 'package:flutter/material.dart';
 import 'package:wanbook/shared/menu_bottom.dart';
 
