@@ -80,6 +80,7 @@ class _JoinScreenState extends State<JoinScreen> {
     );
   }
 
+  // 에러 메시지 있는 TextFormField
   Widget buildFieldWithError(String label, String errorText, String hintText,
       {bool obscure = false, bool hasCheckButton = false}) {
     return Column(

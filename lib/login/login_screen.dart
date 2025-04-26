@@ -16,9 +16,10 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  
+
+  // 아이디 저장 여부
   bool saveId = false;
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

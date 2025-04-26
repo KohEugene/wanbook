@@ -65,6 +65,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  // 사용자 정보 섹션
   Widget userInfoSection() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
