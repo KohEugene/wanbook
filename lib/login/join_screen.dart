@@ -3,7 +3,6 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:wanbook/home/home_screen.dart';
 import 'package:wanbook/login/login_screen.dart';
 import 'package:wanbook/shared/menu_bottom.dart';
 
@@ -33,54 +32,55 @@ class _JoinScreenState extends State<JoinScreen> {
         ),
       ),
       body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth*0.05, vertical: SizeConfig.screenHeight*0.05),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        buildFieldWithError('아이디', '사용할 수 없는 아이디입니다', '아이디 입력 (6~20자)'),
-                        buildFieldWithError('비밀번호', '사용할 수 없는 비밀번호입니다', '비밀번호 입력 (문자, 숫자, 특수문자 포함 8~20자)'),
-                        buildFieldWithError('비밀번호 확인', '비밀번호가 일치하지 않습니다', '비밀번호 재입력'),
-                        buildSimpleField('이름', '이름을 입력해 주세요'),
-                        buildSimpleField('전화번호', "휴대폰 번호 입력 ('-' 제외 11자리 입력)"),
-                        buildFieldWithError('별명', '사용할 수 없는 별명입니다', '별명을 입력해 주세요', hasCheckButton: true),
-                      ],
-                    ),
-                  )
-              ),
-              SizedBox(height: 20),
-              SizedBox(
-                  width: SizeConfig.screenWidth * 0.9,
-                  height: 57,
-                  child: TextButton(onPressed: (){
-                    Navigator.push(context, MaterialPageRoute(builder: (context) {
-                      return MenuBottom();
-                    },));
-                  },
-                      style: TextButton.styleFrom(
-                          backgroundColor: Color(0xffE4E4E4),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16)
-                          )
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth*0.05, vertical: SizeConfig.screenHeight*0.05),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          buildFieldWithError('아이디', '사용할 수 없는 아이디입니다', '아이디 입력 (6~20자)'),
+                          buildFieldWithError('비밀번호', '사용할 수 없는 비밀번호입니다', '비밀번호 입력 (문자, 숫자, 특수문자 포함 8~20자)'),
+                          buildFieldWithError('비밀번호 확인', '비밀번호가 일치하지 않습니다', '비밀번호 재입력'),
+                          buildSimpleField('이름', '이름을 입력해 주세요'),
+                          buildSimpleField('전화번호', "휴대폰 번호 입력 ('-' 제외 11자리 입력)"),
+                          buildFieldWithError('별명', '사용할 수 없는 별명입니다', '별명을 입력해 주세요', hasCheckButton: true),
+                        ],
                       ),
-                      child: Text('가입하기', style: TextStyle(
-                          color: Color(0xff777777),
-                          fontWeight: FontWeight.w600,
-                          fontSize: 18),
-                      )
-                  )
-              ),
-            ],
-          ),
-        )
+                    )
+                ),
+                SizedBox(height: 20),
+                SizedBox(
+                    width: SizeConfig.screenWidth * 0.9,
+                    height: 57,
+                    child: TextButton(onPressed: (){
+                      Navigator.push(context, MaterialPageRoute(builder: (context) {
+                        return MenuBottom();
+                      },));
+                    },
+                        style: TextButton.styleFrom(
+                            backgroundColor: Color(0xffE4E4E4),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16)
+                            )
+                        ),
+                        child: Text('가입하기', style: TextStyle(
+                            color: Color(0xff777777),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 18),
+                        )
+                    )
+                ),
+              ],
+            ),
+          )
       ),
     );
   }
 
+  // 에러 메시지 있는 TextFormField
   Widget buildFieldWithError(String label, String errorText, String hintText,
       {bool obscure = false, bool hasCheckButton = false}) {
     return Column(

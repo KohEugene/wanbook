@@ -17,11 +17,13 @@ class MyApp extends StatelessWidget {
           return MaterialApp(
             title: '완북',
             debugShowCheckedModeBanner: false,
+            // 테마 설정
             theme: ThemeData(
                 scaffoldBackgroundColor: Colors.white,
                 appBarTheme: AppBarTheme(
                   scrolledUnderElevation: 0,
                   backgroundColor: Colors.white,
+                  centerTitle: true,
                   titleTextStyle: TextStyle(
                     color: Colors.black,
                     fontSize: 20,
