@@ -24,43 +24,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
         automaticallyImplyLeading: false,
         title: Text('내 프로필'),
       ),
-      body: SingleChildScrollView(
-          child: Padding(
-            // 양쪽 여백 넣기 (좌우, 상하 기준)
-            padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth*0.05),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(height: 16,),
-                userInfoSection(),
-                SizedBox(height: 16,),
-                readingStatus(),
-                SizedBox(height: 16,),
-                GestureDetector(
-                    onTap: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) {
-                        return ChatlistScreen();
-                        },));
-                      },
-                    child: chatWithChackmeong()
-                ),
-                SizedBox(height: 16,),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(child: readingCard('가장 빨리 읽었어요', '3시간 독서')),
-                    SizedBox(width: 16,),
-                    Expanded(child: readingCard('가장 오래 읽었어요', '1개월 독서'))
-                  ],
-                ),
-                SizedBox(height: 16,),
-                monthlyRecord(),
-                SizedBox(height: 16,),
-                achieveBadge(),
-                SizedBox(height: 16,),
-              ],
-            ),
-          )
+      body: SafeArea(
+        child: SingleChildScrollView(
+            child: Padding(
+              // 양쪽 여백 넣기 (좌우, 상하 기준)
+              padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth*0.05),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: 16,),
+                  userInfoSection(),
+                  SizedBox(height: 16,),
+                  readingStatus(),
+                  SizedBox(height: 16,),
+                  GestureDetector(
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) {
+                          return ChatlistScreen();
+                          },));
+                        },
+                      child: chatWithChackmeong()
+                  ),
+                  SizedBox(height: 16,),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(child: readingCard('가장 빨리 읽었어요', '3시간 독서')),
+                      SizedBox(width: 16,),
+                      Expanded(child: readingCard('가장 오래 읽었어요', '1개월 독서'))
+                    ],
+                  ),
+                  SizedBox(height: 16,),
+                  monthlyRecord(),
+                  SizedBox(height: 16,),
+                  achieveBadge(),
+                  SizedBox(height: 16,),
+                ],
+              ),
+            )
+        ),
       )
     );
   }

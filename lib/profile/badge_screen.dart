@@ -113,7 +113,7 @@ class _BadgeScreenState extends State<BadgeScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: GridView.count(
               crossAxisCount: 4,
-              mainAxisSpacing: 30,
+              mainAxisSpacing: 24,
               crossAxisSpacing: 16,
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
@@ -150,7 +150,7 @@ class _BadgeScreenState extends State<BadgeScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: GridView.count(
               crossAxisCount: 4,
-              mainAxisSpacing: 30,
+              mainAxisSpacing: 24,
               crossAxisSpacing: 16,
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
