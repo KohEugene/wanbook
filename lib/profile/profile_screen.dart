@@ -37,14 +37,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   SizedBox(height: 16,),
                   readingStatus(),
                   SizedBox(height: 16,),
-                  GestureDetector(
-                      onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) {
-                          return ChatlistScreen();
-                          },));
-                        },
-                      child: chatWithChackmeong()
-                  ),
+                  chatWithChackmeong(),
                   SizedBox(height: 16,),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -180,17 +173,44 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Container(
       width: SizeConfig.screenWidth * 0.9,
       height: 166,
-      padding: EdgeInsets.only(top: 16, left: 16),
+      padding: EdgeInsets.only(top: 16, left: 16, right: 16),
       decoration: BoxDecoration(
           color: Color(0xffF8F8F8),
           borderRadius: BorderRadius.circular(16)
       ),
       child: Stack(
         children: [
-          Text('책멍이와의 대화', style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.w600,
-            fontSize: 18)
+          Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('책멍이와의 대화', style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 18),
+                ),
+                TextButton(onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return ChatlistScreen();
+                  },));
+                },
+                  style: ButtonStyle(
+                      overlayColor: WidgetStateColor.resolveWith((states) => Colors.transparent,)
+                  ),
+                  child: Row(
+                    children: [
+                      Text('목록 보기', style: TextStyle(
+                          color: Color(0xff777777),
+                          fontWeight: FontWeight.w400,
+                          fontSize: 14),
+                      ),
+                      Icon(Icons.chevron_right_rounded,
+                        color: Color(0xff777777),
+                        size: 14,
+                      )
+                    ],
+                  ),
+                ),
+              ]
           ),
           Image.asset('assets/images/list_Chaekmeong.png')
         ],
@@ -308,6 +328,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     return BadgeScreen();
                   },));
                 },
+                  style: ButtonStyle(
+                      overlayColor: WidgetStateColor.resolveWith((states) => Colors.transparent,)
+                  ),
                   child: Row(
                     children: [
                       Text('더보기', style: TextStyle(
@@ -367,6 +390,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   return BadgeScreen();
                 },));
                 },
+                style: ButtonStyle(
+                  overlayColor: WidgetStateColor.resolveWith((states) => Colors.transparent,)
+                ),
                 child: Row(
                   children: [
                     Text('더보기', style: TextStyle(

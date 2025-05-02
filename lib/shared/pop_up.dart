@@ -91,6 +91,7 @@ class _PopUpState extends State<PopUp> {
                     width: 118,
                     height: 46,
                     child: TextButton(onPressed: (){
+                      Navigator.of(context).pop();
                     },
                         style: TextButton.styleFrom(
                             backgroundColor: Color(0xffE4E4E4),
