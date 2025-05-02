@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:wanbook/shared/menu_bottom.dart';
 import 'package:wanbook/search/search_result_screen.dart'; 
+import 'package:wanbook/question/purpose_screen.dart';
 
 import '../shared/size_config.dart';
 
@@ -221,12 +222,20 @@ class _SearchScreenState extends State<SearchScreen> {
               } 
               if (index == 1) {
                 return buildBookItem(
-                  '데미안', 
-                  '헤르만 헤세', 
-                  imageUrl: 'https://covers.openlibrary.org/b/id/14633424-L.jpg'
-                  , 
+                  '데미안',
+                  '헤르만 헤세',
+                  imageUrl: 'https://covers.openlibrary.org/b/id/14633424-L.jpg',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ReadingPurposeScreen(),
+                      ),
+                    );
+                  },
                 );
-              } 
+              }
+
               else {
                 return buildBookItem(
                   '책 제목', 
@@ -242,44 +251,46 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   // 개별 책 항목
-  Widget buildBookItem(String title, String author, {String? imageUrl}) {
-    return Container(
-      width: 100,
-      margin: EdgeInsets.only(right: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            height: 150,
-            width: 110,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
+  Widget buildBookItem(String title, String author, {String? imageUrl, VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 100,
+        margin: EdgeInsets.only(right: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              height: 150,
+              width: 110,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: imageUrl != null
+                  ? CachedNetworkImage(
+                      imageUrl: imageUrl,
+                      placeholder: (context, url) => Center(child: CircularProgressIndicator()),
+                      errorWidget: (context, url, error) => Container(color: Colors.grey[300]),
+                      fit: BoxFit.cover,
+                    )
+                  : Container(color: Colors.grey[300]),
+              ),
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: imageUrl != null
-                ? CachedNetworkImage(
-                    imageUrl: imageUrl,
-                    placeholder: (context, url) => Center(child: CircularProgressIndicator()),
-                    errorWidget: (context, url, error) => Container(
-                                  color: Colors.grey[300], ),
-                    fit: BoxFit.cover,
-                  )
-                : Container(color: Colors.grey[300]),
+            SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.only(left: 4),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  Text(author, style: TextStyle(color: Color(0xff777777), fontSize: 14)),
+                ],
+              ),
             ),
-          ),
-          SizedBox(height: 8),
-          Padding(
-            padding: const EdgeInsets.only(left: 4),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                Text(author, style: TextStyle(color: Color(0xff777777), fontSize: 14)),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

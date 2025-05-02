@@ -4,7 +4,7 @@
 // 검색화면 보고 싶으면 위 3개 제목을 쳐서 확인할 것것
 
 import 'package:flutter/material.dart';
-
+import 'package:wanbook/library/library_screen.dart';
 //import 'package:wanbook/search/addlibrary_menu.dart';
 
 import '../shared/size_config.dart'; 
@@ -236,18 +236,73 @@ Widget buildBookCover() {
       width: double.infinity,
       height: 50,
       child: ElevatedButton(
-        onPressed: () {},
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                backgroundColor: Color(0xffF8F8F8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                title: Text(
+                  '서재에 추가되었습니다!',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xff0077FF),
+                  ),
+                ),
+                content: Text(
+                  '해당 도서가 내 서재에 추가되었어요.',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Color(0xff777777),
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context); // 단순 닫기
+                    },
+                    style: TextButton.styleFrom(
+                      foregroundColor: Color(0xff777777),
+                    ),
+                    child: Text('머무르기'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => LibraryScreen()));
+                    },
+                    style: TextButton.styleFrom(
+                      foregroundColor: Color(0xff0077FF),
+                    ),
+                    child: Text('서재로 이동'),
+                  ),
+                ],
+              );
+            },
+          );
+        },
         style: ElevatedButton.styleFrom(
           backgroundColor: Color(0xffCCE4FF),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
+          elevation: 0,
+              shadowColor: Colors.transparent,
         ),
         child: Text(
           '내 서재에 추가',
-          style: TextStyle(color: Color(0xff0077FF), fontSize: 16, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: Color(0xff0077FF),
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
     );
   }
+
 }
