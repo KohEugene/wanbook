@@ -116,7 +116,7 @@ class _PreKnowledgeScreenState extends State<PreKnowledgeScreen> {
             height: 38,
             padding: EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
-              color: isSelected ? Color(0xffA2C8FA) : Color(0xffD7D7D7),
+              color: isSelected ? Color(0xffCCE4FF) : Color(0xffE4E4E4),
               borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(24),
                 topRight: Radius.circular(24),
@@ -129,7 +129,7 @@ class _PreKnowledgeScreenState extends State<PreKnowledgeScreen> {
               label,
               style: TextStyle(
                 fontSize: 16,
-                color: isSelected ? Color(0xff0066FF) : Color(0xff777777),
+                color: isSelected ? Color(0xff0077FF) : Color(0xff777777),
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               ),
             ),
@@ -261,15 +261,20 @@ class _PreKnowledgeScreenState extends State<PreKnowledgeScreen> {
   Widget buildProgressBar({required int currentStep, int totalSteps = 4}) {
     double progress = currentStep / totalSteps;
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(4),
-      child: LinearProgressIndicator(
-        value: progress,
-        minHeight: 4,
-        backgroundColor: Color(0xffD0D0D0),
-        valueColor: AlwaysStoppedAnimation<Color>(Color(0xff4A7DFF)), // 진행도
-      ),
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 0, end: progress),
+      duration: Duration(milliseconds: 300),
+      builder: (context, value, _) {
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: LinearProgressIndicator(
+            value: value,
+            minHeight: 4,
+            backgroundColor: Color(0xffE4E4E4),
+            valueColor: AlwaysStoppedAnimation<Color>(Color(0xff0077FF)),
+          ),
+        );
+      },
     );
   }
-
 }

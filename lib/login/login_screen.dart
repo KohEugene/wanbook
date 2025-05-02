@@ -33,7 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text('로그인'),
+        title: Text('로그인', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
       ),
       body: SafeArea(
         child: Padding(

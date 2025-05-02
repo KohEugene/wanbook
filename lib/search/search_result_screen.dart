@@ -1,7 +1,5 @@
 
 // 검색 결과 화면
-// 아직 예시용으로 '데미안', '채식주의자', '싯다르타'만 넣어둔 상태
-// 검색화면 보고 싶으면 위 3개 제목을 쳐서 확인할 것것
 
 import 'package:flutter/material.dart';
 import 'package:wanbook/library/library_screen.dart';
@@ -24,22 +22,36 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
   late String bookTitle;
   late String bookAuthor;
   late String bookImageUrl;
+  late String bookDescription;
 
   // 검색 예시용 책
-    final Map<String, Map<String, String>> books = {
-      '데미안': {
-        'author': '헤르만 헤세',
-        'imageUrl': 'https://covers.openlibrary.org/b/id/14633424-L.jpg',
-      },
-      '채식주의자': {
-        'author': '한강',
-        'imageUrl': 'https://covers.openlibrary.org/b/id/10226571-L.jpg',
-      },
-      '싯다르타': {
-        'author': '헤르만 헤세',
-        'imageUrl': 'https://covers.openlibrary.org/b/id/6456720-L.jpg',
-      },
-    };
+  final Map<String, Map<String, String>> books = {
+    '데미안': {
+      'author': '헤르만 헤세',
+      'imageAsset': 'assets/images/b_damian.png',
+      'description': '자아의 탄생과 성장을 주제로, 내면의 갈등과 깨달음을 통해 한 소년이 자신만의 세계를 인식하게 되는 과정을 그려냅니다. 모든 인간이 겪는 어둠과 빛의 경계를 마주하게 되는 여정 속에서, 삶에 대한 새로운 시각을 제시합니다.',
+    },
+    '소년이 온다': {
+      'author': '한강',
+      'imageAsset': 'assets/images/b_boycome.png',
+      'description': '어느 도시의 아픔을 배경으로, 고통과 기억이 교차하는 목소리들이 등장하며 인간의 존엄과 슬픔을 마주하게 합니다. 담담한 서술 속에서도 깊은 울림을 전하며, 역사 속 개인의 흔적을 조용히 되새기게 합니다.',
+    },
+    '종의 기원': {
+      'author': '정유정',
+      'imageAsset': 'assets/images/b_jong.png',
+      'description': '인간 본성의 이면을 파고드는 한 인물의 이야기를 통해, 냉정한 사고와 충동 사이에서 발생하는 복잡한 심리를 사실적으로 그려냅니다. 강렬한 분위기 속에서도 침착한 서사가 이어지며, 인간 존재에 대한 철학적 고찰을 던집니다.',
+    },
+    '침묵의 봄': {
+      'author': '레이첼 카슨',
+      'imageAsset': 'assets/images/b_spring.png',
+      'description': '자연이 점차 침묵에 잠기게 되는 배경 아래, 우리가 인식하지 못했던 일상의 위험성과 환경의 연관성을 통찰력 있게 풀어냅니다. 과학적 사실을 바탕으로 하되 그 표현은 매우 문학적이며, 경고와 성찰이 교차하는 목소리가 인상 깊습니다.',
+    },
+    '이기적 유전자': {
+      'author': '리처드 도킨스',
+      'imageAsset': 'assets/images/b_gene.png',
+      'description': '진화의 핵심을 개체가 아닌 유전자로 바라보는 새로운 관점이 제시되며, 생명 현상을 설명하는 방식에 일대 전환을 불러옵니다. 어려운 개념이지만 명쾌한 비유와 설명을 통해 독자의 이해를 돕고, 존재의 의미에 대해 다시 생각하게 만듭니다.',
+    },
+  };
 
   @override
   void initState() {
@@ -47,15 +59,17 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
     _searchController = TextEditingController(text: widget.searchKeyword);
 
     final bookData = books[widget.searchKeyword];
-    
+
     if (bookData != null) {
       bookTitle = widget.searchKeyword;
       bookAuthor = bookData['author'] ?? '작가 미상';
-      bookImageUrl = bookData['imageUrl'] ?? '';
+      bookImageUrl = bookData['imageAsset'] ?? '';
+      bookDescription = bookData['description'] ?? '';
     } else {
       bookTitle = '검색 결과 없음';
       bookAuthor = '';
       bookImageUrl = '';
+      bookDescription = '';
     }
   }
 
@@ -171,24 +185,24 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
 
 
   // 책 이미지
-Widget buildBookCover() {
-  return Center(
-    child: Container(
-      width: 220,
-      height: 300,
-      decoration: BoxDecoration(
-        color: Color(0xffD9D9D9),
-        borderRadius: BorderRadius.circular(8),
-        image: bookImageUrl.isNotEmpty
-          ? DecorationImage(
-              image: NetworkImage(bookImageUrl),
-              fit: BoxFit.cover,
-            )
-          : null,
+  Widget buildBookCover() {
+    return Center(
+      child: Container(
+        width: 220,
+        height: 300,
+        decoration: BoxDecoration(
+          color: Color(0xffD9D9D9),
+          borderRadius: BorderRadius.circular(8),
+          image: bookImageUrl.isNotEmpty
+              ? DecorationImage(
+                  image: AssetImage(bookImageUrl),
+                  fit: BoxFit.cover,
+                )
+              : null,
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   // 책정보
   Widget buildBookInfo() {
@@ -214,16 +228,13 @@ Widget buildBookCover() {
                 '$bookAuthor 저자(글)',
                 style: TextStyle(fontSize: 14, color: Colors.black),
               ),
-            SizedBox(height: 4),
-            Text(
-              '출판사 · 출판일',
-              style: TextStyle(fontSize: 14, color: Color(0xff777777)),
-            ),
-            SizedBox(height: 8),
-            Text(
-              '어쩌구저쩌구 책 설명이 여기에 들어갑니다.어쩌구저쩌구 책 설명이 여기에 들어갑니다. 어쩌구저쩌구 책 설명이 여기에 들어갑니다.어쩌구저쩌구 책 설명이 여기에 들어갑니다.책의 요약이나 소개문구 웃땨땨땨땨땨땨. 최대한 스포 안하는 선에서 간단히 적을 것것',
-              style: TextStyle(fontSize: 14, color: Color(0xff777777)),
-            ),
+            SizedBox(height: 16),
+              Text(
+                bookDescription.isNotEmpty
+                    ? bookDescription
+                    : '해당 도서에 대한 설명이 없습니다.',
+                style: TextStyle(fontSize: 14, color: Color(0xff777777)),
+              ),
           ],
         ),
       ),
@@ -246,7 +257,7 @@ Widget buildBookCover() {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 title: Text(
-                  '서재에 추가되었습니다!',
+                  '추가 완료료',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
