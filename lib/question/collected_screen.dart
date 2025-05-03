@@ -3,8 +3,9 @@ import 'package:wanbook/question/ready_screen.dart';
 
 class CollectedScreen extends StatefulWidget {
   final List<String> selectedItems;
+  final String title;
 
-  const CollectedScreen({super.key, required this.selectedItems});
+  const CollectedScreen({super.key, required this.selectedItems, required this.title});
 
   @override
   State<CollectedScreen> createState() => _CollectedScreenState();
@@ -173,7 +174,7 @@ class _CollectedScreenState extends State<CollectedScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ReadyScreen(),
+                  builder: (context) => ReadyScreen(title: widget.title),
                 ),
               );
             },

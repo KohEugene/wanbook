@@ -4,7 +4,8 @@ import 'package:wanbook/question/collected_screen.dart';
 import 'package:wanbook/question/ready_screen.dart';
 
 class PreKnowledgeScreen extends StatefulWidget {
-  const PreKnowledgeScreen({super.key});
+  final String title;
+  const PreKnowledgeScreen({super.key, required this.title});
 
   @override
   State<PreKnowledgeScreen> createState() => _PreKnowledgeScreenState();
@@ -169,7 +170,7 @@ class _PreKnowledgeScreenState extends State<PreKnowledgeScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ReadyScreen(),
+                  builder: (context) => ReadyScreen(title: widget.title),
                 ),
               );
             },
@@ -234,7 +235,7 @@ class _PreKnowledgeScreenState extends State<PreKnowledgeScreen> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => CollectingScreen(
-                      selectedItems: selectedPreKnowledgeList,
+                      selectedItems: selectedPreKnowledgeList, title: widget.title
                     ),
                   ),
                 );

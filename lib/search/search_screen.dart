@@ -53,14 +53,14 @@ class _SearchScreenState extends State<SearchScreen> {
                   SizedBox(height: 24),
                   buildBookSection(
                     '추천 도서',
-                    highlightTitle: '싯다르타',
-                    highlightAuthor: '헤르만 헤세',
+                    highlightTitle: '',
+                    highlightAuthor: '',
                   ),
                   SizedBox(height: 24),
                   buildBookSection(
                     '인기 도서',
-                    highlightTitle: '소년이 온다',
-                    highlightAuthor: '한강',
+                    highlightTitle: '',
+                    highlightAuthor: '',
                   ),
                   SizedBox(height: 24),
                 ],

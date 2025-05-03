@@ -6,8 +6,9 @@ import 'collected_screen.dart';
 
 class CollectingScreen extends StatefulWidget {
   final List<String> selectedItems;
+  final String title;
 
-  const CollectingScreen({super.key, required this.selectedItems});
+  const CollectingScreen({super.key, required this.selectedItems, required this.title});
 
   @override
   State<CollectingScreen> createState() => _CollectingScreenState();
@@ -49,7 +50,7 @@ class _CollectingScreenState extends State<CollectingScreen> {
         context,
         MaterialPageRoute(
           builder: (context) => CollectedScreen(
-            selectedItems: widget.selectedItems,
+            selectedItems: widget.selectedItems, title: widget.title
         ),
       ),
     );

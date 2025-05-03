@@ -3,13 +3,15 @@ import 'package:flutter/material.dart';
 
 import 'package:wanbook/shared/menu_bottom.dart';
 import 'package:wanbook/profile/profile_screen.dart';
+import 'package:wanbook/search/search_result_screen.dart';
 import 'package:wanbook/home/speechbubble.dart';
+
 
 import '../shared/size_config.dart';
 import 'dart:math';
 
-class HomeScreen extends StatelessWidget {
-  HomeScreen({super.key});
+class HomeScreen2 extends StatelessWidget {
+  HomeScreen2({super.key});
 
   // 진행도바 예시용 독서
   final List<String> titleList = [
@@ -68,7 +70,7 @@ class HomeScreen extends StatelessWidget {
     "오늘도 한 페이지씩 완독 향해 가볼까요? 아자아자!",
     "책멍이는 언제나 옆에 있어요! 한 페이지씩 차근차근 같이 가요!",
     "독서하는 닉네임님의 모습은 언제나 멋져요! 오늘도 파이팅!",
-    "닉네임님, 지금까지 3권 읽었어요! 멋져요!",
+    "닉네임님! 지금까지 3권 읽었어요! 멋져요!",
   ];
   final Random random = Random();
   // 책멍이 말풍선 문구에서 문장부호 줄바꿈 함수 
@@ -77,7 +79,6 @@ class HomeScreen extends StatelessWidget {
         .replaceAllMapped(RegExp(r'([.?!])\s*'), (match) => '${match.group(1)}\n')
         .trim();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -92,12 +93,16 @@ class HomeScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: 24),
+                SizedBox(height: 20),
                 buildGreeting(),
                 SizedBox(height: 24),
                 buildChaekmeongImage(formattedMessage),
                 SizedBox(height: 24),
-                buildReadingSection(),
+                  buildBookSection(
+                    '이런 책은 어떠신가요? 인기도서목록',
+                    highlightTitle: '',
+                    highlightAuthor: '',
+                  ),
                 SizedBox(height: 24),
                 buildAttendanceSection(context),
                 SizedBox(height: 24),
@@ -148,115 +153,154 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  //진행도 섹션
-  Widget buildReadingSection() {
-    // 100% 미완독 책들의 인덱스만 추출
-    List<int> incompleteIndexes = [];
-    for (int i = 0; i < percentList.length; i++) {
-      if (percentList[i] != '100%') {
-        incompleteIndexes.add(i);
-      }
-    }
-
-    if (incompleteIndexes.isEmpty) return SizedBox.shrink();
-
-    // 랜덤으로 하나 선택
-    int selectedIndex = incompleteIndexes[Random().nextInt(incompleteIndexes.length)];
-
-    String title = titleList[selectedIndex];
-    String author = bookInfoMap[title]?['author'] ?? '알 수 없음';
-    String? coverImage = bookInfoMap[title]?['image'];
-    String percentText = percentList[selectedIndex];
-    double percentValue = double.parse(percentText.replaceAll('%', '')) / 100;
-
+  // 추천 도서
+  Widget buildBookSection(String title, {
+    required String highlightTitle,
+    required String highlightAuthor,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black)),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 210,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: 5,
+            itemBuilder: (context, index) {
+              if (index == 0) {
+                return buildBookItem(
+                  '데미안',
+                  '헤르만 헤세',
+                  imageAsset: 'assets/images/b_damian.png',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SearchResultScreen(searchKeyword: '데미안'),
+                      ),
+                    );
+                  },
+                );
+              } else if (index == 1) {
+                return buildBookItem(
+                  '소년이 온다',
+                  '한강',
+                  imageAsset: 'assets/images/b_boycome.png',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SearchResultScreen(searchKeyword: '소년이 온다'),
+                      ),
+                    );
+                  },
+                );
+              } else if (index == 2) {
+                return buildBookItem(
+                  '종의 기원',
+                  '정유정',
+                  imageAsset: 'assets/images/b_jong.png',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SearchResultScreen(searchKeyword: '종의 기원'),
+                      ),
+                    );
+                  },
+                );
+              } else if (index == 3) {
+                return buildBookItem(
+                  '침묵의 봄',
+                  '레이첼 카슨',
+                  imageAsset: 'assets/images/b_spring.png',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SearchResultScreen(searchKeyword: '침묵의 봄'),
+                      ),
+                    );
+                  },
+                );
+              } else if (index == 4) {
+                return buildBookItem(
+                  '이기적 유전자',
+                  '리처드 도킨스',
+                  imageAsset: 'assets/images/b_gene.png',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SearchResultScreen(searchKeyword: '이기적 유전자'),
+                      ),
+                    );
+                  },
+                );
+              } else {
+                return buildBookItem(
+                  '책 제목',
+                  '저자 명',
+                  imageAsset: null,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SearchResultScreen(searchKeyword: '책 제목'),
+                      ),
+                    );
+                  },
+                );
+              }
+            },
+          ),
+        )
+      ],
+    );
+  }
+
+  // 개별 책 항목
+  Widget buildBookItem(String title, String author, {String? imageAsset, VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 100,
+        margin: const EdgeInsets.only(right: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('아직 완독할 도서가 남았어요!',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-            TextButton(
-              onPressed: () {},
-              child: Row(
+            Container(
+              height: 150,
+              width: 110,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: imageAsset != null
+                    ? Image.asset(
+                        imageAsset,
+                        fit: BoxFit.cover,
+                      )
+                    : Container(color: Colors.grey[300]),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.only(left: 4),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('독서하기', style: TextStyle(color: Color(0xff777777), fontSize: 14)),
-                  Icon(Icons.chevron_right_rounded, color: Color(0xff777777), size: 14),
+                  Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black)),
+                  Text(author, style: const TextStyle(color: Color(0xff777777), fontSize: 14, fontWeight: FontWeight.w400)),
                 ],
               ),
-            )
+            ),
           ],
         ),
-        SizedBox(height: 8),
-        Container(
-          height: 200,
-          padding: EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Color(0xffF8F8F8),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Row(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: coverImage != null
-                    ? Image.asset(coverImage, width: 110, height: 150, fit: BoxFit.cover)
-                    : Container(width: 110, height: 150, color: Color(0xffD9D9D9)),
-              ),
-              SizedBox(width: 24),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(height: 8),
-                    Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                    Text(author, style: TextStyle(color: Color(0xff777777), fontSize: 14)),
-                    SizedBox(height: 16),
-                    Text(
-                      "이 책의 미리보기 내용 또는 소개 문장.이 책의 미리보기 내용 또는 소개 문장.이 책의 미리보기 내용 또는 소개 문장.이 책의 미리보기 내용 또는 소개 문장.",
-                      style: TextStyle(color: Color(0xff777777), fontSize: 14),
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    SizedBox(height: 16),
-
-                    // 진행도바
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            height: 8,
-                            decoration: BoxDecoration(
-                              color: Color(0xffE4E4E4),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: FractionallySizedBox(
-                              alignment: Alignment.centerLeft,
-                              widthFactor: percentValue, // 비율만큼만 파란색 
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: Color(0xff0077FF), // 파란색 진행 바
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 8),
-                        Text(
-                          percentText,
-                          style: TextStyle(fontSize: 12, color: Color(0xff0077FF)),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
+      ),
     );
   }
 

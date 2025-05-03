@@ -14,37 +14,93 @@ class ReadingBookScreen extends StatefulWidget {
 }
 
 class _ReadingBookScreenState extends State<ReadingBookScreen> {
+  final List<String> titleList = [
+    '데미안', '종의 기원', '소년이 온다', '이기적 유전자', '싯다르타', '침묵의 봄', '이방인', '아몬드', '눈먼 자들의 도시'
+  ];
 
-  final List<String> titleList = ['데미안', '종의 기원', '책 제목', '책 제목', '책 제목', '책 제목'];
-  final List<String> authorList = ['헤르만 헤세', '정유정', '저자 명', '저자 명', '저자 명', '저자 명'];
-  final List<String> percentList = ['51%', '7%', '23%', '75%', '90%', '42%'];
-  final List<String> lastReadList = ['3시간 전', '16시간 전', '24시간 전', '24시간 전', '24시간 전', '24시간 전'];
+  final List<String> percentList = [
+    '0%', '7%', '100%', '23%', '75%', '100%', '0%', '42%', '100%'
+  ];
+
+  final List<String> lastReadList = [
+    '3시간 전', '16시간 전', '24시간 전', '24시간 전', '24시간 전', '24시간 전', '24시간 전', '24시간 전', '24시간 전'
+  ];
+
+  final Map<String, Map<String, String>> bookInfoMap = {
+    '데미안': {
+      'author': '헤르만 헤세',
+      'image': 'assets/images/b_damian.png',
+    },
+    '소년이 온다': {
+      'author': '한강',
+      'image': 'assets/images/b_boycome.png',
+    },
+    '종의 기원': {
+      'author': '정유정',
+      'image': 'assets/images/b_jong.png',
+    },
+    '이기적 유전자': {
+      'author': '리처드 도킨스',
+      'image': 'assets/images/b_gene.png',
+    },
+    '싯다르타': {
+      'author': '헤르만 헤세',
+      'image': 'assets/images/b_shitda.png',
+    },
+    '침묵의 봄': {
+      'author': '레이첼 카슨',
+      'image': 'assets/images/b_spring.png',
+    },
+    '이방인': {
+      'author': '알베르 카뮈',
+      'image': 'assets/images/b_gentile.png',
+    },
+    '아몬드': {
+      'author': '손원평',
+      'image': 'assets/images/b_amond.png',
+    },
+    '눈먼 자들의 도시': {
+      'author': '사라마구',
+      'image': 'assets/images/b_eye.png',
+    },
+  };
 
   @override
   Widget build(BuildContext context) {
+    // '100%'가 아닌 책
+    List<int> readingIndexes = [];
+    for (int i = 0; i < percentList.length; i++) {
+      if (percentList[i] != '100%') {
+        readingIndexes.add(i);
+      }
+    }
+
     return Padding(
-        padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth*0.05, vertical: 16),
-        child: GridView.builder(
-          itemCount: titleList.length,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              childAspectRatio: 0.5
-          ),
-          itemBuilder: (context, index) {
-            String title = titleList[index];
-            String author = authorList[index];
-            String percent = percentList[index];
-            String lastReadTime = lastReadList[index];
-            return readingInfo(title, author, percent, lastReadTime);
-          },
-        )
+      padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.05, vertical: 16),
+      child: GridView.builder(
+        itemCount: readingIndexes.length,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+          childAspectRatio: 0.5,
+        ),
+        itemBuilder: (context, index) {
+          int originalIndex = readingIndexes[index];
+          String title = titleList[originalIndex];
+          String author = bookInfoMap[title]!['author']!;
+          String imagePath = bookInfoMap[title]!['image']!;
+          String percent = percentList[originalIndex];
+          String lastReadTime = lastReadList[originalIndex];
+
+          return readingInfo(title, author, imagePath, percent, lastReadTime);
+        },
+      ),
     );
   }
 
   // 책 위젯
-  Widget readingInfo(String title, String author, String percent, String lastReadTime) {
+  Widget readingInfo(String title, String author, String imagePath, String percent, String lastReadTime) {
     return SizedBox(
       width: 110,
       height: 223,
@@ -52,42 +108,39 @@ class _ReadingBookScreenState extends State<ReadingBookScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 110, height: 150,
+            width: 110,
+            height: 150,
             decoration: BoxDecoration(
-                color: Color(0xffD9D9D9),
-                borderRadius: BorderRadius.circular(8)
+              image: DecorationImage(
+                image: AssetImage(imagePath),
+                fit: BoxFit.cover,
+              ),
+              borderRadius: BorderRadius.circular(8),
+              color: Color(0xffD9D9D9),
             ),
           ),
-          SizedBox(height: 4,),
+          SizedBox(height: 4),
           Text(title, style: TextStyle(
               color: Colors.black,
               fontWeight: FontWeight.w600,
-              fontSize: 16)
-          ),
+              fontSize: 16)),
           Text(author, style: TextStyle(
               color: Color(0xff777777),
               fontWeight: FontWeight.w400,
-              fontSize: 14)
-          ),
+              fontSize: 14)),
           Row(
             children: [
-              Row(
-                children: [
-                  Icon(Icons.library_add_check_outlined, color: Color(0xff777777), size: 12,),
-                  SizedBox(width: 2,),
-                  Text(percent, style: TextStyle(
-                      color: Color(0xff777777),
-                      fontWeight: FontWeight.w400,
-                      fontSize: 12),
-                  )
-                ],
-              ),
-              SizedBox(width: 4,),
+              Icon(Icons.library_add_check_outlined, color: Color(0xff777777), size: 12),
+              SizedBox(width: 2),
+              Text(percent, style: TextStyle(
+                  color: Color(0xff777777),
+                  fontWeight: FontWeight.w400,
+                  fontSize: 12)),
+              SizedBox(width: 4),
               Text(lastReadTime, style: TextStyle(
                   color: Color(0xff777777),
                   fontWeight: FontWeight.w400,
-                  fontSize: 12)
-              )
+                  fontSize: 12))
             ],
           )
         ],

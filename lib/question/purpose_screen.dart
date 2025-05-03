@@ -2,9 +2,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:wanbook/question/preknowledge_screen.dart';
+import 'package:wanbook/library/all_book_screen.dart';
 
 class ReadingPurposeScreen extends StatefulWidget {
-  const ReadingPurposeScreen({super.key});
+  final String title;
+  const ReadingPurposeScreen({super.key, required this.title});
 
   @override
   State<ReadingPurposeScreen> createState() => _ReadingPurposeScreenState();
@@ -196,7 +198,7 @@ class _ReadingPurposeScreenState extends State<ReadingPurposeScreen> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => PreKnowledgeScreen()),
+                MaterialPageRoute(builder: (context) => PreKnowledgeScreen(title: widget.title)),
               );
             },
             style: OutlinedButton.styleFrom(
@@ -259,7 +261,7 @@ class _ReadingPurposeScreenState extends State<ReadingPurposeScreen> {
               } else {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => PreKnowledgeScreen()),
+                  MaterialPageRoute(builder: (context) => PreKnowledgeScreen(title: widget.title)),
                 );
               }
             },

@@ -4,6 +4,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:wanbook/home/home_screen.dart';
+import 'package:wanbook/home/home_screen2.dart';
 import 'package:wanbook/library/library_screen.dart';
 import 'package:wanbook/profile/profile_screen.dart';
 import 'package:wanbook/search/search_screen.dart';
@@ -21,6 +22,8 @@ class _MenuBottomState extends State<MenuBottom> {
 
   final List<Widget> _pages = [
     HomeScreen(),
+    // 진행도서X 홈 확인용
+    // HomeScreen2(),
     SearchScreen(),
     LibraryScreen(),
     ProfileScreen()

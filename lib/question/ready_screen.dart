@@ -1,8 +1,12 @@
 // 모든 단계 완료 화면
 import 'package:flutter/material.dart';
 
+import 'package:wanbook/ebook/book_screen.dart';
+
 class ReadyScreen extends StatefulWidget {
-  const ReadyScreen({super.key});
+  final String title;
+
+  const ReadyScreen({super.key, required this.title});
 
   @override
   State<ReadyScreen> createState() => _ReadyScreenState();
@@ -80,7 +84,13 @@ class _ReadyScreenState extends State<ReadyScreen> {
     width: double.infinity,
     child: OutlinedButton(
       onPressed: () {
-              // ebook화면으로로
+              // ebook화면으로
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => BookScreen(title: widget.title),
+                ),
+              );
             },
         style: OutlinedButton.styleFrom(
           backgroundColor: Color(0xffCCE4FF),
