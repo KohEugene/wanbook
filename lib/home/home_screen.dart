@@ -111,6 +111,9 @@ class HomeScreen extends StatelessWidget {
             ),
             TextButton(
               onPressed: () {},
+              style: ButtonStyle(
+                      overlayColor: WidgetStateColor.resolveWith((states) => Colors.transparent,)
+                  ),
               child: Row(
                   children: [
                     Text('독서하기', style: TextStyle(
@@ -199,6 +202,9 @@ class HomeScreen extends StatelessWidget {
                   MaterialPageRoute(builder: (context) => ProfileScreen()),
                 );
               },
+              style: ButtonStyle(
+                      overlayColor: WidgetStateColor.resolveWith((states) => Colors.transparent,)
+                  ),
               child: Row(
                 children: [
                   Text(

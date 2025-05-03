@@ -195,7 +195,7 @@ class _JoinScreenState extends State<JoinScreen> {
                         child: Text('중복 확인', style: TextStyle(
                             color: Color(0xff777777),
                             fontWeight: FontWeight.w400,
-                            fontSize: 10),
+                            fontSize: 14),
                         )
                     )
                 ),

@@ -50,7 +50,46 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text('닉네임의 서재'),
+        title: Text('닉네임의 서재', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+      ),
+      body: Column(
+        children: [
+          Align(
+            alignment: Alignment.topCenter,
+            child: SizedBox(
+              width: SizeConfig.screenWidth * 0.9,
+              child: TabBar(
+                controller: tabController,
+                indicatorPadding: EdgeInsets.symmetric(horizontal: 8),
+                labelColor: Color(0xff0077FF),
+                labelStyle: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600
+                ),
+                unselectedLabelColor: Color(0xff777777),
+                unselectedLabelStyle: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400
+                ),
+                overlayColor: WidgetStatePropertyAll(Colors.transparent),
+                indicatorColor: Color(0xff0077FF),
+                indicatorWeight: 3,
+                indicatorSize: TabBarIndicatorSize.tab,
+                tabs: [
+                  Tab(text: "전체 도서",),
+                  Tab(text: "독서 중",),
+                  Tab(text: "완독 도서",)
+                ],
+              ),
+            ),
+          ),
+          Expanded(
+              child: TabBarView(
+                  controller: tabController,
+                  children: _pages
+              )
+          )
+        ],
       ),
       body: Column(
         children: [

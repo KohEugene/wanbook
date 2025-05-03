@@ -22,7 +22,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text('내 프로필'),
+        title: Text('내 프로필', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -133,7 +133,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: Text('로그아웃', style: TextStyle(
                     color: Color(0xff777777),
                     fontWeight: FontWeight.w400,
-                    fontSize: 10),
+                    fontSize: 14),
                 )
             )
         ),

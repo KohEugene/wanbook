@@ -2,14 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:wanbook/shared/menu_bottom.dart';
 import 'package:wanbook/search/search_result_screen.dart'; 
-import 'package:wanbook/question/purpose_screen.dart';
 
 import '../shared/size_config.dart';
-
-import 'package:cached_network_image/cached_network_image.dart';
-// 이거 사용하려면 pubspec.yaml에 dependencies: cached_network_image: ^3.3.0 추가
-// 그리고 난 후 터미널에 flutter pub get 입력
-
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -152,13 +146,16 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
             if (showClear)
               TextButton(
-                onPressed: onClear,
-                style: TextButton.styleFrom(
-                  foregroundColor: Color(0xff777777),
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              onPressed: onClear,
+              style: ButtonStyle(
+                overlayColor: WidgetStateProperty.resolveWith<Color?>(
+                  (Set<WidgetState> states) => Colors.transparent,
                 ),
-                child: Text('지우기'),
+                foregroundColor: WidgetStateProperty.all(Color(0xff777777)),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
+              child: Text('지우기'),
+            ),
           ],
         ),
         SizedBox(height: 8),
@@ -206,41 +203,95 @@ class _SearchScreenState extends State<SearchScreen> {
       children: [
         Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         const SizedBox(height: 12),
-          SizedBox(
-            height: 210,
-            child: ListView.builder(
+        SizedBox(
+          height: 210,
+          child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: 5,
             itemBuilder: (context, index) {
               if (index == 0) {
                 return buildBookItem(
-                  '싯다르타', 
-                  '헤르만 헤세', 
-                  imageUrl: 'https://covers.openlibrary.org/b/id/6456720-L.jpg'
-                  , 
-                );
-              } 
-              if (index == 1) {
-                return buildBookItem(
                   '데미안',
                   '헤르만 헤세',
-                  imageUrl: 'https://covers.openlibrary.org/b/id/14633424-L.jpg',
+                  imageAsset: 'assets/images/b_damian.png',
                   onTap: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const ReadingPurposeScreen(),
+                        builder: (context) => SearchResultScreen(searchKeyword: '데미안'),
                       ),
                     );
                   },
                 );
-              }
-
-              else {
+              } else if (index == 1) {
                 return buildBookItem(
-                  '책 제목', 
+                  '소년이 온다',
+                  '한강',
+                  imageAsset: 'assets/images/b_boycome.png',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SearchResultScreen(searchKeyword: '소년이 온다'),
+                      ),
+                    );
+                  },
+                );
+              } else if (index == 2) {
+                return buildBookItem(
+                  '종의 기원',
+                  '정유정',
+                  imageAsset: 'assets/images/b_jong.png',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SearchResultScreen(searchKeyword: '종의 기원'),
+                      ),
+                    );
+                  },
+                );
+              } else if (index == 3) {
+                return buildBookItem(
+                  '침묵의 봄',
+                  '레이첼 카슨',
+                  imageAsset: 'assets/images/b_spring.png',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SearchResultScreen(searchKeyword: '침묵의 봄'),
+                      ),
+                    );
+                  },
+                );
+              } else if (index == 4) {
+                return buildBookItem(
+                  '이기적 유전자',
+                  '리처드 도킨스',
+                  imageAsset: 'assets/images/b_gene.png',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SearchResultScreen(searchKeyword: '이기적 유전자'),
+                      ),
+                    );
+                  },
+                );
+              } else {
+                return buildBookItem(
+                  '책 제목',
                   '저자 명',
-                  imageUrl: 'https://via.placeholder.com/110x150.png',
+                  imageAsset: null,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SearchResultScreen(searchKeyword: '책 제목'),
+                      ),
+                    );
+                  },
                 );
               }
             },
@@ -251,12 +302,12 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   // 개별 책 항목
-  Widget buildBookItem(String title, String author, {String? imageUrl, VoidCallback? onTap}) {
+  Widget buildBookItem(String title, String author, {String? imageAsset, VoidCallback? onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: 100,
-        margin: EdgeInsets.only(right: 12),
+        margin: const EdgeInsets.only(right: 12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -268,24 +319,22 @@ class _SearchScreenState extends State<SearchScreen> {
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: imageUrl != null
-                  ? CachedNetworkImage(
-                      imageUrl: imageUrl,
-                      placeholder: (context, url) => Center(child: CircularProgressIndicator()),
-                      errorWidget: (context, url, error) => Container(color: Colors.grey[300]),
-                      fit: BoxFit.cover,
-                    )
-                  : Container(color: Colors.grey[300]),
+                child: imageAsset != null
+                    ? Image.asset(
+                        imageAsset,
+                        fit: BoxFit.cover,
+                      )
+                    : Container(color: Colors.grey[300]),
               ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Padding(
               padding: const EdgeInsets.only(left: 4),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  Text(author, style: TextStyle(color: Color(0xff777777), fontSize: 14)),
+                  Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  Text(author, style: const TextStyle(color: Color(0xff777777), fontSize: 14)),
                 ],
               ),
             ),
@@ -294,5 +343,6 @@ class _SearchScreenState extends State<SearchScreen> {
       ),
     );
   }
+
 }
 

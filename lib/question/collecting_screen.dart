@@ -120,15 +120,21 @@ class _CollectingScreenState extends State<CollectingScreen> {
   // 진행도 바
   Widget buildProgressBar({required int currentStep, int totalSteps = 4}) {
     double progress = currentStep / totalSteps;
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(4),
-      child: LinearProgressIndicator(
-        value: progress,
-        minHeight: 4,
-        backgroundColor: Color(0xffD0D0D0),
-        valueColor: AlwaysStoppedAnimation<Color>(Color(0xff4A7DFF)),
-      ),
+
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 0, end: progress),
+      duration: Duration(milliseconds: 300),
+      builder: (context, value, _) {
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: LinearProgressIndicator(
+            value: value,
+            minHeight: 4,
+            backgroundColor: Color(0xffE4E4E4),
+            valueColor: AlwaysStoppedAnimation<Color>(Color(0xff0077FF)),
+          ),
+        );
+      },
     );
   }
-
 }
