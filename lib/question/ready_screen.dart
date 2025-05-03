@@ -18,10 +18,11 @@ class _ReadyScreenState extends State<ReadyScreen> {
       appBar: AppBar(
         automaticallyImplyLeading: true,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new, size: 18),
+          icon: Icon(Icons.chevron_left_rounded),
+          color: Colors.black,
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text('준비 완료', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        title: Text('준비 완료'),
         centerTitle: true,
       ),
       body: SafeArea(

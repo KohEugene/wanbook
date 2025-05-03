@@ -32,12 +32,13 @@ class _ReadingPurposeScreenState extends State<ReadingPurposeScreen> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new, size: 18),
+          icon: Icon(Icons.chevron_left_rounded),
+          color: Colors.black,
           onPressed: () {
             Navigator.pop(context);
           },
         ),
-        title: Text('독서 목적', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        title: Text('독서 목적'),
         centerTitle: true,
       ),
       body: SafeArea(
@@ -209,7 +210,7 @@ class _ReadingPurposeScreenState extends State<ReadingPurposeScreen> {
               shadowColor: Colors.transparent,
               elevation: 0,
             ),
-            child: Text('건너뛰기', style: TextStyle(fontSize: 18)),
+            child: Text('건너뛰기', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400)),
           ),
         ),
         const SizedBox(width: 16),
@@ -272,7 +273,7 @@ class _ReadingPurposeScreenState extends State<ReadingPurposeScreen> {
               elevation: 0,
               shadowColor: Colors.transparent,
             ),
-            child: Text('다음', style: TextStyle(fontSize: 18)),
+            child: Text('다음', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400)),
           ),
         ),
       ],

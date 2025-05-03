@@ -20,6 +20,9 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _idController = TextEditingController();
   final _pwdController = TextEditingController();
+  
+  // 비밀번호 obscure 여부
+  bool obscurePwd = true;
 
   // 아이디 저장 여부
   bool saveId = false;
@@ -33,7 +36,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text('로그인', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        title: Text('로그인'),
       ),
       body: SafeArea(
         child: Padding(
@@ -88,14 +91,15 @@ class _LoginScreenState extends State<LoginScreen> {
           child: TextFormField(
             controller: _idController,
             autovalidateMode: AutovalidateMode.onUserInteraction,
+            cursorColor: Color(0xff0077FF),
             decoration: InputDecoration(
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.all(16),
-                hintText: '아이디를 입력해 주세요!',
+                hintText: '아이디를 입력해 주세요',
                 hintStyle: TextStyle(
                     color: Color(0xff777777),
                     fontWeight: FontWeight.w400,
-                    fontSize: 16
+                    fontSize: 16,
                 ),
             ),
           ),
@@ -127,24 +131,35 @@ class _LoginScreenState extends State<LoginScreen> {
         Container(
           width: SizeConfig.screenWidth * 0.9,
           height: 54,
+          padding: EdgeInsets.only(right: 12),
           decoration: ShapeDecoration(
             color: Color(0xffF8F8F8),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16))
           ),
           child: TextFormField(
-            obscureText: true,
+            obscureText: obscurePwd,
             controller: _pwdController,
             autovalidateMode: AutovalidateMode.onUserInteraction,
+            cursorColor: Color(0xff0077FF),
             decoration: InputDecoration(
               border: InputBorder.none,
               contentPadding: EdgeInsets.all(16),
-              hintText: '비밀번호를 입력해 주세요!',
+              hintText: '비밀번호를 입력해 주세요',
               hintStyle: TextStyle(
                 color: Color(0xff777777),
                 fontWeight: FontWeight.w400,
                 fontSize: 16
               ),
+              suffixIcon: IconButton(
+                icon: Icon(obscurePwd ? Icons.visibility_outlined : Icons.visibility_off_outlined),
+                onPressed: () {
+                  setState(() {
+                    obscurePwd = !obscurePwd;
+                  });},
+                iconSize: 24,
+                color: Color(0xff777777),
+              )
             ),
           ),
         ),
@@ -172,10 +187,10 @@ class _LoginScreenState extends State<LoginScreen> {
     return SizedBox(
         width: SizeConfig.screenWidth * 0.9,
         height: 57,
-        child: TextButton(onPressed: (){
+        child: OutlinedButton(onPressed: (){
           setState(() {
-            _idError = _idController.text.isEmpty ? '아이디를 입력해 주세요' : null;
-            _pwdError = _pwdController.text.isEmpty ? '비밀번호를 입력해 주세요' : null;
+            _idError = _idController.text.isEmpty ? '아이디를 입력해 주세요!' : null;
+            _pwdError = _pwdController.text.isEmpty ? '비밀번호를 입력해 주세요!' : null;
           });
           if (_idError == null && _pwdError == null) {
             Navigator.push(context, MaterialPageRoute(
@@ -185,14 +200,18 @@ class _LoginScreenState extends State<LoginScreen> {
             ));
           }
         },
-            style: TextButton.styleFrom(
+            style: OutlinedButton.styleFrom(
+                foregroundColor: Color(0xff0077FF),
                 backgroundColor: Color(0xffCCE4FF),
+                padding: EdgeInsets.symmetric(vertical: 8),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16)
-                )
+                ),
+                side: BorderSide(color: Colors.transparent),
+                shadowColor: Colors.transparent,
+                elevation: 0
             ),
             child: Text('로그인', style: TextStyle(
-                color: Color(0xff0077FF),
                 fontWeight: FontWeight.w600,
                 fontSize: 18
               ),
@@ -230,19 +249,23 @@ class _LoginScreenState extends State<LoginScreen> {
     return SizedBox(
         width: SizeConfig.screenWidth * 0.9,
         height: 57,
-        child: TextButton(onPressed: (){
+        child: OutlinedButton(onPressed: (){
           Navigator.push(context, MaterialPageRoute(builder: (context) {
             return JoinScreen();
           },));
         },
-            style: TextButton.styleFrom(
+            style: OutlinedButton.styleFrom(
+                foregroundColor: Color(0xff777777),
                 backgroundColor: Color(0xffE4E4E4),
+                padding: EdgeInsets.symmetric(vertical: 8),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16)
-                )
+                ),
+                side: BorderSide(color: Colors.transparent),
+                shadowColor: Colors.transparent,
+                elevation: 0
             ),
             child: Text('회원가입', style: TextStyle(
-                color: Color(0xff777777),
                 fontWeight: FontWeight.w600,
                 fontSize: 18),
             )

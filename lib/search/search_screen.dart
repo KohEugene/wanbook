@@ -77,10 +77,11 @@ class _SearchScreenState extends State<SearchScreen> {
       children: [
         // 뒤로가기 아이콘
         IconButton(
-          icon: Icon(Icons.arrow_back_ios_new, size: 18),
+          icon: Icon(Icons.chevron_left_rounded),
           onPressed: () {
             Navigator.pop(context);
           },
+          color: Colors.black,
         ),
 
         // 검색창
@@ -100,7 +101,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     decoration: InputDecoration(
                       hintText: '검색어를 입력해 주세요',
                       border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 16), // 텍스트 위치 조정정
+                      contentPadding: EdgeInsets.symmetric(horizontal: 16), // 텍스트 위치 조정
                     ),
                   ),
                 ),

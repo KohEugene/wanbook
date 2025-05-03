@@ -115,7 +115,8 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
   return Row(
     children: [
       IconButton(
-        icon: Icon(Icons.arrow_back_ios_new, size: 18),
+        icon: Icon(Icons.chevron_left_rounded),
+        color: Colors.black,
         onPressed: () {
           Navigator.pop(context);
         },
@@ -246,7 +247,7 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
     return SizedBox(
       width: double.infinity,
       height: 50,
-      child: ElevatedButton(
+      child: OutlinedButton(
         onPressed: () {
           showDialog(
             context: context,
@@ -257,10 +258,10 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 title: Text(
-                  '추가 완료료',
+                  '추가 완료',
                   style: TextStyle(
                     fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w600,
                     color: Color(0xff0077FF),
                   ),
                 ),
@@ -268,6 +269,7 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
                   '해당 도서가 내 서재에 추가되었어요.',
                   style: TextStyle(
                     fontSize: 16,
+                    fontWeight: FontWeight.w400,
                     color: Color(0xff777777),
                   ),
                 ),
@@ -296,20 +298,21 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
             },
           );
         },
-        style: ElevatedButton.styleFrom(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: Color(0xff0077FF),
           backgroundColor: Color(0xffCCE4FF),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
           elevation: 0,
-              shadowColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          side: BorderSide(color: Colors.transparent)
         ),
         child: Text(
           '내 서재에 추가',
           style: TextStyle(
-            color: Color(0xff0077FF),
             fontSize: 16,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ),

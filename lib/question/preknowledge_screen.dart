@@ -32,12 +32,13 @@ class _PreKnowledgeScreenState extends State<PreKnowledgeScreen> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new, size: 18),
+          icon: Icon(Icons.chevron_left_rounded),
+          color: Colors.black,
           onPressed: () {
             Navigator.pop(context);
           },
         ),
-        title: Text('사전 지식', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        title: Text('사전 지식'),
         centerTitle: true,
       ),
       body: SafeArea(

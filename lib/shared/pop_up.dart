@@ -70,6 +70,7 @@ class _PopUpState extends State<PopUp> {
                       borderRadius: BorderRadius.circular(16))
               ),
               child: TextFormField(
+                cursorColor: Color(0xff0077FF),
                 decoration: InputDecoration(
                     border: InputBorder.none,
                     contentPadding: EdgeInsets.all(16),
@@ -90,18 +91,21 @@ class _PopUpState extends State<PopUp> {
                 SizedBox(
                     width: 118,
                     height: 46,
-                    child: TextButton(onPressed: (){
+                    child: OutlinedButton(onPressed: (){
                       Navigator.of(context).pop();
                     },
-                        style: TextButton.styleFrom(
+                        style: OutlinedButton.styleFrom(
+                            foregroundColor: Color(0xff777777),
                             backgroundColor: Color(0xffE4E4E4),
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(32)
-                            )
+                            ),
+                            side: BorderSide(color: Colors.transparent),
+                            shadowColor: Colors.transparent,
+                            elevation: 0,
                         ),
                         child: Text('취소', style: TextStyle(
-                            color: Color(0xff777777),
-                            fontWeight: FontWeight.w600,
+                            fontWeight: FontWeight.w400,
                             fontSize: 16),
                         )
                     )
@@ -110,16 +114,19 @@ class _PopUpState extends State<PopUp> {
                 SizedBox(
                     width: 118,
                     height: 46,
-                    child: TextButton(onPressed: (){
+                    child: OutlinedButton(onPressed: (){
                     },
-                        style: TextButton.styleFrom(
+                        style: OutlinedButton.styleFrom(
+                            foregroundColor: Color(0xff0077FF),
                             backgroundColor: Color(0xffCCE4FF),
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(32)
-                            )
+                            ),
+                            side: BorderSide(color: Colors.transparent),
+                            shadowColor: Colors.transparent,
+                            elevation: 0,
                         ),
                         child: Text('변경', style: TextStyle(
-                            color: Color(0xff0077FF),
                             fontWeight: FontWeight.w600,
                             fontSize: 16),
                         )

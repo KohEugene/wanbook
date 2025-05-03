@@ -22,7 +22,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text('내 프로필', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        title: Text('내 프로필'),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -123,15 +123,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
         SizedBox(
             width: 90,
             height: 36,
-            child: TextButton(onPressed: (){},
-                style: TextButton.styleFrom(
+            child: OutlinedButton(onPressed: (){},
+                style: OutlinedButton.styleFrom(
+                    foregroundColor: Color(0xff777777),
                     backgroundColor: Color(0xffF8F8F8),
+                    padding: EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(32)
-                    )
+                    ),
+                    side: BorderSide(color: Colors.transparent),
+                    shadowColor: Colors.transparent,
+                    elevation: 0,
                 ),
                 child: Text('로그아웃', style: TextStyle(
-                    color: Color(0xff777777),
                     fontWeight: FontWeight.w400,
                     fontSize: 14),
                 )

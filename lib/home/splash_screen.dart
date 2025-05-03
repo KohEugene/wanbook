@@ -33,8 +33,8 @@ class SplashScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('책멍이와', style: TextStyle(fontWeight: FontWeight.w400, fontSize: 28, color: Colors.black)),
-                      Text('함께 완독하자!', style: TextStyle(fontWeight: FontWeight.w400, fontSize: 28, color: Colors.black)),
+                      Text('책멍이와', style: TextStyle(fontWeight: FontWeight.w400, fontSize: 28, color: Color(0xff777777))),
+                      Text('함께 완독하자!', style: TextStyle(fontWeight: FontWeight.w400, fontSize: 28, color: Color(0xff777777))),
                       Text('완북', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 28, color: Colors.black))
                     ],
                   ),

@@ -185,15 +185,19 @@ class _JoinScreenState extends State<JoinScreen> {
                 child: SizedBox(
                     width: 90,
                     height: 36,
-                    child: TextButton(onPressed: (){},
-                        style: TextButton.styleFrom(
+                    child: OutlinedButton(onPressed: (){},
+                        style: OutlinedButton.styleFrom(
+                            foregroundColor: Color(0xff777777),
                             backgroundColor: Color(0xffF8F8F8),
+                            padding: EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(32)
-                            )
+                            ),
+                            side: BorderSide(color: Colors.transparent),
+                            shadowColor: Colors.transparent,
+                            elevation: 0,
                         ),
                         child: Text('중복 확인', style: TextStyle(
-                            color: Color(0xff777777),
                             fontWeight: FontWeight.w400,
                             fontSize: 14),
                         )
@@ -299,18 +303,21 @@ class _JoinScreenState extends State<JoinScreen> {
     return SizedBox(
         width: SizeConfig.screenWidth * 0.9,
         height: 57,
-        child: TextButton(
+        child: OutlinedButton(
             onPressed: isFormvalid ? () {
               Navigator.push(context, MaterialPageRoute(builder: (context) => MenuBottom()));
             } : null,
-            style: TextButton.styleFrom(
+            style: OutlinedButton.styleFrom(
+                foregroundColor: isFormvalid ? Color(0xff0077FF) : Color(0xff777777),
                 backgroundColor: isFormvalid ? Color(0xffCCE4FF) : Color(0xffE4E4E4),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16)
-                )
+                ),
+                side: BorderSide(color: Colors.transparent),
+                shadowColor: Colors.transparent,
+                elevation: 0
             ),
             child: Text('가입하기', style: TextStyle(
-                color: isFormvalid ? Color(0xff0077FF) : Color(0xff777777),
                 fontWeight: FontWeight.w600,
                 fontSize: 18),
             )
