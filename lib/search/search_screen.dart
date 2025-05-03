@@ -13,6 +13,7 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
+
   final recentSearches = ['데미안', '종의 기원', '소년이 온다', '책제목'];
   final recommendedSearches = ['데미안', '종의 기원', '소년이 온다', '싯다르타', '눈먼 자들의 도시'];
   final TextEditingController _searchController = TextEditingController();
@@ -22,49 +23,48 @@ class _SearchScreenState extends State<SearchScreen> {
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.05),
-          
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(height: 24),
-                buildSearchBar(context),
-                SizedBox(height: 24),
-                buildSearchSection(
-                  '최근 검색어',
-                  recentSearches,
-                  showClear: true,
-                  onClear: () {
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.05),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: 24),
+                  buildSearchBar(context),
+                  SizedBox(height: 24),
+                  buildSearchSection(
+                    '최근 검색어',
+                    recentSearches,
+                    showClear: true,
+                    onClear: () {
                         setState(() {
                           recentSearches.clear();
                         });
                       },
-                      onWordTap: (word) {
-                        print('클릭된 검색어: $word');
-                        //검색 실행 로직 추가필요
-                      },),
-                SizedBox(height: 24),
-                buildSearchSection('추천 검색어', recommendedSearches,
                     onWordTap: (word) {
                       print('클릭된 검색어: $word');
                         //검색 실행 로직 추가필요
                     },),
-                SizedBox(height: 24),
-                buildBookSection(
-                  '추천 도서',
-                  highlightTitle: '싯다르타',
-                  highlightAuthor: '헤르만 헤세',
-                ),
-                SizedBox(height: 24),
-                buildBookSection(
-                  '인기 도서',
-                  highlightTitle: '소년이 온다',
-                  highlightAuthor: '한강',
-                ),
-                SizedBox(height: 24),
-              ],
-            ),
+                  SizedBox(height: 24),
+                  buildSearchSection('추천 검색어', recommendedSearches,
+                    onWordTap: (word) {
+                      print('클릭된 검색어: $word');
+                        //검색 실행 로직 추가필요
+                    },),
+                  SizedBox(height: 24),
+                  buildBookSection(
+                    '추천 도서',
+                    highlightTitle: '싯다르타',
+                    highlightAuthor: '헤르만 헤세',
+                  ),
+                  SizedBox(height: 24),
+                  buildBookSection(
+                    '인기 도서',
+                    highlightTitle: '소년이 온다',
+                    highlightAuthor: '한강',
+                  ),
+                  SizedBox(height: 24),
+                ],
+              ),
           ),
         ),
       ),
@@ -83,7 +83,7 @@ class _SearchScreenState extends State<SearchScreen> {
           },
           color: Colors.black,
         ),
-
+        SizedBox(width: 8,),
         // 검색창
         Expanded(
           child: Container(
@@ -98,8 +98,14 @@ class _SearchScreenState extends State<SearchScreen> {
                 Expanded(
                   child: TextField(
                     controller: _searchController,
+                    cursorColor: Color(0xff0077FF),
                     decoration: InputDecoration(
                       hintText: '검색어를 입력해 주세요',
+                      hintStyle: TextStyle(
+                        color: Color(0xff777777),
+                        fontWeight: FontWeight.w400,
+                        fontSize: 16,
+                      ),
                       border: InputBorder.none,
                       contentPadding: EdgeInsets.symmetric(horizontal: 16), // 텍스트 위치 조정
                     ),
@@ -126,7 +132,6 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-
   // 최근, 추천 검색어
   Widget buildSearchSection(
     String title,
@@ -143,20 +148,24 @@ class _SearchScreenState extends State<SearchScreen> {
           children: [
             Text(
               title,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black),
             ),
             if (showClear)
               TextButton(
-              onPressed: onClear,
-              style: ButtonStyle(
-                overlayColor: WidgetStateProperty.resolveWith<Color?>(
-                  (Set<WidgetState> states) => Colors.transparent,
+                onPressed: onClear,
+                style: ButtonStyle(
+                  overlayColor: WidgetStateProperty.resolveWith<Color?>(
+                    (Set<WidgetState> states) => Colors.transparent,
+                  ),
+                  foregroundColor: WidgetStateProperty.all(Color(0xff777777)),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
-                foregroundColor: WidgetStateProperty.all(Color(0xff777777)),
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                child: Text('지우기', style: TextStyle(
+                    color: Color(0xff777777),
+                    fontWeight: FontWeight.w400,
+                    fontSize: 14),
+                ),
               ),
-              child: Text('지우기'),
-            ),
           ],
         ),
         SizedBox(height: 8),
@@ -174,6 +183,11 @@ class _SearchScreenState extends State<SearchScreen> {
                   margin: EdgeInsets.only(right: 8), // Chip 사이 간격
                   child: Chip(
                     label: Text(word),
+                    labelStyle: TextStyle(
+                      color: Color(0xff777777),
+                      fontWeight: FontWeight.w400,
+                      fontSize: 16
+                    ),
                     backgroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.only(
@@ -202,7 +216,7 @@ class _SearchScreenState extends State<SearchScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black)),
         const SizedBox(height: 12),
         SizedBox(
           height: 210,
@@ -334,8 +348,8 @@ class _SearchScreenState extends State<SearchScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  Text(author, style: const TextStyle(color: Color(0xff777777), fontSize: 14)),
+                  Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black)),
+                  Text(author, style: const TextStyle(color: Color(0xff777777), fontSize: 14, fontWeight: FontWeight.w400)),
                 ],
               ),
             ),
@@ -344,6 +358,4 @@ class _SearchScreenState extends State<SearchScreen> {
       ),
     );
   }
-
 }
-

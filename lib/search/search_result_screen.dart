@@ -17,6 +17,7 @@ class SearchResultScreen extends StatefulWidget {
 }
 
 class _SearchResultScreenState extends State<SearchResultScreen> {
+
   late TextEditingController _searchController;
 
   late String bookTitle;
@@ -111,79 +112,85 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
   }
 
   // 검색창
- Widget buildSearchBar(BuildContext context) {
-  return Row(
-    children: [
-      IconButton(
-        icon: Icon(Icons.chevron_left_rounded),
-        color: Colors.black,
-        onPressed: () {
-          Navigator.pop(context);
-        },
-      ),
-      Expanded(
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 12),
-          height: 56,
-          decoration: BoxDecoration(
-            color: Color(0xffF8F8F8),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: '검색어를 입력해 주세요',
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(horizontal: 8),
-                  ),
-                ),
-              ),
-              if (_searchController.text.isNotEmpty)
-                GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _searchController.clear();
-                    });
-                  },
-                  child: Container(
-                    width: 24,
-                    height: 24,
-                    decoration: BoxDecoration(
-                      color: Color(0xffD9D9D9),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.close_rounded,
-                      size: 16,
-                      color: Color(0xff777777),
+  Widget buildSearchBar(BuildContext context) {
+    return Row(
+      children: [
+        IconButton(
+          icon: Icon(Icons.chevron_left_rounded),
+          color: Colors.black,
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        SizedBox(width: 8,),
+        Expanded(
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 12),
+            height: 56,
+            decoration: BoxDecoration(
+              color: Color(0xffF8F8F8),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _searchController,
+                    cursorColor: Color(0xff0077FF),
+                    decoration: InputDecoration(
+                      hintText: '검색어를 입력해 주세요',
+                      hintStyle: TextStyle(
+                        color: Color(0xff777777),
+                        fontWeight: FontWeight.w400,
+                        fontSize: 16,
+                      ),
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(horizontal: 8),
                     ),
                   ),
                 ),
-              SizedBox(width: 8),
-              IconButton(
-                icon: Icon(Icons.search, color: Color(0xff777777)),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => SearchResultScreen(
-                        searchKeyword: _searchController.text,
+                if (_searchController.text.isNotEmpty)
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _searchController.clear();
+                      });
+                    },
+                    child: Container(
+                      width: 24,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        color: Color(0xffD9D9D9),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.close_rounded,
+                        size: 16,
+                        color: Color(0xff777777),
                       ),
                     ),
-                  );
-                },
-              ),
-            ],
+                  ),
+                SizedBox(width: 8),
+                IconButton(
+                  icon: Icon(Icons.search, color: Color(0xff777777)),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SearchResultScreen(
+                          searchKeyword: _searchController.text,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
           ),
         ),
-      ),
-    ],
-  );
-}
-
+      ],
+    );
+  }
 
   // 책 이미지
   Widget buildBookCover() {
@@ -221,21 +228,21 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
           children: [
             Text(
               bookTitle,
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
             ),
             SizedBox(height: 8),
             if (bookAuthor.isNotEmpty)
               Text(
                 '$bookAuthor 저자(글)',
-                style: TextStyle(fontSize: 14, color: Colors.black),
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.black),
               ),
             SizedBox(height: 16),
-              Text(
-                bookDescription.isNotEmpty
-                    ? bookDescription
-                    : '해당 도서에 대한 설명이 없습니다.',
-                style: TextStyle(fontSize: 14, color: Color(0xff777777)),
-              ),
+            Text(
+              bookDescription.isNotEmpty
+                  ? bookDescription
+                  : '해당 도서에 대한 설명이 없습니다.',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Color(0xff777777)),
+            ),
           ],
         ),
       ),

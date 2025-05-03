@@ -20,8 +20,8 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.05),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.05),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -131,9 +131,9 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
         SizedBox(height: 8),
-
         Container(
-          padding: EdgeInsets.all(12),
+          height: 200,
+          padding: EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: Color(0xffF8F8F8),
             borderRadius: BorderRadius.circular(16),
@@ -143,13 +143,13 @@ class HomeScreen extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: Image.asset(
-                  'assets/images/book.png',
+                  'assets/images/boycome.png',
                   width: 110,
                   height: 150,
                   fit: BoxFit.cover,
                 ),
               ),
-              SizedBox(width: 16),
+              SizedBox(width: 24),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -162,14 +162,23 @@ class HomeScreen extends StatelessWidget {
                     SizedBox(height: 8),
                     Text("소년이 온다",
                         style: TextStyle(
-                            fontWeight: FontWeight.w600, fontSize: 16)),
+                            color: Colors.black,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600)
+                    ),
                     Text("한강 작가",
                         style: TextStyle(
-                            color: Color(0xff777777), fontSize: 14)),
-                    SizedBox(height: 4),
+                            color: Color(0xff777777),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,)
+                    ),
+                    SizedBox(height: 24),
                     Text(
                       "어머님, 그리고 당신은 멀리 북간도에 계십니다. 어머님, 그리고 당신은 멀리 북간도에 계십니다람쥐쥐쥐쥐쥐쥐.어머님, 그리고 당신은 멀리 북간도에 계십니다.",
-                      style: TextStyle(fontSize: 14, color: Color(0xff777777)),
+                      style: TextStyle(
+                          color: Color(0xff777777),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,),
                       overflow: TextOverflow.ellipsis,
                       maxLines: 3,
                     )
@@ -193,7 +202,7 @@ class HomeScreen extends StatelessWidget {
           children: [
             Text(
               '출석 체크',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black),
             ),
             TextButton(
               onPressed: () {
@@ -227,49 +236,43 @@ class HomeScreen extends StatelessWidget {
         ),
         Text(
           "닉네임님은 현재 독서량 ‘n권’으로 상위 n%예요!",
-          style: TextStyle(fontSize: 14, color: Color(0xff777777)),
+          style: TextStyle(fontSize: 14, color: Color(0xff777777), fontWeight: FontWeight.w400,),
         ),
         SizedBox(height: 10),
-
-    Container(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: Color(0xffF8F8F8),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: List.generate(
-          7,
-          (index) {
-            List<String> days = ['일', '월', '화', '수', '목', '금', '토'];
-            bool isSelected = index < 2;
-            Color textColor = isSelected ? Color(0xff0077FF) : Color(0xff777777);
-            Color borderColor = isSelected ? Color(0xff0077FF) : Color(0xff777777);
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: Color(0xffF8F8F8),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: List.generate(7, (index) {
+              List<String> days = ['일', '월', '화', '수', '목', '금', '토'];
+              bool isSelected = index < 2;
+              Color textColor = isSelected ? Color(0xff0077FF) : Color(0xff777777);
+              Color borderColor = isSelected ? Color(0xff0077FF) : Color(0xff777777);
             
-            return Container(
-              width: 30,
-              height: 30,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: borderColor),
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                days[index],
-                style: TextStyle(
-                  color: textColor,
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
+              return Container(
+                width: 30,
+                height: 30,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: borderColor),
                 ),
-              ),
-            );
-          },
-        ),
-      ),
-    )
-
-
+                alignment: Alignment.center,
+                child: Text(
+                  days[index],
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              );
+            },),
+          ),
+        )
       ],
     );
   }

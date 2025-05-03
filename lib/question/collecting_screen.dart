@@ -14,6 +14,7 @@ class CollectingScreen extends StatefulWidget {
 }
 
 class _CollectingScreenState extends State<CollectingScreen> {
+
   late Timer _imageTimer;
   late Timer _navigationTimer;
   bool _showFirstImage = true;
@@ -94,12 +95,12 @@ class _CollectingScreenState extends State<CollectingScreen> {
       children: [
         Text(
           '책멍이가 정보를 수집 중이에요',
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: Colors.black),
         ),
         const SizedBox(height: 6),
         Text(
           '잠시만 기다려주세요',
-          style: TextStyle(fontSize: 16, color: Color(0xff777777)),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400, color: Color(0xff777777)),
         ),
       ],
     );

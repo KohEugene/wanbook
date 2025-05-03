@@ -70,13 +70,13 @@ class _PreKnowledgeScreenState extends State<PreKnowledgeScreen> {
       children: [
         Text(
           '원하시는 사전 지식이 있으신가요?',
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: Colors.black),
           textAlign: TextAlign.center, // 줄 바꿈 시에도 중앙 정렬
         ),
         const SizedBox(height: 6),
         Text(
           '해당하는 것을 선택하시면\n책멍이가 알려드릴게요!',
-          style: TextStyle(fontSize: 16, color: Color(0xff777777)),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400, color: Color(0xff777777)),
           textAlign: TextAlign.center,
         ),
       ],
@@ -131,13 +131,12 @@ class _PreKnowledgeScreenState extends State<PreKnowledgeScreen> {
               style: TextStyle(
                 fontSize: 16,
                 color: isSelected ? Color(0xff0077FF) : Color(0xff777777),
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
               ),
             ),
           ),
         ),
       );
-      
     }
 
     return Center(
@@ -185,14 +184,14 @@ class _PreKnowledgeScreenState extends State<PreKnowledgeScreen> {
               shadowColor: Colors.transparent,
               elevation: 0,
             ),
-            child: Text('건너뛰기', style: TextStyle(fontSize: 18)),
+            child: Text('건너뛰기', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400)),
           ),
         ),
         const SizedBox(width: 16),
 
         // 다음 버튼
         Expanded(
-          child: ElevatedButton(
+          child: OutlinedButton(
               onPressed: () {
               if (selectedPreKnowledgeList.isEmpty) {
                 showDialog(
@@ -241,17 +240,18 @@ class _PreKnowledgeScreenState extends State<PreKnowledgeScreen> {
                 );
               }
             },
-            style: ElevatedButton.styleFrom(
+            style: OutlinedButton.styleFrom(
               backgroundColor: Color(0xffCCE4FF),
               foregroundColor: Color(0xff0077FF),
               padding: EdgeInsets.symmetric(vertical: 20),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(32),
               ),
+              side: BorderSide(color: Colors.transparent),
               elevation: 0,
               shadowColor: Colors.transparent,
             ),
-            child: Text('다음', style: TextStyle(fontSize: 18)),
+            child: Text('다음', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
           ),
         ),
       ],

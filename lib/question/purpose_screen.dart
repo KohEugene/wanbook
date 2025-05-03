@@ -70,13 +70,13 @@ class _ReadingPurposeScreenState extends State<ReadingPurposeScreen> {
       children: [
         Text(
           '주요 독서 목적은 무엇인가요?',
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: Colors.black),
           textAlign: TextAlign.center, // 줄 바꿈 시에도 중앙 정렬
         ),
         const SizedBox(height: 6),
         Text(
           '알맞은 알림 설정을 위하여\n정보가 필요해요!',
-          style: TextStyle(fontSize: 16, color: Color(0xff777777)),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400, color: Color(0xff777777)),
           textAlign: TextAlign.center,
         ),
       ],
@@ -133,7 +133,7 @@ class _ReadingPurposeScreenState extends State<ReadingPurposeScreen> {
                       style: TextStyle(
                         fontSize: 16,
                         color: isSelected ? Color(0xff0077FF) : Color(0xff777777),
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                       ),
                     ),
                   ),
@@ -173,7 +173,7 @@ class _ReadingPurposeScreenState extends State<ReadingPurposeScreen> {
                       style: TextStyle(
                         fontSize: 16,
                         color: isSelected ? Color(0xff0077FF) : Color(0xff777777),
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                       ),
                     ),
                   ),
@@ -217,7 +217,7 @@ class _ReadingPurposeScreenState extends State<ReadingPurposeScreen> {
 
         // 다음 버튼
         Expanded(
-          child: ElevatedButton(
+          child: OutlinedButton(
             // 아무것도 선택x시 다음버튼 못 되게
             onPressed: () {
               if (selectedPurpose.isEmpty) {
@@ -263,17 +263,18 @@ class _ReadingPurposeScreenState extends State<ReadingPurposeScreen> {
                 );
               }
             },
-            style: ElevatedButton.styleFrom(
+            style: OutlinedButton.styleFrom(
               backgroundColor: Color(0xffCCE4FF),
               foregroundColor: Color(0xff0077FF),
               padding: EdgeInsets.symmetric(vertical: 20),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(32),
               ),
+              side: BorderSide(color: Colors.transparent),
               elevation: 0,
               shadowColor: Colors.transparent,
             ),
-            child: Text('다음', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400)),
+            child: Text('다음', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
           ),
         ),
       ],

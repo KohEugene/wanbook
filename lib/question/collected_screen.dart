@@ -67,13 +67,13 @@ class _CollectedScreenState extends State<CollectedScreen> {
       children: [
         Text(
           '책멍이가 정보 수집을 완료했어요!',
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: Colors.black),
           textAlign: TextAlign.center, // 줄 바꿈 시에도 중앙 정렬
         ),
         const SizedBox(height: 6),
         Text(
           '해당 정보를 클릭하시면\n더 자세한 내용을 볼 수 있어요',
-          style: TextStyle(fontSize: 16, color: Color(0xff777777)),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400, color: Color(0xff777777)),
           textAlign: TextAlign.center,
         ),
       ],
@@ -102,7 +102,8 @@ class _CollectedScreenState extends State<CollectedScreen> {
                 title,
                 style: TextStyle(
                   fontSize: 16,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black
                 ),
               ),
               GestureDetector(
@@ -115,13 +116,33 @@ class _CollectedScreenState extends State<CollectedScreen> {
                     }
                   });
                 },
-                child: Text(
-                  isExpanded ? '접기 <' : '더보기 >',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Color(0xff777777),
+                child: isExpanded
+                ? Row(
+                    children: [
+                      Text('접기', style: TextStyle(
+                        color: Color(0xff777777),
+                        fontWeight: FontWeight.w400,
+                        fontSize: 14),
+                      ),
+                      Icon(Icons.chevron_left_rounded,
+                        color: Color(0xff777777),
+                        size: 14,
+                      )
+                    ],
+                  )
+                : Row(
+                    children: [
+                      Text('더보기', style: TextStyle(
+                        color: Color(0xff777777),
+                        fontWeight: FontWeight.w400,
+                        fontSize: 14),
+                      ),
+                      Icon(Icons.chevron_right_rounded,
+                        color: Color(0xff777777),
+                        size: 14,
+                      )
+                    ],
                   ),
-                ),
               ),
             ],
           ),
@@ -134,7 +155,7 @@ class _CollectedScreenState extends State<CollectedScreen> {
             'Vivamus dignissim lectus sed pellentesque tellus. Lorem ipsum dolor sit amet consectetur. ''Lorem ipsum dolor sit amet consectetur. Venenatis iaculis senectus vulputate id eget pretium. '
             'Vivamus dignissim lectus sed pellentesque tellus. Lorem ipsum dolor sit amet consectetur. '
             'Venenatis iaculis senectus vulputate id eget pretium. Vivamus dignissim lectus sed pellentesque tellus.',
-            style: TextStyle(fontSize: 14, color: Color(0xff777777)),
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Color(0xff777777)),
             maxLines: isExpanded ? null : 5,
             overflow: isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
           ),
@@ -147,7 +168,7 @@ class _CollectedScreenState extends State<CollectedScreen> {
   Widget buildBottomButtons() {
   return SizedBox(
     width: double.infinity,
-    child: ElevatedButton(
+    child: OutlinedButton(
       onPressed: () {
               Navigator.push(
                 context,
@@ -156,17 +177,18 @@ class _CollectedScreenState extends State<CollectedScreen> {
                 ),
               );
             },
-      style: ElevatedButton.styleFrom(
+      style: OutlinedButton.styleFrom(
         backgroundColor: Color(0xffCCE4FF),
         foregroundColor: Color(0xff0077FF),
         padding: EdgeInsets.symmetric(vertical: 20),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(32),
         ),
+        side: BorderSide(color: Colors.transparent),
         elevation: 0,
         shadowColor: Colors.transparent,
       ),
-      child: Text('다음', style: TextStyle(fontSize: 18)),
+      child: Text('다음', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
     ),
   );
 }

@@ -166,6 +166,7 @@ class _JoinScreenState extends State<JoinScreen> {
               ),
               child: TextFormField(
                 controller: controller,
+                cursorColor: Color(0xff777777),
                 obscureText: obscure,
                 decoration: InputDecoration(
                     border: InputBorder.none,
@@ -235,6 +236,7 @@ class _JoinScreenState extends State<JoinScreen> {
           ),
           child: TextFormField(
             controller: controller,
+            cursorColor: Color(0xff777777),
             decoration: InputDecoration(
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.all(16),
