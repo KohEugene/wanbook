@@ -48,14 +48,17 @@ class _ChatScreenState extends State<ChatScreen> {
         leading: IconButton(
           icon: const Icon(Icons.chevron_left_rounded),
           color: Colors.black,
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            int count = 0;
+            Navigator.popUntil(context, (route) => count++ == 2);
+          },
         ),
       ),
       body: Column(
         children: [
           Expanded(
             child: ListView.builder(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.symmetric(horizontal: 24),
               itemCount: _messages.length,
               itemBuilder: (context, index) {
                 final msg = _messages[index];
@@ -66,9 +69,10 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+            padding: const EdgeInsets.symmetric(horizontal: 24),
             child: buildMessageInputArea(),
           ),
+          const SizedBox(height: 24),
         ],
       ),
     );
@@ -158,6 +162,7 @@ class _ChatScreenState extends State<ChatScreen> {
               hintText: '메시지를 입력하세요.',
               hintStyle: const TextStyle(
                 color: Color(0xff777777),
+                fontWeight: FontWeight.w400,
                 fontSize: 14,
               ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
