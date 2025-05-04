@@ -17,13 +17,18 @@ class JoinScreen extends StatefulWidget {
 
 class _JoinScreenState extends State<JoinScreen> {
 
-  final _formKey = GlobalKey<FormState>();
   final _idController = TextEditingController();
   final _pwdController = TextEditingController();
   final _rePwdController = TextEditingController();
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _nicknameController = TextEditingController();
+
+  // 포커스 여부
+  final _idFocus = FocusNode();
+  final _pwdFocus = FocusNode();
+  final _rePwdFocus = FocusNode();
+  final _nicknameFocus = FocusNode();
 
   // 에러 여부
   bool _idHasError = false;
@@ -43,10 +48,19 @@ class _JoinScreenState extends State<JoinScreen> {
   @override
   void initState() {
     super.initState();
-    _idController.addListener(validateInputs);
-    _pwdController.addListener(validateInputs);
-    _rePwdController.addListener(validateInputs);
-    _nicknameController.addListener(validateInputs);
+
+    _idFocus.addListener(() {
+      if (!_idFocus.hasFocus) validateId();
+    });
+    _pwdFocus.addListener(() {
+      if (!_pwdFocus.hasFocus) validatePassword();
+    });
+    _rePwdFocus.addListener(() {
+      if (!_rePwdFocus.hasFocus) validateRePassword();
+    });
+    _nicknameFocus.addListener(() {
+      if (!_nicknameFocus.hasFocus) validateNickname();
+    });
   }
 
   @override
@@ -57,7 +71,76 @@ class _JoinScreenState extends State<JoinScreen> {
     _nameController.dispose();
     _phoneController.dispose();
     _nicknameController.dispose();
+
+    _idFocus.dispose();
+    _pwdFocus.dispose();
+    _rePwdFocus.dispose();
+    _nicknameFocus.dispose();
+
     super.dispose();
+  }
+
+  // 아이디 유효성 검사 함수 (중복 확인 절차 추가 필요)
+  void validateId() {
+    setState(() {
+      if (_idController.text.length < 6 || _idController.text.length > 20) {
+        _idHasError = true;
+        _idError = '사용할 수 없는 아이디입니다';
+      } else {
+        _idHasError = false;
+      }
+      validateInputs();
+    });
+  }
+
+  // 비밀번호 유효성 검사 함수
+  void validatePassword() {
+    setState(() {
+      String pwd = _pwdController.text;
+      bool hasLetter = pwd.contains(RegExp(r'[A-Za-z]'));
+      bool hasNumber = pwd.contains(RegExp(r'[0-9]'));
+      bool hasSpecial = pwd.contains(RegExp(r'[!@#\$%^&*(),.?":{}|<>]'));
+      if (pwd.length < 8 || pwd.length > 20 || !(hasLetter && hasNumber && hasSpecial)) {
+        _pwdHasError = true;
+        _pwdError = '사용할 수 없는 비밀번호입니다';
+      } else {
+        _pwdHasError = false;
+      }
+      validateInputs();
+    });
+  }
+
+  // 비밀번호 재입력 유효성 검사 함수
+  void validateRePassword() {
+    setState(() {
+      if (_rePwdController.text != _pwdController.text) {
+        _rePwdHasError = true;
+        _rePwdError = '비밀번호가 일치하지 않습니다';
+      } else {
+        _rePwdHasError = false;
+      }
+      validateInputs();
+    });
+  }
+
+  // 별명 유효성 검사 함수
+  void validateNickname() {
+    setState(() {
+      if (_nicknameController.text.isEmpty) {
+        _nicknameHasError = true;
+        _nicknameError = '사용할 수 없는 별명입니다';
+      } else {
+        _nicknameHasError = false;
+      }
+      validateInputs();
+    });
+  }
+
+  // 모든 조건 충족 여부 검사 함수
+  void validateInputs() {
+    setState(() {
+      isFormvalid = !_idHasError && !_pwdHasError && !_rePwdHasError && !_nicknameHasError;
+    });
   }
 
   @override
@@ -85,18 +168,18 @@ class _JoinScreenState extends State<JoinScreen> {
                   child: Column(
                     children: [
                       buildFieldWithError(
-                          controller: _idController,
+                          controller: _idController, focusNode: _idFocus,
                           label: '아이디', hintText: '아이디 입력 (6~20자)',
                           hasError: _idHasError, errorMessage: _idError,
                           hasCheckButton: true
                       ),
                       buildFieldWithError(
-                          controller: _pwdController,
+                          controller: _pwdController, focusNode: _pwdFocus,
                           label: '비밀번호', hintText: '비밀번호 입력 (문자, 숫자, 특수문자 포함 8~20자)',
                           hasError: _pwdHasError, errorMessage: _pwdError
                       ),
                       buildFieldWithError(
-                          controller: _rePwdController,
+                          controller: _rePwdController, focusNode: _rePwdFocus,
                           label: '비밀번호 확인', hintText: '비밀번호 재입력',
                           hasError: _rePwdHasError, errorMessage: _rePwdError
                       ),
@@ -109,7 +192,7 @@ class _JoinScreenState extends State<JoinScreen> {
                           label: '전화번호', hintText: "휴대폰 번호 입력 ('-' 제외 11자리 입력)"
                       ),
                       buildFieldWithError(
-                          controller: _nicknameController,
+                          controller: _nicknameController, focusNode: _nicknameFocus,
                           label: '별명', hintText: '별명을 입력해 주세요',
                           hasError: _nicknameHasError, errorMessage: _nicknameError,
                           hasCheckButton: true
@@ -132,6 +215,7 @@ class _JoinScreenState extends State<JoinScreen> {
     required TextEditingController controller,
     required String label,
     required String hintText,
+    FocusNode? focusNode,
     bool hasError = false,
     String errorMessage = '',
     bool obscure = false,
@@ -166,6 +250,7 @@ class _JoinScreenState extends State<JoinScreen> {
               ),
               child: TextFormField(
                 controller: controller,
+                focusNode: focusNode,
                 cursorColor: Color(0xff777777),
                 obscureText: obscure,
                 decoration: InputDecoration(
@@ -252,53 +337,6 @@ class _JoinScreenState extends State<JoinScreen> {
         SizedBox(height: 8,)
       ],
     );
-  }
-
-  void validateInputs() {
-    setState(() {
-
-      // 고민1 : 문구를 좀 더 자세하게? (조건 설명 방식으로)
-      // 고민2 : 전화번호 11자리 맞는지 확인하는 조건 추가 여부
-
-      // ID validation (중복 확인 작업 추가 필요)
-      if (_idController.text.length < 6 || _idController.text.length > 20) {
-        _idHasError = true;
-        _idError = '사용할 수 없는 아이디입니다';
-      } else {
-        _idHasError = false;
-      }
-
-      // Password validation
-      String pwd = _pwdController.text;
-      bool hasLetter = pwd.contains(RegExp(r'[A-Za-z]'));
-      bool hasNumber = pwd.contains(RegExp(r'[0-9]'));
-      bool hasSpecial = pwd.contains(RegExp(r'[!@#\$%^&*(),.?":{}|<>]'));
-      if (pwd.length < 8 || pwd.length > 20 || !(hasLetter && hasNumber && hasSpecial)) {
-        _pwdHasError = true;
-        _pwdError = '사용할 수 없는 비밀번호입니다';
-      } else {
-        _pwdHasError = false;
-      }
-
-      // Password Confirm validation
-      if (_rePwdController.text != _pwdController.text) {
-        _rePwdHasError = true;
-        _rePwdError = '비밀번호가 일치하지 않습니다';
-      } else {
-        _rePwdHasError = false;
-      }
-
-      // Nickname validation (중복 확인 작업 추가 필요)
-      if (_nicknameController.text.isEmpty) {
-        _nicknameHasError = true;
-        _nicknameError = '사용할 수 없는 별명입니다';
-      } else {
-        _nicknameHasError = false;
-      }
-
-      // 모든 조건 충족 시
-      isFormvalid = !_idHasError && !_pwdHasError && !_rePwdHasError && !_nicknameHasError;
-    });
   }
 
   Widget signUpButton() {

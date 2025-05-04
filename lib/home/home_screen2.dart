@@ -317,9 +317,12 @@ class HomeScreen2 extends StatelessWidget {
               onPressed: () {
                 Navigator.push(context, MaterialPageRoute(builder: (context) => ProfileScreen()));
               },
+              style: ButtonStyle(
+                  overlayColor: WidgetStateColor.resolveWith((states) => Colors.transparent,)
+              ),
               child: Row(
                 children: [
-                  Text('더보기', style: TextStyle(color: Color(0xff777777), fontSize: 14)),
+                  Text('더보기', style: TextStyle(color: Color(0xff777777), fontWeight: FontWeight.w400, fontSize: 14)),
                   Icon(Icons.chevron_right_rounded, color: Color(0xff777777), size: 14),
                 ],
               ),

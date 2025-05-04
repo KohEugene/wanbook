@@ -17,6 +17,18 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+
+  final Map<String, Map<String, String>> bookInfoMap = {
+    '침묵의 봄': {
+      'author': '레이첼 카슨',
+      'image': 'assets/images/b_spring.png',
+    },
+    '눈먼 자들의 도시': {
+      'author': '사라마구',
+      'image': 'assets/images/b_eye.png',
+    },
+  };
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,9 +54,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Expanded(child: readingCard('가장 빨리 읽었어요', '3시간 독서')),
+                      Expanded(child: readingCard('가장 빨리 읽었어요', '침묵의 봄', '3시간 독서')),
                       SizedBox(width: 16,),
-                      Expanded(child: readingCard('가장 오래 읽었어요', '1개월 독서'))
+                      Expanded(child: readingCard('가장 오래 읽었어요', '눈먼 자들의 도시', '1개월 독서'))
                     ],
                   ),
                   SizedBox(height: 16,),
@@ -222,7 +234,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget readingCard(String title, String duration) {
+  Widget readingCard(String section, String title, String duration) {
+    final bookData = bookInfoMap[title];
+    final author = bookData?['author'] ?? '작가 미상';
+    final imagePath = bookData?['image'];
+
     return Container(
       width: SizeConfig.screenWidth * 0.45,
       height: 288,
@@ -234,7 +250,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: TextStyle(
+          Text(section, style: TextStyle(
               color: Colors.black,
               fontWeight: FontWeight.w600,
               fontSize: 18),
@@ -244,16 +260,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
             width: 110, height: 150,
             decoration: BoxDecoration(
                 color: Color(0xffD9D9D9),
-                borderRadius: BorderRadius.circular(8)
+                borderRadius: BorderRadius.circular(8),
+                image: imagePath != null
+                    ? DecorationImage(
+                  image: AssetImage(imagePath),
+                  fit: BoxFit.cover,
+                )
+                    : null,
             ),
           ),
-          SizedBox(height: 4,),
-          Text('책 제목', style: TextStyle(
+          SizedBox(height: 8,),
+          Text(title, style: TextStyle(
               color: Colors.black,
               fontWeight: FontWeight.w600,
               fontSize: 16)
           ),
-          Text('저자명', style: TextStyle(
+          Text(author, style: TextStyle(
               color: Color(0xff777777),
               fontWeight: FontWeight.w400,
               fontSize: 14)

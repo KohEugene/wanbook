@@ -70,6 +70,7 @@ class HomeScreen extends StatelessWidget {
     "독서하는 닉네임님의 모습은 언제나 멋져요! 오늘도 파이팅!",
     "닉네임님, 지금까지 3권 읽었어요! 멋져요!",
   ];
+
   final Random random = Random();
   // 책멍이 말풍선 문구에서 문장부호 줄바꿈 함수 
   String splitMessageByPunctuation(String message) {
@@ -77,7 +78,6 @@ class HomeScreen extends StatelessWidget {
         .replaceAllMapped(RegExp(r'([.?!])\s*'), (match) => '${match.group(1)}\n')
         .trim();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -176,12 +176,15 @@ class HomeScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text('아직 완독할 도서가 남았어요!',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                style: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600)),
             TextButton(
               onPressed: () {},
+              style: ButtonStyle(
+                  overlayColor: WidgetStateColor.resolveWith((states) => Colors.transparent,)
+              ),
               child: Row(
                 children: [
-                  Text('독서하기', style: TextStyle(color: Color(0xff777777), fontSize: 14)),
+                  Text('독서하기', style: TextStyle(color: Color(0xff777777), fontWeight: FontWeight.w400, fontSize: 14)),
                   Icon(Icons.chevron_right_rounded, color: Color(0xff777777), size: 14),
                 ],
               ),
@@ -214,8 +217,8 @@ class HomeScreen extends StatelessWidget {
                     Text(author, style: TextStyle(color: Color(0xff777777), fontSize: 14)),
                     SizedBox(height: 16),
                     Text(
-                      "이 책의 미리보기 내용 또는 소개 문장.이 책의 미리보기 내용 또는 소개 문장.이 책의 미리보기 내용 또는 소개 문장.이 책의 미리보기 내용 또는 소개 문장.",
-                      style: TextStyle(color: Color(0xff777777), fontSize: 14),
+                      "이 책의 미리보기 내용 또는 소개 문장. 이 책의 미리보기 내용 또는 소개 문장. 이 책의 미리보기 내용 또는 소개 문장. 이 책의 미리보기 내용 또는 소개 문장.",
+                      style: TextStyle(color: Color(0xff777777), fontSize: 14, fontWeight: FontWeight.w400),
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -273,9 +276,12 @@ class HomeScreen extends StatelessWidget {
               onPressed: () {
                 Navigator.push(context, MaterialPageRoute(builder: (context) => ProfileScreen()));
               },
+              style: ButtonStyle(
+                  overlayColor: WidgetStateColor.resolveWith((states) => Colors.transparent,)
+              ),
               child: Row(
                 children: [
-                  Text('더보기', style: TextStyle(color: Color(0xff777777), fontSize: 14)),
+                  Text('더보기', style: TextStyle(color: Color(0xff777777), fontWeight: FontWeight.w400, fontSize: 14)),
                   Icon(Icons.chevron_right_rounded, color: Color(0xff777777), size: 14),
                 ],
               ),

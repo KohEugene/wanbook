@@ -5,6 +5,8 @@ import 'package:wanbook/aichat/chat_main_screen.dart';
 
 import 'dart:async';
 
+import 'package:wanbook/library/library_screen.dart';
+
 class BookScreen extends StatefulWidget {
   final String title;
   
@@ -72,12 +74,13 @@ class _BookScreenState extends State<BookScreen> {
               leading: IconButton(
                 icon: Icon(Icons.chevron_left_rounded),
                 color: Colors.black,
-                onPressed: () => Navigator.pop(context),
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return LibraryScreen();
+                  },));
+                },
               ),
               title: Text(widget.title),
-              backgroundColor: Colors.white,
-              centerTitle: true,
-              elevation: 0,
             )
           : null,
       body: SafeArea(
@@ -122,15 +125,14 @@ class _BookScreenState extends State<BookScreen> {
   }
 
   // 뒤에 텍스트 이미지
-Widget buildBackground() {
-  return Positioned.fill(
-    child: Image.asset(
-      'assets/images/t_damian.png',
-      fit: BoxFit.contain,
-    ),
-  );
-}
-
+  Widget buildBackground() {
+    return Positioned.fill(
+      child: Image.asset(
+        'assets/images/t_damian.png',
+        fit: BoxFit.contain,
+      ),
+    );
+  }
 
   // 책 진행도 바
   Widget buildProgressSection(BuildContext context) {

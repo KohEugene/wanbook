@@ -13,10 +13,11 @@ class ChatMainScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
-        centerTitle: true,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        elevation: 0,
+        leading: IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: Icon(Icons.chevron_left_rounded),
+          color: Colors.black,
+        ),
       ),
       body: buildChatBody(),
     );
@@ -61,7 +62,7 @@ class ChatMainScreen extends StatelessWidget {
       '도움이 필요하신가요?',
       style: TextStyle(
         fontSize: 22,
-        fontWeight: FontWeight.w700,
+        fontWeight: FontWeight.w600,
         color: Colors.black,
       ),
     );
@@ -74,6 +75,7 @@ class ChatMainScreen extends StatelessWidget {
       textAlign: TextAlign.center,
       style: TextStyle(
         fontSize: 16,
+        fontWeight: FontWeight.w400,
         color: Color(0xff777777),
       ),
     );
@@ -111,13 +113,23 @@ class ChatMainScreen extends StatelessWidget {
   // 메시지 입력창
   Widget buildMessageInput() {
     return TextField(
+      cursorColor: Color(0xff0077FF),
       decoration: InputDecoration(
         hintText: '메시지를 입력하세요.',
+        hintStyle: TextStyle(
+            color: Color(0xff777777),
+            fontWeight: FontWeight.w400,
+            fontSize: 14
+        ),
         contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide(color: Color(0xffE4E4E4)),
         ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: Color(0xff0077FF), width: 2),
+        )
       ),
     );
   }
