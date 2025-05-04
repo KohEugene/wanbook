@@ -10,7 +10,8 @@ import 'package:wanbook/profile/profile_screen.dart';
 import 'package:wanbook/search/search_screen.dart';
 
 class MenuBottom extends StatefulWidget {
-  const MenuBottom({super.key});
+  final int initialIndex;
+  const MenuBottom({super.key, this.initialIndex = 0});
 
   @override
   State<MenuBottom> createState() => _MenuBottomState();
@@ -18,7 +19,14 @@ class MenuBottom extends StatefulWidget {
 
 class _MenuBottomState extends State<MenuBottom> {
   
-  int selectedIndex = 0;
+  late int selectedIndex;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    selectedIndex = widget.initialIndex;
+  }
 
   final List<Widget> _pages = [
     HomeScreen(),

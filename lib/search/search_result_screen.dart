@@ -2,10 +2,9 @@
 // 검색 결과 화면
 
 import 'package:flutter/material.dart';
-import 'package:wanbook/library/library_screen.dart';
-//import 'package:wanbook/search/addlibrary_menu.dart';
 
-import '../shared/size_config.dart'; 
+import '../shared/menu_bottom.dart';
+import '../shared/size_config.dart';
 
 class SearchResultScreen extends StatefulWidget {
   final String searchKeyword;
@@ -292,8 +291,9 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
                   ),
                   TextButton(
                     onPressed: () {
-                      Navigator.pop(context);
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => LibraryScreen()));
+                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
+                        return MenuBottom(initialIndex: 2,);
+                      },));
                     },
                     style: TextButton.styleFrom(
                       foregroundColor: Color(0xff0077FF),

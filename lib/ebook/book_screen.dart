@@ -5,7 +5,7 @@ import 'package:wanbook/aichat/chat_main_screen.dart';
 
 import 'dart:async';
 
-import 'package:wanbook/library/library_screen.dart';
+import 'package:wanbook/shared/menu_bottom.dart';
 
 class BookScreen extends StatefulWidget {
   final String title;
@@ -75,8 +75,8 @@ class _BookScreenState extends State<BookScreen> {
                 icon: Icon(Icons.chevron_left_rounded),
                 color: Colors.black,
                 onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) {
-                    return LibraryScreen();
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
+                    return MenuBottom(initialIndex: 2,);
                   },));
                 },
               ),

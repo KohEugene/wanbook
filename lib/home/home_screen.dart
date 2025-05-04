@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'package:wanbook/shared/menu_bottom.dart';
-import 'package:wanbook/profile/profile_screen.dart';
 import 'package:wanbook/home/speechbubble.dart';
 import 'package:wanbook/ebook/book_screen.dart';
 
@@ -282,7 +281,9 @@ class HomeScreen extends StatelessWidget {
             Text('출석 체크', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black)),
             TextButton(
               onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => ProfileScreen()));
+                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
+                  return MenuBottom(initialIndex: 3,);
+                },));
               },
               style: ButtonStyle(
                   overlayColor: WidgetStateColor.resolveWith((states) => Colors.transparent,)
