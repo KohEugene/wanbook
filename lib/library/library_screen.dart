@@ -56,7 +56,7 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
               TextSpan(
                 text: '닉네임',
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: 18,
                   fontWeight: FontWeight.w400,
                   color: Color(0xff777777)
                 )
@@ -64,7 +64,7 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
               TextSpan(
                   text: '의 ',
                   style: TextStyle(
-                      fontSize: 20,
+                      fontSize: 18,
                       fontWeight: FontWeight.w400,
                       color: Colors.black
                   )
@@ -72,7 +72,7 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
               TextSpan(
                   text: '서재',
                   style: TextStyle(
-                      fontSize: 20,
+                      fontSize: 18,
                       fontWeight: FontWeight.w600,
                       color: Colors.black
                   )

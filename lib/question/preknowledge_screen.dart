@@ -71,13 +71,13 @@ class _PreKnowledgeScreenState extends State<PreKnowledgeScreen> {
       children: [
         Text(
           '원하시는 사전 지식이 있으신가요?',
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: Colors.black),
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Colors.black),
           textAlign: TextAlign.center, // 줄 바꿈 시에도 중앙 정렬
         ),
         const SizedBox(height: 6),
         Text(
           '해당하는 것을 선택하시면\n책멍이가 알려드릴게요!',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400, color: Color(0xff777777)),
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Color(0xff777777)),
           textAlign: TextAlign.center,
         ),
       ],
@@ -130,7 +130,7 @@ class _PreKnowledgeScreenState extends State<PreKnowledgeScreen> {
             child: Text(
               label,
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 14,
                 color: isSelected ? Color(0xff0077FF) : Color(0xff777777),
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
               ),
@@ -165,94 +165,98 @@ class _PreKnowledgeScreenState extends State<PreKnowledgeScreen> {
       children: [
         // 건너뛰기 버튼
         Expanded(
-          child: OutlinedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ReadyScreen(title: widget.title),
+          child: SizedBox(
+            height: 50,
+            child: OutlinedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ReadyScreen(title: widget.title),
+                  ),
+                );
+              },
+              style: OutlinedButton.styleFrom(
+                backgroundColor: Color(0xffE4E4E4),
+                foregroundColor: Color(0xff777777),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(32),
                 ),
-              );
-            },
-            style: OutlinedButton.styleFrom(
-              backgroundColor: Color(0xffE4E4E4),
-              foregroundColor: Color(0xff777777),
-              padding: EdgeInsets.symmetric(vertical: 20),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(32),
+                side: BorderSide(color: Colors.transparent),
+                shadowColor: Colors.transparent,
+                elevation: 0,
               ),
-              side: BorderSide(color: Colors.transparent),
-              shadowColor: Colors.transparent,
-              elevation: 0,
+              child: Text('건너뛰기', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400)),
             ),
-            child: Text('건너뛰기', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400)),
           ),
         ),
         const SizedBox(width: 16),
 
         // 다음 버튼
         Expanded(
-          child: OutlinedButton(
-              onPressed: () {
-              if (selectedPreKnowledgeList.isEmpty) {
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    return AlertDialog(
-                      backgroundColor: Color(0xffF8F8F8),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      title: Text(
-                        '알림',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xff0077FF),
+          child: SizedBox(
+            height: 50,
+            child: OutlinedButton(
+                onPressed: () {
+                if (selectedPreKnowledgeList.isEmpty) {
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        backgroundColor: Color(0xffF8F8F8),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
                         ),
-                      ),
-                      content: Text(
-                        '하나 이상의 사전 지식을 선택해 주세요.',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Color(0xff777777),
-                        ),
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          style: TextButton.styleFrom(
-                            foregroundColor: Color(0xff0077FF),
+                        title: Text(
+                          '알림',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xff0077FF),
                           ),
-                          child: Text('확인'),
                         ),
-                      ],
-                    );
-                  },
-                );
-              } else {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => CollectingScreen(
-                      selectedItems: selectedPreKnowledgeList, title: widget.title
+                        content: Text(
+                          '하나 이상의 사전 지식을 선택해 주세요.',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Color(0xff777777),
+                          ),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            style: TextButton.styleFrom(
+                              foregroundColor: Color(0xff0077FF),
+                            ),
+                            child: Text('확인'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                } else {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CollectingScreen(
+                        selectedItems: selectedPreKnowledgeList, title: widget.title
+                      ),
                     ),
-                  ),
-                );
-              }
-            },
-            style: OutlinedButton.styleFrom(
-              backgroundColor: Color(0xffCCE4FF),
-              foregroundColor: Color(0xff0077FF),
-              padding: EdgeInsets.symmetric(vertical: 20),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(32),
+                  );
+                }
+              },
+              style: OutlinedButton.styleFrom(
+                backgroundColor: Color(0xffCCE4FF),
+                foregroundColor: Color(0xff0077FF),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(32),
+                ),
+                side: BorderSide(color: Colors.transparent),
+                elevation: 0,
+                shadowColor: Colors.transparent,
               ),
-              side: BorderSide(color: Colors.transparent),
-              elevation: 0,
-              shadowColor: Colors.transparent,
+              child: Text('다음', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
             ),
-            child: Text('다음', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
           ),
         ),
       ],

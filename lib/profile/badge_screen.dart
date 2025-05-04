@@ -63,8 +63,8 @@ class _BadgeScreenState extends State<BadgeScreen> {
               alignment: Alignment.center,
               children: [
                 Container(
-                  width: 60,
-                  height: 60,
+                  width: 55,
+                  height: 55,
                   decoration: BoxDecoration(
                       color: Color(0xffD9D9D9),
                       shape: BoxShape.circle),
@@ -84,7 +84,7 @@ class _BadgeScreenState extends State<BadgeScreen> {
           Text(title, style: TextStyle(
               color: Color(0xff777777),
               fontWeight: FontWeight.w400,
-              fontSize: 14),
+              fontSize: 12),
           )
         ],
       ),
@@ -94,7 +94,7 @@ class _BadgeScreenState extends State<BadgeScreen> {
   Widget allMonthlyRecord() {
     return Container(
       width: SizeConfig.screenWidth * 0.9,
-      height: 420,
+      height: 400,
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
           color: Color(0xffF8F8F8),
@@ -113,8 +113,9 @@ class _BadgeScreenState extends State<BadgeScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: GridView.count(
               crossAxisCount: 4,
-              mainAxisSpacing: 24,
+              mainAxisSpacing: 30,
               crossAxisSpacing: 16,
+              childAspectRatio: 0.7,
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
               children:
@@ -131,7 +132,7 @@ class _BadgeScreenState extends State<BadgeScreen> {
   Widget allAchieveBadge(List<bool> achievedList) {
     return Container(
       width: SizeConfig.screenWidth * 0.9,
-      height: 420,
+      height: 400,
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
           color: Color(0xffF8F8F8),
@@ -150,8 +151,9 @@ class _BadgeScreenState extends State<BadgeScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: GridView.count(
               crossAxisCount: 4,
-              mainAxisSpacing: 24,
+              mainAxisSpacing: 30,
               crossAxisSpacing: 16,
+              childAspectRatio: 0.7,
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
               children:

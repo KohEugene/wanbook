@@ -68,13 +68,13 @@ class _CollectedScreenState extends State<CollectedScreen> {
       children: [
         Text(
           '책멍이가 정보 수집을 완료했어요!',
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: Colors.black),
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Colors.black),
           textAlign: TextAlign.center, // 줄 바꿈 시에도 중앙 정렬
         ),
         const SizedBox(height: 6),
         Text(
           '해당 정보를 클릭하시면\n더 자세한 내용을 볼 수 있어요',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400, color: Color(0xff777777)),
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Color(0xff777777)),
           textAlign: TextAlign.center,
         ),
       ],
@@ -169,6 +169,7 @@ class _CollectedScreenState extends State<CollectedScreen> {
   Widget buildBottomButtons() {
   return SizedBox(
     width: double.infinity,
+    height: 50,
     child: OutlinedButton(
       onPressed: () {
               Navigator.push(
@@ -181,7 +182,6 @@ class _CollectedScreenState extends State<CollectedScreen> {
       style: OutlinedButton.styleFrom(
         backgroundColor: Color(0xffCCE4FF),
         foregroundColor: Color(0xff0077FF),
-        padding: EdgeInsets.symmetric(vertical: 20),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(32),
         ),
@@ -189,7 +189,7 @@ class _CollectedScreenState extends State<CollectedScreen> {
         elevation: 0,
         shadowColor: Colors.transparent,
       ),
-      child: Text('다음', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+      child: Text('다음', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
     ),
   );
 }

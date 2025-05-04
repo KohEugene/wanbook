@@ -39,36 +39,38 @@ class _LoginScreenState extends State<LoginScreen> {
         title: Text('로그인'),
       ),
       body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(
-              SizeConfig.screenWidth*0.05, SizeConfig.screenHeight*0.1,
-              SizeConfig.screenWidth*0.05, SizeConfig.screenHeight*0.05
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text('완북', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 22, color: Colors.black)),
-              SizedBox(height: 24),
-              Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    loginField(),
-                    SizedBox(height: 8),
-                    passwordField()
-                  ],
-                ),
-              ),
-              SizedBox(height: 8),
-              loginButton(),
-              SizedBox(height: 8),
-              checkSaveId(),
-              Spacer(),
-              Divider(thickness: 1, color: Color(0xffC9C9C9)),
-              SizedBox(height: 20),
-              joinButton(),
-            ],
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(
+                SizeConfig.screenWidth*0.05, SizeConfig.screenHeight*0.1,
+                SizeConfig.screenWidth*0.05, SizeConfig.screenHeight*0.05
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text('완북', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 22, color: Colors.black)),
+                  SizedBox(height: 24),
+                  Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        loginField(),
+                        SizedBox(height: 8),
+                        passwordField()
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  loginButton(),
+                  SizedBox(height: 8),
+                  checkSaveId(),
+                  SizedBox(height: 20),
+                  Divider(thickness: 1, color: Color(0xffC9C9C9)),
+                  SizedBox(height: 20),
+                  joinButton(),
+                ]
+            ),
           ),
         ),
       ),

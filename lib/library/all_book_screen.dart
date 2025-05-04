@@ -68,22 +68,24 @@ class _AllBookScreenState extends State<AllBookScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.05, vertical: 16),
-      child: GridView.builder(
-        itemCount: titleList.length,
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-          childAspectRatio: 0.5,
+    return Scaffold(
+      body: Padding(
+        padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.05, vertical: 16),
+        child: GridView.builder(
+          itemCount: titleList.length,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+            childAspectRatio: 0.48,
+          ),
+          itemBuilder: (context, index) {
+            String title = titleList[index];
+            String percent = percentList[index];
+            String lastReadTime = lastReadList[index];
+            return readingInfo(title, percent, lastReadTime);
+          },
         ),
-        itemBuilder: (context, index) {
-          String title = titleList[index];
-          String percent = percentList[index];
-          String lastReadTime = lastReadList[index];
-          return readingInfo(title, percent, lastReadTime);
-        },
       ),
     );
   }
@@ -115,14 +117,14 @@ class _AllBookScreenState extends State<AllBookScreen> {
         }
       },
       child: SizedBox(
-        width: 110,
-        height: 223,
+        width: 100,
+        height: 210,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              width: 110,
-              height: 150,
+              width: 100,
+              height: 140,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
                 color: imagePath == null ? Color(0xffD9D9D9) : null,
@@ -139,12 +141,18 @@ class _AllBookScreenState extends State<AllBookScreen> {
                 style: const TextStyle(
                     color: Colors.black,
                     fontWeight: FontWeight.w600,
-                    fontSize: 16)),
+                    fontSize: 14),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+            ),
             Text(author,
                 style: const TextStyle(
                     color: Color(0xff777777),
                     fontWeight: FontWeight.w400,
-                    fontSize: 14)),
+                    fontSize: 12),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+            ),
             Row(
               children: [
                 Row(
@@ -156,8 +164,9 @@ class _AllBookScreenState extends State<AllBookScreen> {
                         style: const TextStyle(
                           color: Color(0xff777777),
                           fontWeight: FontWeight.w400,
-                          fontSize: 12,
-                        )),
+                          fontSize: 11,
+                        )
+                    ),
                   ],
                 ),
                 const SizedBox(width: 4),
@@ -165,7 +174,8 @@ class _AllBookScreenState extends State<AllBookScreen> {
                     style: const TextStyle(
                         color: Color(0xff777777),
                         fontWeight: FontWeight.w400,
-                        fontSize: 12))
+                        fontSize: 11)
+                )
               ],
             )
           ],

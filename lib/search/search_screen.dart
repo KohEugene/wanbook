@@ -188,7 +188,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     labelStyle: TextStyle(
                       color: Color(0xff777777),
                       fontWeight: FontWeight.w400,
-                      fontSize: 16
+                      fontSize: 14
                     ),
                     backgroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
@@ -221,7 +221,7 @@ class _SearchScreenState extends State<SearchScreen> {
         Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black)),
         const SizedBox(height: 12),
         SizedBox(
-          height: 210,
+          height: 190,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: 5,
@@ -329,8 +329,8 @@ class _SearchScreenState extends State<SearchScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              height: 150,
-              width: 110,
+              height: 140,
+              width: 100,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -341,7 +341,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         imageAsset,
                         fit: BoxFit.cover,
                       )
-                    : Container(color: Colors.grey[300]),
+                    : Container(color: Color(0xffD9D9D9)),
               ),
             ),
             const SizedBox(height: 8),
@@ -350,8 +350,8 @@ class _SearchScreenState extends State<SearchScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black)),
-                  Text(author, style: const TextStyle(color: Color(0xff777777), fontSize: 14, fontWeight: FontWeight.w400)),
+                  Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black)),
+                  Text(author, style: const TextStyle(color: Color(0xff777777), fontSize: 12, fontWeight: FontWeight.w400)),
                 ],
               ),
             ),

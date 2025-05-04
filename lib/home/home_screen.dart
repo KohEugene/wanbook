@@ -130,8 +130,8 @@ class HomeScreen extends StatelessWidget {
         children: [
           // 말풍선
           Positioned(
-            right: 120,
-            top: 20,
+            right: 80,
+            top: 50,
             child: SpeechBubble(message: message),
           ),
           // 책멍이
@@ -140,7 +140,7 @@ class HomeScreen extends StatelessWidget {
             bottom: 0,
             child: Image.asset(
               'assets/images/home_Chaekmeong.png',
-              height: 170,
+              height: 120,
             ),
           ),
         ],
@@ -225,7 +225,7 @@ class HomeScreen extends StatelessWidget {
                     SizedBox(height: 16),
                     Text(
                       "이 책의 미리보기 내용 또는 소개 문장. 이 책의 미리보기 내용 또는 소개 문장. 이 책의 미리보기 내용 또는 소개 문장. 이 책의 미리보기 내용 또는 소개 문장.",
-                      style: TextStyle(color: Color(0xff777777), fontSize: 14, fontWeight: FontWeight.w400),
+                      style: TextStyle(color: Color(0xff777777), fontSize: 12, fontWeight: FontWeight.w400),
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                     ),

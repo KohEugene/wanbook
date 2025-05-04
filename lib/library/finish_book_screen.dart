@@ -83,7 +83,7 @@ class _FinishBookScreenState extends State<FinishBookScreen> {
           crossAxisCount: 3,
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
-          childAspectRatio: 0.5,
+          childAspectRatio: 0.48,
         ),
         itemBuilder: (context, index) {
           int originalIndex = completedIndexes[index];
@@ -102,14 +102,14 @@ class _FinishBookScreenState extends State<FinishBookScreen> {
   // 책 위젯
   Widget readingInfo(String title, String author, String imagePath, String percent, String lastReadTime) {
     return SizedBox(
-      width: 110,
-      height: 223,
+      width: 100,
+      height: 210,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 110,
-            height: 150,
+            width: 100,
+            height: 140,
             decoration: BoxDecoration(
               image: DecorationImage(
                 image: AssetImage(imagePath),
@@ -123,12 +123,16 @@ class _FinishBookScreenState extends State<FinishBookScreen> {
           Text(title, style: TextStyle(
               color: Colors.black,
               fontWeight: FontWeight.w600,
-              fontSize: 16)
+              fontSize: 14),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
           ),
           Text(author, style: TextStyle(
               color: Color(0xff777777),
               fontWeight: FontWeight.w400,
-              fontSize: 14)
+              fontSize: 12),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
           ),
           Row(
             children: [
@@ -137,13 +141,13 @@ class _FinishBookScreenState extends State<FinishBookScreen> {
               Text(percent, style: TextStyle(
                   color: Color(0xff777777),
                   fontWeight: FontWeight.w400,
-                  fontSize: 12),
+                  fontSize: 11),
               ),
               SizedBox(width: 4),
               Text(lastReadTime, style: TextStyle(
                   color: Color(0xff777777),
                   fontWeight: FontWeight.w400,
-                  fontSize: 12)
+                  fontSize: 11)
               )
             ],
           )
@@ -151,5 +155,4 @@ class _FinishBookScreenState extends State<FinishBookScreen> {
       ),
     );
   }
-
 }

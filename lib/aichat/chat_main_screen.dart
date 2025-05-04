@@ -82,14 +82,14 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
 
     return Wrap(
       spacing: 14,
-      runSpacing: 14,
+      runSpacing: 8,
       children: hints.map((hint) {
         return GestureDetector(
           onTap: () => navigateToChatScreen(hint),
           child: Chip(
             label: Text(hint),
             backgroundColor: const Color(0xffE4E4E4),
-            labelStyle: const TextStyle(color: Color(0xff777777)),
+            labelStyle: const TextStyle(color: Color(0xff777777), fontWeight: FontWeight.w400, fontSize: 12),
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(24),
@@ -110,8 +110,8 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
   Widget buildChaekmeongImage() {
     return Image.asset(
       'assets/images/main_Chaekmeong_1.png',
-      width: 200,
-      height: 200,
+      width: 180,
+      height: 180,
     );
   }
 
@@ -120,7 +120,7 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
     return const Text(
       '도움이 필요하신가요?',
       style: TextStyle(
-        fontSize: 22,
+        fontSize: 20,
         fontWeight: FontWeight.w600,
         color: Colors.black,
       ),
@@ -133,7 +133,7 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
       '아래는 많은 독서가들이 궁금해하는 것들이에요!',
       textAlign: TextAlign.center,
       style: TextStyle(
-        fontSize: 16,
+        fontSize: 14,
         fontWeight: FontWeight.w400,
         color: Color(0xff777777),
       ),
@@ -155,7 +155,7 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                 fontWeight: FontWeight.w400,
                 fontSize: 14,
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: const BorderSide(color: Color(0xffE4E4E4)),

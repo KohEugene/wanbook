@@ -139,7 +139,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 style: OutlinedButton.styleFrom(
                     foregroundColor: Color(0xff777777),
                     backgroundColor: Color(0xffF8F8F8),
-                    padding: EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(32)
                     ),
@@ -149,7 +148,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 child: Text('로그아웃', style: TextStyle(
                     fontWeight: FontWeight.w400,
-                    fontSize: 14),
+                    fontSize: 12),
                 )
             )
         ),
@@ -189,21 +188,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Container(
       width: SizeConfig.screenWidth * 0.9,
       height: 166,
-      padding: EdgeInsets.only(top: 16, left: 16, right: 16),
+      padding: EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
           color: Color(0xffF8F8F8),
           borderRadius: BorderRadius.circular(16)
       ),
       child: Stack(
         children: [
-          Image.asset('assets/images/list_Chaekmeong.png'),
+          Positioned(
+              bottom: 0, left: 0, right: 0,
+              child: Image.asset('assets/images/list_Chaekmeong.png', fit: BoxFit.cover,)
+          ),
           Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('책멍이와의 대화', style: TextStyle(
                     color: Colors.black,
                     fontWeight: FontWeight.w600,
-                    fontSize: 18),
+                    fontSize: 16),
                 ),
                 TextButton(onPressed: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) {
@@ -241,7 +243,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     return Container(
       width: SizeConfig.screenWidth * 0.45,
-      height: 288,
+      height: 270,
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
           color: Color(0xffF8F8F8),
@@ -253,11 +255,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Text(section, style: TextStyle(
               color: Colors.black,
               fontWeight: FontWeight.w600,
-              fontSize: 18),
+              fontSize: 16),
           ),
           SizedBox(height: 8,),
           Container(
-            width: 110, height: 150,
+            width: 100, height: 140,
             decoration: BoxDecoration(
                 color: Color(0xffD9D9D9),
                 borderRadius: BorderRadius.circular(8),
@@ -273,17 +275,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Text(title, style: TextStyle(
               color: Colors.black,
               fontWeight: FontWeight.w600,
-              fontSize: 16)
+              fontSize: 14),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
           ),
           Text(author, style: TextStyle(
               color: Color(0xff777777),
               fontWeight: FontWeight.w400,
-              fontSize: 14)
+              fontSize: 12),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
           ),
           Text(duration, style: TextStyle(
               color: Color(0xff777777),
               fontWeight: FontWeight.w400,
-              fontSize: 12)
+              fontSize: 11)
           )
         ],
       ),
@@ -301,8 +307,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             alignment: Alignment.center,
             children: [
               Container(
-                width: 60,
-                height: 60,
+                width: 55,
+                height: 55,
                 decoration: BoxDecoration(
                   color: Color(0xffD9D9D9),
                   shape: BoxShape.circle),
@@ -322,7 +328,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Text(title, style: TextStyle(
             color: Color(0xff777777),
             fontWeight: FontWeight.w400,
-            fontSize: 14),
+            fontSize: 12),
           )
         ],
       ),
@@ -333,12 +339,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Container(
       width: SizeConfig.screenWidth * 0.9,
       height: 166,
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
           color: Color(0xffF8F8F8),
           borderRadius: BorderRadius.circular(16)
       ),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
@@ -347,7 +354,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Text('월간 기록', style: TextStyle(
                     color: Colors.black,
                     fontWeight: FontWeight.w600,
-                    fontSize: 18),
+                    fontSize: 16),
                 ),
                 TextButton(onPressed: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) {
@@ -395,12 +402,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Container(
       width: SizeConfig.screenWidth * 0.9,
       height: 166,
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
           color: Color(0xffF8F8F8),
           borderRadius: BorderRadius.circular(16)
       ),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
@@ -409,7 +417,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Text('업적 배지', style: TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.w600,
-                  fontSize: 18),
+                  fontSize: 16),
               ),
               TextButton(onPressed: () {
                 Navigator.push(context, MaterialPageRoute(builder: (context) {

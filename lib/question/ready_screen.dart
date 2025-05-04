@@ -56,12 +56,12 @@ class _ReadyScreenState extends State<ReadyScreen> {
       children: [
         Text(
           '모든 단계가 끝났어요!',
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: Colors.black),
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Colors.black),
         ),
         const SizedBox(height: 6),
         Text(
           '이제 독서를 시작해볼까요?',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400, color: Color(0xff777777)),
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Color(0xff777777)),
         ),
       ],
     );
@@ -82,6 +82,7 @@ class _ReadyScreenState extends State<ReadyScreen> {
   Widget buildBottomButtons() {
   return SizedBox(
     width: double.infinity,
+    height: 50,
     child: OutlinedButton(
       onPressed: () {
               // ebook화면으로
@@ -95,7 +96,6 @@ class _ReadyScreenState extends State<ReadyScreen> {
         style: OutlinedButton.styleFrom(
           backgroundColor: Color(0xffCCE4FF),
           foregroundColor: Color(0xff0077FF),
-          padding: EdgeInsets.symmetric(vertical: 20),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(32),
           ),
@@ -103,7 +103,7 @@ class _ReadyScreenState extends State<ReadyScreen> {
           elevation: 0,
           shadowColor: Colors.transparent,
         ),
-        child: Text('독서하기', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+        child: Text('독서하기', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
       ),
     );
   }

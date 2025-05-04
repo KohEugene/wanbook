@@ -134,8 +134,8 @@ class HomeScreen2 extends StatelessWidget {
         children: [
           // 말풍선
           Positioned(
-            right: 120,
-            top: 20,
+            right: 80,
+            top: 50,
             child: SpeechBubble(message: message),
           ),
           // 책멍이
@@ -144,7 +144,7 @@ class HomeScreen2 extends StatelessWidget {
             bottom: 0,
             child: Image.asset(
               'assets/images/home_Chaekmeong.png',
-              height: 170,
+              height: 120,
             ),
           ),
         ],
@@ -163,7 +163,7 @@ class HomeScreen2 extends StatelessWidget {
         Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black)),
         const SizedBox(height: 12),
         SizedBox(
-          height: 210,
+          height: 190,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: 5,
@@ -271,8 +271,8 @@ class HomeScreen2 extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              height: 150,
-              width: 110,
+              height: 140,
+              width: 100,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -283,7 +283,7 @@ class HomeScreen2 extends StatelessWidget {
                         imageAsset,
                         fit: BoxFit.cover,
                       )
-                    : Container(color: Colors.grey[300]),
+                    : Container(color: Color(0xffD9D9D09)),
               ),
             ),
             const SizedBox(height: 8),
@@ -292,8 +292,8 @@ class HomeScreen2 extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.black)),
-                  Text(author, style: const TextStyle(color: Color(0xff777777), fontSize: 14, fontWeight: FontWeight.w400)),
+                  Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black)),
+                  Text(author, style: const TextStyle(color: Color(0xff777777), fontSize: 12, fontWeight: FontWeight.w400)),
                 ],
               ),
             ),

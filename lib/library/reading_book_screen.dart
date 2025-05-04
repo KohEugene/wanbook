@@ -75,26 +75,27 @@ class _ReadingBookScreenState extends State<ReadingBookScreen> {
       }
     }
 
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.05, vertical: 16),
-      child: GridView.builder(
-        itemCount: readingIndexes.length,
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-          childAspectRatio: 0.5,
+    return Scaffold(
+      body: Padding(
+        padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.05, vertical: 16),
+        child: GridView.builder(
+          itemCount: readingIndexes.length,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+            childAspectRatio: 0.48,
+          ),
+          itemBuilder: (context, index) {
+            int originalIndex = readingIndexes[index];
+            String title = titleList[originalIndex];
+            String author = bookInfoMap[title]!['author']!;
+            String imagePath = bookInfoMap[title]!['image']!;
+            String percent = percentList[originalIndex];
+            String lastReadTime = lastReadList[originalIndex];
+            return readingInfo(title, author, imagePath, percent, lastReadTime);
+          },
         ),
-        itemBuilder: (context, index) {
-          int originalIndex = readingIndexes[index];
-          String title = titleList[originalIndex];
-          String author = bookInfoMap[title]!['author']!;
-          String imagePath = bookInfoMap[title]!['image']!;
-          String percent = percentList[originalIndex];
-          String lastReadTime = lastReadList[originalIndex];
-
-          return readingInfo(title, author, imagePath, percent, lastReadTime);
-        },
       ),
     );
   }
@@ -102,14 +103,14 @@ class _ReadingBookScreenState extends State<ReadingBookScreen> {
   // 책 위젯
   Widget readingInfo(String title, String author, String imagePath, String percent, String lastReadTime) {
     return SizedBox(
-      width: 110,
-      height: 223,
+      width: 100,
+      height: 210,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 110,
-            height: 150,
+            width: 100,
+            height: 140,
             decoration: BoxDecoration(
               image: DecorationImage(
                 image: AssetImage(imagePath),
@@ -123,11 +124,17 @@ class _ReadingBookScreenState extends State<ReadingBookScreen> {
           Text(title, style: TextStyle(
               color: Colors.black,
               fontWeight: FontWeight.w600,
-              fontSize: 16)),
+              fontSize: 14),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+          ),
           Text(author, style: TextStyle(
               color: Color(0xff777777),
               fontWeight: FontWeight.w400,
-              fontSize: 14)),
+              fontSize: 12),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+          ),
           Row(
             children: [
               Icon(Icons.library_add_check_outlined, color: Color(0xff777777), size: 12),
@@ -135,12 +142,12 @@ class _ReadingBookScreenState extends State<ReadingBookScreen> {
               Text(percent, style: TextStyle(
                   color: Color(0xff777777),
                   fontWeight: FontWeight.w400,
-                  fontSize: 12)),
+                  fontSize: 11)),
               SizedBox(width: 4),
               Text(lastReadTime, style: TextStyle(
                   color: Color(0xff777777),
                   fontWeight: FontWeight.w400,
-                  fontSize: 12))
+                  fontSize: 11))
             ],
           )
         ],

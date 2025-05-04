@@ -269,13 +269,12 @@ class _JoinScreenState extends State<JoinScreen> {
               Positioned(
                 right: 16,
                 child: SizedBox(
-                    width: 90,
+                    width: 94,
                     height: 36,
                     child: OutlinedButton(onPressed: (){},
                         style: OutlinedButton.styleFrom(
                             foregroundColor: Color(0xff777777),
                             backgroundColor: Color(0xffF8F8F8),
-                            padding: EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(32)
                             ),
@@ -285,7 +284,7 @@ class _JoinScreenState extends State<JoinScreen> {
                         ),
                         child: Text('중복 확인', style: TextStyle(
                             fontWeight: FontWeight.w400,
-                            fontSize: 14),
+                            fontSize: 12),
                         )
                     )
                 ),

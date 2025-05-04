@@ -47,6 +47,7 @@ class _ChatlistScreenState extends State<ChatlistScreen> {
           child: Padding(
             padding: EdgeInsets.symmetric(
                 horizontal: SizeConfig.screenWidth*0.05,
+                vertical: 16
             ),
             child: ListView.builder(
                 itemCount: titleList.length,

@@ -165,7 +165,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 fontWeight: FontWeight.w400,
                 fontSize: 14,
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: const BorderSide(color: Color(0xffE4E4E4)),
