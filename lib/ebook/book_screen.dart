@@ -99,7 +99,11 @@ class _BookScreenState extends State<BookScreen> {
         title: Text(widget.title),
         centerTitle: true,
         leading: IconButton(
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
+              return MenuBottom(initialIndex: 2,);
+            },));
+          },
           icon: const Icon(Icons.chevron_left_rounded),
           color: Colors.black,
         ),

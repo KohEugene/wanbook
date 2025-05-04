@@ -196,6 +196,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       child: Stack(
         children: [
+          Image.asset('assets/images/list_Chaekmeong.png'),
           Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -228,7 +229,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ]
           ),
-          Image.asset('assets/images/list_Chaekmeong.png')
         ],
       ),
     );
