@@ -1,3 +1,6 @@
+
+// AI 챗봇 시작화면
+
 import 'package:flutter/material.dart';
 import 'package:wanbook/aichat/chat_screen.dart';
 

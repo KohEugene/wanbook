@@ -68,21 +68,6 @@ class _BookScreenState extends State<BookScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: showUI
-          ? AppBar(
-              automaticallyImplyLeading: false,
-              leading: IconButton(
-                icon: Icon(Icons.chevron_left_rounded),
-                color: Colors.black,
-                onPressed: () {
-                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
-                    return MenuBottom(initialIndex: 2,);
-                  },));
-                },
-              ),
-              title: Text(widget.title),
-            )
-          : null,
       body: SafeArea(
         child: GestureDetector(
           onTap: () {
@@ -91,11 +76,32 @@ class _BookScreenState extends State<BookScreen> {
           child: Stack(
             children: [
               buildBackground(),
+              if (showUI) buildCustomAppBar(context),
               if (showUI) buildProgressSection(context),
               if (showUI) buildFloatingChaekmeongIcon(),
               if (showHint) buildHintChaekmeongIcon(context, widget.title),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  // 클릭할때 텍스트 배경 사이즈 변경되는 것때문에 appbar 따로 뺌
+  Widget buildCustomAppBar(BuildContext context) {
+    return Positioned(
+      top: 0,
+      left: 0,
+      right: 0,
+      child: AppBar(
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor ?? Colors.white,
+        elevation: Theme.of(context).appBarTheme.elevation ?? 0,
+        title: Text(widget.title),
+        centerTitle: true,
+        leading: IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.chevron_left_rounded),
+          color: Colors.black,
         ),
       ),
     );
@@ -126,10 +132,15 @@ class _BookScreenState extends State<BookScreen> {
 
   // 뒤에 텍스트 이미지
   Widget buildBackground() {
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Positioned.fill(
-      child: Image.asset(
-        'assets/images/t_damian.png',
-        fit: BoxFit.contain,
+      child: Center(
+        child: Image.asset(
+          'assets/images/t_damian.png',
+          height: screenHeight,
+          fit: BoxFit.contain,
+        ),
       ),
     );
   }

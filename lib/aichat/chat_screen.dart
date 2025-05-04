@@ -11,6 +11,34 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  final TextEditingController _controller = TextEditingController();
+  final List<Map<String, String>> _messages = []; // {'sender': 'user'|'bot', 'text': ...}
+
+  @override
+  void initState() {
+    super.initState();
+    // 초기 메시지 받아와서 사용자 봇 메시지로 구성
+    _messages.add({'sender': 'user', 'text': widget.message});
+    _messages.add({'sender': 'bot', 'text': '${widget.message}에 대한 답변입니다.'});
+  }
+
+  void _sendMessage(String input) {
+    if (input.trim().isEmpty) return;
+
+    setState(() {
+      _messages.add({'sender': 'user', 'text': input.trim()});
+      _messages.add({'sender': 'bot', 'text': '${input.trim()}에 대한 답변입니다.'});
+    });
+
+    _controller.clear();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,20 +51,24 @@ class _ChatScreenState extends State<ChatScreen> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: buildChatBody(),
-    );
-  }
-
-  // 전체 챗 화면
-  Widget buildChatBody() {
-    return Padding(
-      padding: const EdgeInsets.all(20),
-      child: Column(
+      body: Column(
         children: [
-          const SizedBox(height: 16),
-          buildUserChat(widget.message),
-          const SizedBox(height: 16),
-          buildBotChat("주제에 대한 답변주제에 대한 답변주제에 대한 답변주제에 대한 답변주제에 대한 답변주제에 대한 답변주제에 대한 답변"),
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.all(20),
+              itemCount: _messages.length,
+              itemBuilder: (context, index) {
+                final msg = _messages[index];
+                return msg['sender'] == 'user'
+                    ? buildUserChat(msg['text']!)
+                    : buildBotChat(msg['text']!);
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+            child: buildMessageInputArea(),
+          ),
         ],
       ),
     );
@@ -48,9 +80,10 @@ class _ChatScreenState extends State<ChatScreen> {
       alignment: Alignment.centerRight,
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * 0.65, // 화면 너비의 65%까지만 말풍선
+          maxWidth: MediaQuery.of(context).size.width * 0.65,
         ),
         child: Container(
+          margin: const EdgeInsets.symmetric(vertical: 8),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: const BoxDecoration(
             color: Color(0xff0077FF),
@@ -86,9 +119,10 @@ class _ChatScreenState extends State<ChatScreen> {
           Flexible(
             child: ConstrainedBox(
               constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width * 0.7, // 화면 너비의 7%까지만 말풍선
+                maxWidth: MediaQuery.of(context).size.width * 0.7,
               ),
               child: Container(
+                margin: const EdgeInsets.symmetric(vertical: 8),
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: const BoxDecoration(
                   color: Colors.white,
@@ -108,6 +142,45 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  // 입력창 + 화살표 버튼
+  Widget buildMessageInputArea() {
+    return Row(
+      children: [
+        Expanded(
+          child: TextField(
+            controller: _controller,
+            onSubmitted: _sendMessage,
+            cursorColor: const Color(0xff0077FF),
+            decoration: InputDecoration(
+              hintText: '메시지를 입력하세요.',
+              hintStyle: const TextStyle(
+                color: Color(0xff777777),
+                fontSize: 14,
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(color: Color(0xffE4E4E4)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: const BorderSide(color: Color(0xff0077FF), width: 2),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        GestureDetector(
+          onTap: () => _sendMessage(_controller.text),
+          child: const CircleAvatar(
+            backgroundColor: Color(0xff0077FF),
+            child: Icon(Icons.arrow_upward_rounded, color: Colors.white),
+          ),
+        ),
+      ],
     );
   }
 }
