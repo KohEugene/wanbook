@@ -113,7 +113,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   SizedBox(width: 2,),
                   Text(_idError!, style: TextStyle(
                     color: Color(0xffFF4F4F),
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w400,
                     fontSize: 12),
                   ),
                 ],
@@ -172,7 +172,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 SizedBox(width: 2,),
                 Text(_pwdError!, style: TextStyle(
                     color: Color(0xffFF4F4F),
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w400,
                     fontSize: 12),
                 ),
               ],

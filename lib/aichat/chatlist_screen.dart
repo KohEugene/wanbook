@@ -14,6 +14,23 @@ class ChatlistScreen extends StatefulWidget {
 }
 
 class _ChatlistScreenState extends State<ChatlistScreen> {
+
+  final List<String> coverList = [
+    'assets/images/b_damian.png', 'assets/images/b_gene.png', 'assets/images/b_gentile.png'
+  ];
+
+  final List<String> titleList = [
+    '데미안', '이기적 유전자', '이방인'
+  ];
+
+  final List<String> lastMessageList = [
+    '데미안의 주제 좀 알려줘', '이기적 유전자를 설명해줘', '이방인을 해석해줘'
+  ];
+
+  final List<String> lastChatList = [
+    '오후 11:40', '오전 9:30', '오후 1:15'
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,23 +48,23 @@ class _ChatlistScreenState extends State<ChatlistScreen> {
             padding: EdgeInsets.symmetric(
                 horizontal: SizeConfig.screenWidth*0.05,
             ),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: 16,),
-                  chatRecord('데미안', '데미안의 주제 좀 알려줘', '오후 11:40'),
-                  chatRecord('책 제목', '(제일 최근 물어본 질문)', '오전 9:30')
-                ],
-              ),
+            child: ListView.builder(
+                itemCount: titleList.length,
+                itemBuilder: (context, index) {
+                  String imagePath = coverList[index];
+                  String title = titleList[index];
+                  String chat = lastMessageList[index];
+                  String time = lastChatList[index];
+                  return chatRecord(imagePath, title, chat, time);
+                },
             )
-          )
-      ),
+          ),
+      )
     );
   }
 
   // 책 당 채팅 목록
-  Widget chatRecord(String title, String chat, String time) {
+  Widget chatRecord(String imagePath, String title, String chat, String time) {
     return SizedBox(
       height: 80,
       child: Row(
@@ -57,29 +74,32 @@ class _ChatlistScreenState extends State<ChatlistScreen> {
             width: 50, height: 50,
             decoration: BoxDecoration(
                 color: Color(0xffD9D9D9),
-                borderRadius: BorderRadius.circular(15)
+                borderRadius: BorderRadius.circular(15),
+                image: DecorationImage(
+                  image: AssetImage(imagePath),
+                  fit: BoxFit.cover,
+                )
             ),
           ),
           SizedBox(width: 16,),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: 5,),
-              Text(title,
-                style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 15
-                ),
+              Text(title, style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 15),
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,  // 책 제목이 긴 경우 말줄임표 이용해 한 줄만 출력
               ),
               SizedBox(height: 5,),
               Text(chat, style: TextStyle(
-                color: Color(0xffADADAD),
-                fontWeight: FontWeight.w400,
-                fontSize: 12),
-              )
+                  color: Color(0xffADADAD),
+                  fontWeight: FontWeight.w400,
+                  fontSize: 12),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
             ],
           ),
           Spacer(),

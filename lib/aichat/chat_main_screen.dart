@@ -160,6 +160,10 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                 borderRadius: BorderRadius.circular(16),
                 borderSide: const BorderSide(color: Color(0xffE4E4E4)),
               ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(color: Color(0xffE4E4E4)),
+              ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: const BorderSide(color: Color(0xff0077FF), width: 2),

@@ -50,7 +50,36 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: Text('닉네임의 서재'),
+        title: Text.rich(
+          TextSpan(
+            children: [
+              TextSpan(
+                text: '닉네임',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w400,
+                  color: Color(0xff777777)
+                )
+              ),
+              TextSpan(
+                  text: '의 ',
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.black
+                  )
+              ),
+              TextSpan(
+                  text: '서재',
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black
+                  )
+              )
+            ]
+          )
+        ),
       ),
       body: Column(
         children: [

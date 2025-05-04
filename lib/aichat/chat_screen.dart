@@ -100,7 +100,7 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
           child: Text(
             message,
-            style: const TextStyle(color: Colors.white, fontSize: 14),
+            style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w400),
           ),
         ),
       ),
@@ -139,7 +139,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
                 child: Text(
                   response,
-                  style: const TextStyle(fontSize: 14, color: Colors.black),
+                  style: const TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.w400),
                 ),
               ),
             ),
@@ -169,6 +169,10 @@ class _ChatScreenState extends State<ChatScreen> {
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: const BorderSide(color: Color(0xffE4E4E4)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(color: Color(0xffE4E4E4)),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),

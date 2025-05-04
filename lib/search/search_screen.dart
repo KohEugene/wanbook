@@ -79,7 +79,9 @@ class _SearchScreenState extends State<SearchScreen> {
         IconButton(
           icon: Icon(Icons.chevron_left_rounded),
           onPressed: () {
-            Navigator.pop(context);
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
+              return MenuBottom(initialIndex: 0,);
+            },));
           },
           color: Colors.black,
         ),
