@@ -21,7 +21,7 @@ class _BookScreenState extends State<BookScreen> {
   final int totalPages = 500;
 
   // UI 표시 여부
-  bool showUI = false;
+  bool showUI = true;
 
   void toggleUI() {
     setState(() {
@@ -93,7 +93,7 @@ class _BookScreenState extends State<BookScreen> {
               buildBackground(),
               if (showUI) buildProgressSection(context),
               if (showUI) buildFloatingChaekmeongIcon(),
-              if (showHint) buildHintChaekmeongIcon(),
+              if (showHint) buildHintChaekmeongIcon(context, widget.title),
             ],
           ),
         ),
@@ -102,7 +102,7 @@ class _BookScreenState extends State<BookScreen> {
   }
 
   // 멈춤 트래킹 책멍 아이콘
-  Widget buildHintChaekmeongIcon() {
+  Widget buildHintChaekmeongIcon(BuildContext context, String title) {
     return Positioned(
       right: 24,
       bottom: 120,
@@ -111,7 +111,7 @@ class _BookScreenState extends State<BookScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => ChatMainScreen(title: widget.title), // 책 제목 전달
+              builder: (context) => ChatMainScreen(title: title),
             ),
           );
         },

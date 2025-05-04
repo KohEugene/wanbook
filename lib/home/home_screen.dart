@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:wanbook/shared/menu_bottom.dart';
 import 'package:wanbook/profile/profile_screen.dart';
 import 'package:wanbook/home/speechbubble.dart';
+import 'package:wanbook/ebook/book_screen.dart';
 
 import '../shared/size_config.dart';
 import 'dart:math';
@@ -97,7 +98,7 @@ class HomeScreen extends StatelessWidget {
                 SizedBox(height: 24),
                 buildChaekmeongImage(formattedMessage),
                 SizedBox(height: 24),
-                buildReadingSection(),
+                buildReadingSection(context),
                 SizedBox(height: 24),
                 buildAttendanceSection(context),
                 SizedBox(height: 24),
@@ -149,7 +150,7 @@ class HomeScreen extends StatelessWidget {
   }
 
   //진행도 섹션
-  Widget buildReadingSection() {
+  Widget buildReadingSection(BuildContext context) {
     // 100% 미완독 책들의 인덱스만 추출
     List<int> incompleteIndexes = [];
     for (int i = 0; i < percentList.length; i++) {
@@ -178,7 +179,14 @@ class HomeScreen extends StatelessWidget {
             Text('아직 완독할 도서가 남았어요!',
                 style: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600)),
             TextButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => BookScreen(title: title),
+                  ),
+                );
+              },
               style: ButtonStyle(
                   overlayColor: WidgetStateColor.resolveWith((states) => Colors.transparent,)
               ),
