@@ -88,49 +88,51 @@ class _PopUpState extends State<PopUp> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SizedBox(
-                    width: 118,
-                    height: 46,
-                    child: OutlinedButton(onPressed: (){
-                      Navigator.of(context).pop();
-                    },
-                        style: OutlinedButton.styleFrom(
-                            foregroundColor: Color(0xff777777),
-                            backgroundColor: Color(0xffE4E4E4),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(32)
-                            ),
-                            side: BorderSide(color: Colors.transparent),
-                            shadowColor: Colors.transparent,
-                            elevation: 0,
-                        ),
-                        child: Text('취소', style: TextStyle(
-                            fontWeight: FontWeight.w400,
-                            fontSize: 16),
-                        )
-                    )
+                Expanded(
+                  child: SizedBox(
+                      height: 46,
+                      child: OutlinedButton(onPressed: (){
+                        Navigator.of(context).pop();
+                      },
+                          style: OutlinedButton.styleFrom(
+                              foregroundColor: Color(0xff777777),
+                              backgroundColor: Color(0xffE4E4E4),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(32)
+                              ),
+                              side: BorderSide(color: Colors.transparent),
+                              shadowColor: Colors.transparent,
+                              elevation: 0,
+                          ),
+                          child: Text('취소', style: TextStyle(
+                              fontWeight: FontWeight.w400,
+                              fontSize: 16),
+                          )
+                      )
+                  ),
                 ),
                 SizedBox(width: 16,),
-                SizedBox(
-                    width: 118,
-                    height: 46,
-                    child: OutlinedButton(onPressed: (){
-                    },
-                        style: OutlinedButton.styleFrom(
-                            foregroundColor: Color(0xff0077FF),
-                            backgroundColor: Color(0xffCCE4FF),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(32)
-                            ),
-                            side: BorderSide(color: Colors.transparent),
-                            shadowColor: Colors.transparent,
-                            elevation: 0,
-                        ),
-                        child: Text('변경', style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 16),
-                        )
-                    )
+                Expanded(
+                  child: SizedBox(
+                      height: 46,
+                      child: OutlinedButton(onPressed: (){
+                      },
+                          style: OutlinedButton.styleFrom(
+                              foregroundColor: Color(0xff0077FF),
+                              backgroundColor: Color(0xffCCE4FF),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(32)
+                              ),
+                              side: BorderSide(color: Colors.transparent),
+                              shadowColor: Colors.transparent,
+                              elevation: 0,
+                          ),
+                          child: Text('변경', style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16),
+                          )
+                      )
+                  ),
                 ),
               ],
             )
