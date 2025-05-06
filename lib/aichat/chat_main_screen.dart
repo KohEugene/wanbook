@@ -78,11 +78,11 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
 
   // 힌트 목록
   Widget buildHintChips() {
-    final List<String> hints = ['데미안의 주제', '아브락사스의 의미', '오마주들'];
+    final List<String> hints = ['데미안의 주제', '아브락사스의 의미', '오마주들', '헤르만 헤세에 대해'];
 
     return Wrap(
       spacing: 14,
-      runSpacing: 8,
+      runSpacing: 4,
       children: hints.map((hint) {
         return GestureDetector(
           onTap: () => navigateToChatScreen(hint),
