@@ -30,7 +30,11 @@ class MyApp extends StatelessWidget {
                     fontWeight: FontWeight.w600
                   )
                 ),
-                fontFamily: 'Pretendard'
+                fontFamily: 'Pretendard',
+                textSelectionTheme: TextSelectionThemeData(
+                  selectionColor: Color(0xffCCE4FF),
+                  selectionHandleColor: Color(0xff0077FF)
+                )
             ),
             home: SplashScreen(),
           );
