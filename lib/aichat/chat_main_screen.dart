@@ -2,6 +2,7 @@
 // AI 챗봇 시작화면
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:wanbook/aichat/chat_screen.dart';
 
 class ChatMainScreen extends StatefulWidget {
@@ -47,31 +48,37 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
           color: Colors.black,
         ),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Column(
-                children: [
-                  const SizedBox(height: 72),
-                  buildChaekmeongImage(),
-                  const SizedBox(height: 16),
-                  buildMainTitle(),
-                  const SizedBox(height: 8),
-                  buildSubTitle(),
-                  const SizedBox(height: 16),
-                  buildHintChips(),
-                  const SizedBox(height: 24),
-                ],
+      body: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () {
+          FocusScope.of(context).unfocus();
+        },
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 72),
+                    buildChaekmeongImage(),
+                    const SizedBox(height: 16),
+                    buildMainTitle(),
+                    const SizedBox(height: 8),
+                    buildSubTitle(),
+                    const SizedBox(height: 16),
+                    buildHintChips(),
+                    const SizedBox(height: 24),
+                  ],
+                ),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-            child: buildMessageInputArea(),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+              child: buildMessageInputArea(),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -108,8 +115,8 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
 
   // 책멍이 이미지
   Widget buildChaekmeongImage() {
-    return Image.asset(
-      'assets/images/main_Chaekmeong_1.png',
+    return SvgPicture.asset(
+      'assets/images/main_Chaekmeong_1.svg',
       width: 180,
       height: 180,
     );
@@ -149,7 +156,7 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
             controller: _controller,
             cursorColor: const Color(0xff0077FF),
             decoration: InputDecoration(
-              hintText: '메시지를 입력하세요.',
+              hintText: '책에 대해 궁금한 점을 물어보세요',
               hintStyle: const TextStyle(
                 color: Color(0xff777777),
                 fontWeight: FontWeight.w400,

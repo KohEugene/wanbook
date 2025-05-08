@@ -158,52 +158,58 @@ class _JoinScreenState extends State<JoinScreen> {
         ),
       ),
       body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth*0.05, vertical: SizeConfig.screenHeight*0.05),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      buildFieldWithError(
-                          controller: _idController, focusNode: _idFocus,
-                          label: '아이디', hintText: '아이디 입력 (6~20자)',
-                          hasError: _idHasError, errorMessage: _idError,
-                          hasCheckButton: true
-                      ),
-                      buildFieldWithError(
-                          controller: _pwdController, focusNode: _pwdFocus,
-                          label: '비밀번호', hintText: '비밀번호 입력 (문자, 숫자, 특수문자 포함 8~20자)',
-                          hasError: _pwdHasError, errorMessage: _pwdError
-                      ),
-                      buildFieldWithError(
-                          controller: _rePwdController, focusNode: _rePwdFocus,
-                          label: '비밀번호 확인', hintText: '비밀번호 재입력',
-                          hasError: _rePwdHasError, errorMessage: _rePwdError
-                      ),
-                      buildSimpleField(
-                          controller: _nameController,
-                          label: '이름', hintText: '이름을 입력해 주세요'
-                      ),
-                      buildSimpleField(
-                          controller: _phoneController,
-                          label: '전화번호', hintText: "휴대폰 번호 입력 ('-' 제외 11자리 입력)"
-                      ),
-                      buildFieldWithError(
-                          controller: _nicknameController, focusNode: _nicknameFocus,
-                          label: '별명', hintText: '별명을 입력해 주세요',
-                          hasError: _nicknameHasError, errorMessage: _nicknameError,
-                          hasCheckButton: true
-                      ),
-                    ],
+        child: GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () {
+            FocusScope.of(context).unfocus();
+          },
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth*0.05, vertical: SizeConfig.screenHeight*0.05),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        buildFieldWithError(
+                            controller: _idController, focusNode: _idFocus,
+                            label: '아이디', hintText: '아이디 입력 (6~20자)',
+                            hasError: _idHasError, errorMessage: _idError,
+                            hasCheckButton: true
+                        ),
+                        buildFieldWithError(
+                            controller: _pwdController, focusNode: _pwdFocus,
+                            label: '비밀번호', hintText: '비밀번호 입력 (문자, 숫자, 특수문자 포함 8~20자)',
+                            hasError: _pwdHasError, errorMessage: _pwdError
+                        ),
+                        buildFieldWithError(
+                            controller: _rePwdController, focusNode: _rePwdFocus,
+                            label: '비밀번호 확인', hintText: '비밀번호 재입력',
+                            hasError: _rePwdHasError, errorMessage: _rePwdError
+                        ),
+                        buildSimpleField(
+                            controller: _nameController,
+                            label: '이름', hintText: '이름을 입력해 주세요'
+                        ),
+                        buildSimpleField(
+                            controller: _phoneController,
+                            label: '전화번호', hintText: "휴대폰 번호 입력 ('-' 제외 11자리 입력)"
+                        ),
+                        buildFieldWithError(
+                            controller: _nicknameController, focusNode: _nicknameFocus,
+                            label: '별명', hintText: '별명을 입력해 주세요',
+                            hasError: _nicknameHasError, errorMessage: _nicknameError,
+                            hasCheckButton: true
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              SizedBox(height: 20),
-              signUpButton()
-            ],
+                SizedBox(height: 20),
+                signUpButton()
+              ],
+            ),
           ),
         ),
       )

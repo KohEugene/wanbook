@@ -21,7 +21,7 @@ class SpeechBubble extends StatelessWidget {
               child: Text(
                 message,
                 style: TextStyle(
-                  color: Color(0xFF777777),
+                  color: Color(0xFF0077FF),
                   fontSize: 14,
                 ),
                 softWrap: true,  // 줄바꿈
@@ -38,7 +38,7 @@ class SpeechBubble extends StatelessWidget {
 class BubblePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = Color(0xFFF8F8F8);
+    final paint = Paint()..color = Color(0xFFCCE4FF);
 
     final rrect = RRect.fromRectAndRadius(
       Rect.fromLTWH(0, 0, size.width, size.height),

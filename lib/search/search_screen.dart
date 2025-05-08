@@ -22,49 +22,55 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.05),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: 24),
-                  buildSearchBar(context),
-                  SizedBox(height: 24),
-                  buildSearchSection(
-                    '최근 검색어',
-                    recentSearches,
-                    showClear: true,
-                    onClear: () {
-                        setState(() {
-                          recentSearches.clear();
-                        });
-                      },
-                    onWordTap: (word) {
-                      print('클릭된 검색어: $word');
-                        //검색 실행 로직 추가필요
-                    },),
-                  SizedBox(height: 24),
-                  buildSearchSection('추천 검색어', recommendedSearches,
-                    onWordTap: (word) {
-                      print('클릭된 검색어: $word');
-                        //검색 실행 로직 추가필요
-                    },),
-                  SizedBox(height: 24),
-                  buildBookSection(
-                    '추천 도서',
-                    highlightTitle: '',
-                    highlightAuthor: '',
-                  ),
-                  SizedBox(height: 24),
-                  buildBookSection(
-                    '인기 도서',
-                    highlightTitle: '',
-                    highlightAuthor: '',
-                  ),
-                  SizedBox(height: 24),
-                ],
-              ),
+        child: GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () {
+            FocusScope.of(context).unfocus();
+          },
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.05),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: 24),
+                    buildSearchBar(context),
+                    SizedBox(height: 24),
+                    buildSearchSection(
+                      '최근 검색어',
+                      recentSearches,
+                      showClear: true,
+                      onClear: () {
+                          setState(() {
+                            recentSearches.clear();
+                          });
+                        },
+                      onWordTap: (word) {
+                        print('클릭된 검색어: $word');
+                          //검색 실행 로직 추가필요
+                      },),
+                    SizedBox(height: 24),
+                    buildSearchSection('추천 검색어', recommendedSearches,
+                      onWordTap: (word) {
+                        print('클릭된 검색어: $word');
+                          //검색 실행 로직 추가필요
+                      },),
+                    SizedBox(height: 24),
+                    buildBookSection(
+                      '추천 도서',
+                      highlightTitle: '',
+                      highlightAuthor: '',
+                    ),
+                    SizedBox(height: 24),
+                    buildBookSection(
+                      '인기 도서',
+                      highlightTitle: '',
+                      highlightAuthor: '',
+                    ),
+                    SizedBox(height: 24),
+                  ],
+                ),
+            ),
           ),
         ),
       ),

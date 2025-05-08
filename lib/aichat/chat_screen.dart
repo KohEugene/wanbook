@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class ChatScreen extends StatefulWidget {
   final String message;
@@ -54,26 +55,32 @@ class _ChatScreenState extends State<ChatScreen> {
           },
         ),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              itemCount: _messages.length,
-              itemBuilder: (context, index) {
-                final msg = _messages[index];
-                return msg['sender'] == 'user'
-                    ? buildUserChat(msg['text']!)
-                    : buildBotChat(msg['text']!);
-              },
+      body: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () {
+          FocusScope.of(context).unfocus();
+        },
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                itemCount: _messages.length,
+                itemBuilder: (context, index) {
+                  final msg = _messages[index];
+                  return msg['sender'] == 'user'
+                      ? buildUserChat(msg['text']!)
+                      : buildBotChat(msg['text']!);
+                },
+              ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: buildMessageInputArea(),
-          ),
-          const SizedBox(height: 24),
-        ],
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: buildMessageInputArea(),
+            ),
+            const SizedBox(height: 24),
+          ],
+        ),
       ),
     );
   }
@@ -114,8 +121,8 @@ class _ChatScreenState extends State<ChatScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Image.asset(
-            'assets/images/main_Chaekmeong_1.png',
+          SvgPicture.asset(
+            'assets/images/main_Chaekmeong_1.svg',
             width: 50,
             height: 50,
           ),
@@ -159,7 +166,7 @@ class _ChatScreenState extends State<ChatScreen> {
             onSubmitted: _sendMessage,
             cursorColor: const Color(0xff0077FF),
             decoration: InputDecoration(
-              hintText: '메시지를 입력하세요.',
+              hintText: '책에 대해 궁금한 점을 물어보세요',
               hintStyle: const TextStyle(
                 color: Color(0xff777777),
                 fontWeight: FontWeight.w400,

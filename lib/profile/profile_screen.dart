@@ -3,6 +3,7 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:wanbook/aichat/chatlist_screen.dart';
 import 'package:wanbook/profile/badge_screen.dart';
 import 'package:wanbook/shared/pop_up.dart';
@@ -101,7 +102,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         onPressed: () {
                           showDialog(
                               context: context,
-                              barrierDismissible: true,
+                              barrierDismissible: false,
                               builder: (context) {
                                 return PopUp();
                               },
@@ -197,7 +198,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           Positioned(
               bottom: 0, left: 0, right: 0,
-              child: Image.asset('assets/images/list_Chaekmeong.png', fit: BoxFit.cover,)
+              child: SvgPicture.asset('assets/images/list_Chaekmeong.svg', fit: BoxFit.cover,)
           ),
           Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,

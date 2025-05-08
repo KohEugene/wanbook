@@ -1,5 +1,6 @@
 // 모든 단계 완료 화면
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:wanbook/ebook/book_screen.dart';
 
@@ -70,8 +71,8 @@ class _ReadyScreenState extends State<ReadyScreen> {
   // 이미지
   Widget buildImage() {
     return Center(
-      child: Image.asset(
-            'assets/images/finish_Chaekmeong.png',
+      child: SvgPicture.asset(
+            'assets/images/finish_Chaekmeong.svg',
         width: 200,
         height: 200,
       ),

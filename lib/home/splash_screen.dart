@@ -5,6 +5,7 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../login/login_screen.dart';
 import '../shared/size_config.dart';
@@ -43,7 +44,7 @@ class SplashScreen extends StatelessWidget {
               Positioned(
                 left: 130,
                 bottom: 60,
-                child: Image.asset('assets/images/main_Chaekmeong_2.png', width: 300, height: 300,),
+                child: SvgPicture.asset('assets/images/main_Chaekmeong_2.svg', width: 300, height: 300,),
               )
             ],
           )
