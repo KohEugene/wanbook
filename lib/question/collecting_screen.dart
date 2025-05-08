@@ -1,5 +1,6 @@
 // 정보 수집 중 화면
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:async';
 
 import 'collected_screen.dart';
@@ -110,10 +111,10 @@ class _CollectingScreenState extends State<CollectingScreen> {
   // 이미지 애니메이션
   Widget buildAnimatedImage() {
     return Center(
-      child: Image.asset(
+      child: SvgPicture.asset(
         _showFirstImage
-            ? 'assets/images/collecting_Chaekmeong_1.png'
-            : 'assets/images/collecting_Chaekmeong_2.png',
+            ? 'assets/images/collecting_Chaekmeong_1.svg'
+            : 'assets/images/collecting_Chaekmeong_2.svg',
         width: 200,
         height: 200,
       ),

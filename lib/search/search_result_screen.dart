@@ -83,26 +83,28 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.05),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(height: 24),
-                buildSearchBar(context),
-
-                SizedBox(height: 24),
-                buildBookCover(),
-
-                SizedBox(height: 24),
-                buildBookInfo(),
-
-                SizedBox(height: 24),
-                buildAddButton(),
-
-                SizedBox(height: 24),
-              ],
+        child: GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () {
+            FocusScope.of(context).unfocus();
+          },
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.05),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: 24),
+                  buildSearchBar(context),
+                  SizedBox(height: 24),
+                  buildBookCover(),
+                  SizedBox(height: 24),
+                  buildBookInfo(),
+                  SizedBox(height: 24),
+                  buildAddButton(),
+                  SizedBox(height: 24),
+                ],
+              ),
             ),
           ),
         ),

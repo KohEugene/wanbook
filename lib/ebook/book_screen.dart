@@ -1,6 +1,7 @@
 // ebook 화면
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:wanbook/aichat/chat_main_screen.dart';
 
 import 'dart:async';
@@ -87,7 +88,7 @@ class _BookScreenState extends State<BookScreen> {
     );
   }
 
-  // 클릭할때 텍스트 배경 사이즈 변경되는 것때문에 appbar 따로 뺌
+  // 클릭할 때 텍스트 배경 사이즈 변경되는 것 때문에 appbar 따로 뺌
   Widget buildCustomAppBar(BuildContext context) {
     return Positioned(
       top: 0,
@@ -125,8 +126,8 @@ class _BookScreenState extends State<BookScreen> {
             ),
           );
         },
-        child: Image.asset(
-          'assets/images/hint_Chaekmeong.png',
+        child: SvgPicture.asset(
+          'assets/images/hint_Chaekmeong.svg',
           width: 100,
           height: 100,
         ),
@@ -208,8 +209,8 @@ class _BookScreenState extends State<BookScreen> {
           ),
           child: Padding(
             padding: EdgeInsets.all(8),
-            child: Image.asset(
-              'assets/images/icon_Chaekmeong.png',
+            child: SvgPicture.asset(
+              'assets/images/icon_Chaekmeong.svg',
               fit: BoxFit.contain,
             ),
           ),

@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:wanbook/shared/menu_bottom.dart';
 import 'package:wanbook/home/speechbubble.dart';
@@ -138,8 +139,8 @@ class HomeScreen extends StatelessWidget {
           Positioned(
             right: 10,
             bottom: 0,
-            child: Image.asset(
-              'assets/images/home_Chaekmeong.png',
+            child: SvgPicture.asset(
+              'assets/images/home_Chaekmeong.svg',
               height: 120,
             ),
           ),
