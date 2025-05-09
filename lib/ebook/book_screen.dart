@@ -7,6 +7,7 @@ import 'package:wanbook/aichat/chat_main_screen.dart';
 import 'dart:async';
 
 import 'package:wanbook/shared/menu_bottom.dart';
+import 'package:wanbook/ebook/pngframeanimation.dart';
 
 class BookScreen extends StatefulWidget {
   final String title;
@@ -126,14 +127,17 @@ class _BookScreenState extends State<BookScreen> {
             ),
           );
         },
-        child: Image.asset(
-          'assets/images/hint_Chaekmeong.gif',
+        child: PngFrameAnimation(
+          basePath: 'assets/images/frames_/hint_Chaekmeong',
+          frameCount: 7, // 프레임 수에 맞게 설정
+          interval: Duration(milliseconds: 80),
           width: 100,
           height: 100,
         ),
       ),
     );
   }
+
 
   // 뒤에 텍스트 이미지
   Widget buildBackground() {
