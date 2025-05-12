@@ -198,7 +198,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           Positioned(
               bottom: 0, left: 0, right: 0,
-              child: SvgPicture.asset('assets/images/list_Chaekmeong.svg', fit: BoxFit.cover,)
+              child: SvgPicture.asset('assets/images/list_Chaekmeong.svg',
+              width: 150,
+              height: 120,
+              fit: BoxFit.contain,),
           ),
           Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,

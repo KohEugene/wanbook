@@ -11,6 +11,8 @@ dependencies:
   flutter:
     sdk: flutter
 
+  flutter_launcher_icons: ^0.13.1
+
   cupertino_icons: ^1.0.8
 
   firebase_core:
@@ -21,6 +23,11 @@ dependencies:
   fluttertoast: ^8.2.12
 
   flutter_svg: ^2.1.0
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/app_icon.png"
 
 dev_dependencies:
   flutter_test:

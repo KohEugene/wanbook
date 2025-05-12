@@ -145,7 +145,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   onTap: updateMessage,
                   child: SvgPicture.asset(
                     'assets/images/home_Chaekmeong.svg',
-                    height: 105,
+                    height: 120,
                   ),
                 ),
                 const SizedBox(height: 10),

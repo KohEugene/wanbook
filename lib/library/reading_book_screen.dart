@@ -3,6 +3,7 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:wanbook/ebook/book_screen.dart';
 
 import '../shared/size_config.dart';
 
@@ -102,55 +103,67 @@ class _ReadingBookScreenState extends State<ReadingBookScreen> {
 
   // 책 위젯
   Widget readingInfo(String title, String author, String imagePath, String percent, String lastReadTime) {
-    return SizedBox(
-      width: 100,
-      height: 210,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 100,
-            height: 140,
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage(imagePath),
-                fit: BoxFit.cover,
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => BookScreen(title: title),
+          ),
+        );
+      },
+      child: SizedBox(
+        width: 100,
+        height: 210,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 100,
+              height: 140,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage(imagePath),
+                  fit: BoxFit.cover,
+                ),
+                borderRadius: BorderRadius.circular(8),
+                color: const Color(0xffD9D9D9),
               ),
-              borderRadius: BorderRadius.circular(8),
-              color: Color(0xffD9D9D9),
             ),
-          ),
-          SizedBox(height: 4),
-          Text(title, style: TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.w600,
-              fontSize: 14),
-            overflow: TextOverflow.ellipsis,
-            maxLines: 1,
-          ),
-          Text(author, style: TextStyle(
-              color: Color(0xff777777),
-              fontWeight: FontWeight.w400,
-              fontSize: 12),
-            overflow: TextOverflow.ellipsis,
-            maxLines: 1,
-          ),
-          Row(
-            children: [
-              Icon(Icons.library_add_check_outlined, color: Color(0xff777777), size: 12),
-              SizedBox(width: 2),
-              Text(percent, style: TextStyle(
-                  color: Color(0xff777777),
-                  fontWeight: FontWeight.w400,
-                  fontSize: 11)),
-              SizedBox(width: 4),
-              Text(lastReadTime, style: TextStyle(
-                  color: Color(0xff777777),
-                  fontWeight: FontWeight.w400,
-                  fontSize: 11))
-            ],
-          )
-        ],
+            const SizedBox(height: 4),
+            Text(title,
+                style: const TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1),
+            Text(author,
+                style: const TextStyle(
+                    color: Color(0xff777777),
+                    fontWeight: FontWeight.w400,
+                    fontSize: 12),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1),
+            Row(
+              children: [
+                const Icon(Icons.library_add_check_outlined, color: Color(0xff777777), size: 12),
+                const SizedBox(width: 2),
+                Text(percent,
+                    style: const TextStyle(
+                        color: Color(0xff777777),
+                        fontWeight: FontWeight.w400,
+                        fontSize: 11)),
+                const SizedBox(width: 4),
+                Text(lastReadTime,
+                    style: const TextStyle(
+                        color: Color(0xff777777),
+                        fontWeight: FontWeight.w400,
+                        fontSize: 11)),
+              ],
+            )
+          ],
+        ),
       ),
     );
   }

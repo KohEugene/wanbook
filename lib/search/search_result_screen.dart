@@ -51,6 +51,26 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
       'imageAsset': 'assets/images/b_gene.png',
       'description': '진화의 핵심을 개체가 아닌 유전자로 바라보는 새로운 관점이 제시되며, 생명 현상을 설명하는 방식에 일대 전환을 불러옵니다. 어려운 개념이지만 명쾌한 비유와 설명을 통해 독자의 이해를 돕고, 존재의 의미에 대해 다시 생각하게 만듭니다.',
     },
+    '아몬드': {
+      'author': '손원평',
+      'imageAsset': 'assets/images/b_amond.png',
+      'description': '감정을 느끼지 못하는 소년의 시선을 통해, 공감과 사랑이 무엇인지 되묻는 이야기입니다. 세상과 어긋난 채 살아가는 인물의 변화 과정을 담담하게 그려내며, 따뜻하면서도 묵직한 여운을 남깁니다.',
+    },
+    '눈먼 자들의 도시': {
+      'author': '사라마구',
+      'imageAsset': 'assets/images/b_eye.png',
+      'description': '갑작스러운 실명 사태 속에서 인간 본성의 민낯이 드러나는 과정을 묘사하며, 문명과 윤리에 대한 통렬한 질문을 던집니다. 집단적 혼란과 절망을 넘어 희망을 향한 움직임이 은유적으로 표현된 작품입니다.',
+    },
+    '싯다르타': {
+      'author': '헤르만 헤세',
+      'imageAsset': 'assets/images/b_shitda.png',
+      'description': '깨달음을 향한 여정을 따라가는 한 인물의 삶을 통해, 존재의 본질과 진정한 행복에 대한 사색을 담고 있습니다. 철학적 사유와 동양적 세계관이 어우러진 문장들이 깊은 울림을 전합니다.',
+    },
+    '이방인': {
+      'author': '알베르 카뮈',
+      'imageAsset': 'assets/images/b_gentile.png',
+      'description': '부조리한 세상 앞에서 무관심하게 살아가는 주인공의 모습을 통해, 삶과 죽음, 존재의 의미에 대한 근본적인 질문을 던지는 작품입니다. 건조한 문체 속에 철학적 깊이가 응축되어 있습니다.',
+    },
   };
 
   @override

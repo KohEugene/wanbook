@@ -14,8 +14,8 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
 
-  final recentSearches = ['데미안', '종의 기원', '소년이 온다', '책제목'];
-  final recommendedSearches = ['데미안', '종의 기원', '소년이 온다', '싯다르타', '눈먼 자들의 도시'];
+  final recentSearches = ['데미안', '아몬드', '이기적 유전자', '이방인', '침묵의 봄'];
+  final recommendedSearches = ['종의 기원', '소년이 온다', '싯다르타', '눈먼 자들의 도시'];
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -36,25 +36,9 @@ class _SearchScreenState extends State<SearchScreen> {
                     SizedBox(height: 24),
                     buildSearchBar(context),
                     SizedBox(height: 24),
-                    buildSearchSection(
-                      '최근 검색어',
-                      recentSearches,
-                      showClear: true,
-                      onClear: () {
-                          setState(() {
-                            recentSearches.clear();
-                          });
-                        },
-                      onWordTap: (word) {
-                        print('클릭된 검색어: $word');
-                          //검색 실행 로직 추가필요
-                      },),
+                    buildRecentSearchSection(),
                     SizedBox(height: 24),
-                    buildSearchSection('추천 검색어', recommendedSearches,
-                      onWordTap: (word) {
-                        print('클릭된 검색어: $word');
-                          //검색 실행 로직 추가필요
-                      },),
+                    buildRecommendedSearchSection(),
                     SizedBox(height: 24),
                     buildBookSection(
                       '추천 도서',
@@ -140,7 +124,45 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  // 최근, 추천 검색어
+  // 최근 검색어
+  Widget buildRecentSearchSection() {
+    return buildSearchSection(
+      '최근 검색어',
+      recentSearches,
+      showClear: true,
+      onClear: () {
+        setState(() {
+          recentSearches.clear();
+        });
+      },
+      onWordTap: (word) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SearchResultScreen(searchKeyword: word),
+          ),
+        );
+      },
+    );
+  }
+
+  // 추천 검색어어
+  Widget buildRecommendedSearchSection() {
+    return buildSearchSection(
+      '추천 검색어',
+      recommendedSearches,
+      onWordTap: (word) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SearchResultScreen(searchKeyword: word),
+          ),
+        );
+      },
+    );
+  }
+
+  // 최근, 추천 검색어 UI
   Widget buildSearchSection(
     String title,
     List<String> words, {
