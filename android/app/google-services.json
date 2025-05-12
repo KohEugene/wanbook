@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "236093632018",
+    "project_id": "wanbook-6448e",
+    "storage_bucket": "wanbook-6448e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:236093632018:android:5bbc83c6f8bf3a18e432cb",
+        "android_client_info": {
+          "package_name": "com.example.wanbook"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAoY32s7xjmkc9Ya454WmNxmtF3puB54XE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

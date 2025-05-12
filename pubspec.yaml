@@ -13,6 +13,8 @@ dependencies:
 
   cupertino_icons: ^1.0.8
 
+  firebase_core:
+
   fluttertoast: ^8.2.12
 
   flutter_svg: ^2.1.0
