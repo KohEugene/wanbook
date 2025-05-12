@@ -1,6 +1,8 @@
 
 // 서재 메인 화면
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:wanbook/library/all_book_screen.dart';
@@ -24,12 +26,13 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
       vsync: this,
       initialIndex: 0
   );
+  String? nickname;
 
   @override
   void initState() {
     tabController.addListener(() {
-
     },);
+    loadNickname();
     super.initState();
   }
 
@@ -37,6 +40,20 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
   void dispose() {
     tabController.dispose();
     super.dispose();
+  }
+
+  Future<void> loadNickname() async {
+    final email = FirebaseAuth.instance.currentUser?.email;
+
+    final querySnapshot = await FirebaseFirestore.instance
+      .collection('users').where('email', isEqualTo: email).limit(1).get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      final userDoc = querySnapshot.docs.first;
+      setState(() {
+        nickname = userDoc.data()['nickname'] ?? '사용자';
+      });
+    }
   }
 
   final List<Widget> _pages = [
@@ -54,7 +71,7 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
           TextSpan(
             children: [
               TextSpan(
-                text: '닉네임',
+                text: '${nickname ?? '사용자'}',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w400,

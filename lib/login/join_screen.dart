@@ -1,6 +1,8 @@
 
 // 회원가입 화면
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:wanbook/login/login_screen.dart';
@@ -349,8 +351,44 @@ class _JoinScreenState extends State<JoinScreen> {
         width: SizeConfig.screenWidth * 0.9,
         height: 57,
         child: OutlinedButton(
-            onPressed: isFormvalid ? () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => MenuBottom()));
+            onPressed: isFormvalid ? () async {
+              String userIdValue = _idController.text.toString();
+              String emailValue = '$userIdValue@wanbook.com';
+              String pwdValue = _pwdController.text.toString();
+              String nameValue = _nameController.text.toString();
+              String phoneValue = _phoneController.text.toString();
+              String nicknameValue = _nicknameController.text.toString();
+
+              Account newAccount = Account(
+                email: emailValue, userId: userIdValue,
+                userPwd: pwdValue, name: nameValue,
+                phonenumber: phoneValue, nickname: nicknameValue,
+              );
+              
+              if (!newAccount.isEmpty()) {
+                try {
+                  UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                      email: newAccount.email, 
+                      password: newAccount.userPwd
+                  );
+                  
+                  FirebaseFirestore _firestore = FirebaseFirestore.instance;
+                  await _firestore.collection('users').doc(newAccount.userId).set({
+                    "email": newAccount.email,
+                    "user_id": newAccount.userId,
+                    "name": newAccount.name,
+                    "nickname": newAccount.nickname,
+                    "phone_number": newAccount.phonenumber,
+                    "profile_image_url": '',
+                  });
+                  FirebaseAuth.instance.signOut();
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => MenuBottom()));
+                } on FirebaseAuthException catch (e) {
+                  if (e.code == 'email-already-in-use') {
+                    print('이미 존재하는 아이디에요');
+                  }
+                }
+              }
             } : null,
             style: OutlinedButton.styleFrom(
                 foregroundColor: isFormvalid ? Color(0xff0077FF) : Color(0xff777777),
@@ -368,5 +406,52 @@ class _JoinScreenState extends State<JoinScreen> {
             )
         )
     );
+  }
+}
+
+class Account {
+  final String email;
+  final String userId;
+  final String userPwd;
+  final String name;
+  final String phonenumber;
+  final String nickname;
+  final String profileImageUrl;
+
+  Account({
+    required this.email,
+    required this.userId,
+    required this.userPwd,
+    required this.name,
+    required this.phonenumber,
+    required this.nickname,
+    this.profileImageUrl = '',
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'email': email,
+      'user_id': userId,
+      'name': name,
+      'nickname': nickname,
+      'phone_number': phonenumber,
+      'profile_image_url': profileImageUrl,
+    };
+  }
+
+  factory Account.fromMap(Map<String, dynamic> map) {
+    return Account(
+      email: map['email'] ?? '',
+      userId: map['user_id'] ?? '',
+      userPwd: '',
+      name: map['name'] ?? '',
+      phonenumber: map['phone_number'] ?? '',
+      nickname: map['nickname'] ?? '',
+      profileImageUrl: map['profile_image_url'] ?? '',
+    );
+  }
+
+  bool isEmpty() {
+    return email.isEmpty || userId.isEmpty || userPwd.isEmpty;
   }
 }

@@ -1,6 +1,8 @@
 
 // 로그인 화면
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:wanbook/login/join_screen.dart';
@@ -195,17 +197,54 @@ class _LoginScreenState extends State<LoginScreen> {
     return SizedBox(
         width: SizeConfig.screenWidth * 0.9,
         height: 57,
-        child: OutlinedButton(onPressed: (){
+        child: OutlinedButton(onPressed: () async {
           setState(() {
             _idError = _idController.text.isEmpty ? '아이디를 입력해 주세요!' : null;
             _pwdError = _pwdController.text.isEmpty ? '비밀번호를 입력해 주세요!' : null;
           });
           if (_idError == null && _pwdError == null) {
-            Navigator.push(context, MaterialPageRoute(
-              builder: (context) {
-                return MenuBottom();
-              },
-            ));
+            final userId = _idController.text.trim();
+            final password = _pwdController.text.trim();
+            final email = '$userId@wanbook.com';  // 인증을 위한 가짜 이메일 생성
+
+            try {
+              await FirebaseAuth.instance.signInWithEmailAndPassword(
+                  email: email,
+                  password: password
+              );
+
+              final userDoc = await FirebaseFirestore.instance
+                .collection('users')
+                .doc(userId)
+                .get();
+
+              if (!userDoc.exists) {
+                setState(() {
+                  _idError = '아이디가 존재하지 않아요';
+                });
+                return;
+              }
+
+              Navigator.push(context, MaterialPageRoute(
+                builder: (context) {
+                  return MenuBottom();
+                },
+              ));
+            } on FirebaseAuthException catch (e) {
+              if (e.code == 'user-not-found') {
+                setState(() {
+                  _idError = '아이디가 존재하지 않아요';
+                });
+              } else if (e.code == 'wrong-password') {
+                setState(() {
+                  _pwdError = '비밀번호를 잘못 입력했어요';
+                });
+              } else {
+                setState(() {
+                  _pwdError = '로그인 중 오류가 발생했어요';
+                });
+              }
+            }
           }
         },
             style: OutlinedButton.styleFrom(
