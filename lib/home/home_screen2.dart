@@ -1,18 +1,24 @@
+// 홈 2 (진행도서 X)
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:wanbook/shared/menu_bottom.dart';
 import 'package:wanbook/search/search_result_screen.dart';
-import 'package:wanbook/home/speechbubble.dart';
-
+import 'package:wanbook/home/ArcProgressPainter.dart';
 
 import '../shared/size_config.dart';
 import 'dart:math';
 
-class HomeScreen2 extends StatelessWidget {
-  HomeScreen2({super.key});
+class HomeScreen2 extends StatefulWidget {
+  const HomeScreen2({super.key});
 
+  @override
+  State<HomeScreen2> createState() => _HomeScreenState2();
+}
+
+class _HomeScreenState2 extends State<HomeScreen2> {
   // 진행도바 예시용 독서
   final List<String> titleList = [
     '데미안', '종의 기원', '소년이 온다', '이기적 유전자', '싯다르타', '침묵의 봄', '이방인', '아몬드', '눈먼 자들의 도시'
@@ -70,9 +76,29 @@ class HomeScreen2 extends StatelessWidget {
     "오늘도 한 페이지씩 완독 향해 가볼까요? 아자아자!",
     "책멍이는 언제나 옆에 있어요! 한 페이지씩 차근차근 같이 가요!",
     "독서하는 닉네임님의 모습은 언제나 멋져요! 오늘도 파이팅!",
-    "닉네임님! 지금까지 3권 읽었어요! 멋져요!",
+    "닉네임님, 지금까지 3권 읽었어요! 멋져요!",
   ];
+
   final Random random = Random();
+  late String currentMessage;
+  int? selectedIndex;
+
+    @override
+  void initState() {
+    super.initState();
+    currentMessage = splitMessageByPunctuation(
+      messages[random.nextInt(messages.length)],
+    );
+  }
+
+  void updateMessage() {
+    setState(() {
+      currentMessage = splitMessageByPunctuation(
+        messages[random.nextInt(messages.length)],
+      );
+    });
+  }
+
   // 책멍이 말풍선 문구에서 문장부호 줄바꿈 함수 
   String splitMessageByPunctuation(String message) {
     return message
@@ -82,9 +108,6 @@ class HomeScreen2 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String randomMessage = messages[random.nextInt(messages.length)];
-    String formattedMessage = splitMessageByPunctuation(randomMessage);
-
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -93,11 +116,11 @@ class HomeScreen2 extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: 20),
+                SizedBox(height: 24),
                 buildGreeting(),
-                SizedBox(height: 24),
-                buildChaekmeongImage(formattedMessage),
-                SizedBox(height: 24),
+                SizedBox(height: 8),
+                buildChaekmeongImage(),
+                SizedBox(height: 30),
                   buildBookSection(
                     '이런 책은 어떠신가요? 인기도서목록',
                     highlightTitle: '',
@@ -126,32 +149,49 @@ class HomeScreen2 extends StatelessWidget {
     );
   }
 
-  //책멍 이미지
-  Widget buildChaekmeongImage(String message) {
+  // 진행바 + 책멍 + 문구
+  Widget buildChaekmeongImage() {
     return SizedBox(
-      height: 250,
+      height: 220,
       width: double.infinity,
-      child: Stack(
-        children: [
-          // 말풍선
-          Positioned(
-            right: 80,
-            top: 50,
-            child: SpeechBubble(message: message),
-          ),
-          // 책멍이
-          Positioned(
-            right: 10,
-            bottom: 0,
-            child: SvgPicture.asset(
-              'assets/images/home_Chaekmeong.svg',
-              height: 120,
+      child: Center(
+        child: Stack(
+          alignment: Alignment.bottomCenter,
+          children: [
+            SizedBox(
+              width: 200,
+              height: 200,
+              child: CustomPaint(
+                painter: ArcProgressPainter(progress: 0.75),
+              ),
             ),
-          ),
-        ],
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                GestureDetector(
+                  onTap: updateMessage,
+                  child: SvgPicture.asset(
+                    'assets/images/home_Chaekmeong.svg',
+                    height: 105,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  currentMessage,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Color(0xff777777),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
+
 
   // 추천 도서
   Widget buildBookSection(String title, {
@@ -162,7 +202,7 @@ class HomeScreen2 extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black)),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         SizedBox(
           height: 190,
           child: ListView.builder(
@@ -213,20 +253,6 @@ class HomeScreen2 extends StatelessWidget {
                 );
               } else if (index == 3) {
                 return buildBookItem(
-                  '침묵의 봄',
-                  '레이첼 카슨',
-                  imageAsset: 'assets/images/b_spring.png',
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SearchResultScreen(searchKeyword: '침묵의 봄'),
-                      ),
-                    );
-                  },
-                );
-              } else if (index == 4) {
-                return buildBookItem(
                   '이기적 유전자',
                   '리처드 도킨스',
                   imageAsset: 'assets/images/b_gene.png',
@@ -239,7 +265,21 @@ class HomeScreen2 extends StatelessWidget {
                     );
                   },
                 );
-              } else {
+              } else if (index == 4) {
+                return buildBookItem(
+                  '침묵의 봄',
+                  '레이첼 카슨',
+                  imageAsset: 'assets/images/b_spring.png',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SearchResultScreen(searchKeyword: '침묵의 봄'),
+                      ),
+                    );
+                  },
+                );
+              }  else {
                 return buildBookItem(
                   '책 제목',
                   '저자 명',
@@ -266,7 +306,7 @@ class HomeScreen2 extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 100,
+        width: 93,
         margin: const EdgeInsets.only(right: 12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

@@ -276,20 +276,6 @@ class _SearchScreenState extends State<SearchScreen> {
                 );
               } else if (index == 3) {
                 return buildBookItem(
-                  '침묵의 봄',
-                  '레이첼 카슨',
-                  imageAsset: 'assets/images/b_spring.png',
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SearchResultScreen(searchKeyword: '침묵의 봄'),
-                      ),
-                    );
-                  },
-                );
-              } else if (index == 4) {
-                return buildBookItem(
                   '이기적 유전자',
                   '리처드 도킨스',
                   imageAsset: 'assets/images/b_gene.png',
@@ -302,7 +288,21 @@ class _SearchScreenState extends State<SearchScreen> {
                     );
                   },
                 );
-              } else {
+              } else if (index == 4) {
+                return buildBookItem(
+                  '침묵의 봄',
+                  '레이첼 카슨',
+                  imageAsset: 'assets/images/b_spring.png',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SearchResultScreen(searchKeyword: '침묵의 봄'),
+                      ),
+                    );
+                  },
+                );
+              }  else {
                 return buildBookItem(
                   '책 제목',
                   '저자 명',
@@ -329,7 +329,7 @@ class _SearchScreenState extends State<SearchScreen> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 100,
+        width: 93,
         margin: const EdgeInsets.only(right: 12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

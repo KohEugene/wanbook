@@ -27,7 +27,7 @@ class _MenuBottomState extends State<MenuBottom> {
   final List<Widget> _pages = [
   HomeScreen(),
   // 진행도서X 홈 확인용
-  // HomeScreen2(),
+  //HomeScreen2(),
   SearchScreen(),
   LibraryScreen(),
   ProfileScreen()
