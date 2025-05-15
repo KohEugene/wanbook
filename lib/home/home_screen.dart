@@ -40,10 +40,17 @@ class _HomeScreenState extends State<HomeScreen> {
   };
 
   final List<String> messages = [
-    "오늘도 한 페이지씩\n완독 향해 가볼까요? 아자아자!",
-    "닉네임님\n한 페이지씩 차근차근\n책멍이와 독서 해해요!",
-    "독서하는 닉네임님의 모습은\n언제나 멋져요! 오늘도 파이팅!",
-    "닉네임님\n지금까지 3권 읽었어요! 멋져요!",
+    "오늘도 한 페이지씩\n완독 향해 가볼까요?\n아자아자!",
+    "닉네임님\n한 페이지씩 차근차근\n책멍이와 독서해요!",
+    "독서하는 닉네임님의 모습은\n언제나 멋져요!\n오늘도 파이팅!",
+    "닉네임님\n지금까지 3권 읽었어요!\n멋져요!",
+    "닉네임님\n지금의 한 페이지가\n완독을 만들어요!",
+    "책멍이가 항상 응원해요!\n오늘도 한 걸음씩\n함께해요!",
+    "조금씩 쌓이는 페이지가\n완독이라는\n큰 성취가 돼요!",
+    "책 속에서 발견하는 즐거움\n오늘도 책멍이와 함께해요!",
+    "책멍이가 보고 있어요!\n닉네임님의 꾸준함\n정말 대단해요!",
+    "닉네임님\n조금씩 차곡차곡,\n책 한 권 완성 중이에요!",
+    "꾸준한 독서의 힘!\n책멍이가 끝까지 함께할게요!\n오늘도 한 장씩 함께 넘겨봐요!",
   ];
 
   final Random random = Random();
@@ -53,9 +60,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    currentMessage = splitMessageByPunctuation(
-      messages[random.nextInt(messages.length)],
-    );
+    currentMessage =
+      messages[random.nextInt(messages.length)];
 
     // 미완독 도서 중 랜덤 1권 고정
     List<int> incompleteIndexes = [];
@@ -106,18 +112,9 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         _scale = 1.0;
         _isClicked = false;
-        currentMessage = splitMessageByPunctuation(
-          messages[random.nextInt(messages.length)],
-        );
+        currentMessage = messages[random.nextInt(messages.length)];
       });
     });
-  }
-
-    // 책멍이 말풍선 문구에서 문장부호 줄바꿈 함수
-  String splitMessageByPunctuation(String message) {
-    return message
-        .replaceAllMapped(RegExp(r'([.?!])\s*'), (match) => '${match.group(1)}\n')
-        .trim();
   }
 
   @override
