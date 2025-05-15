@@ -3,8 +3,8 @@
 
 import 'package:flutter/material.dart';
 
-import '../shared/menu_bottom.dart';
-import '../shared/size_config.dart';
+import '../../shared/menu_bottom.dart';
+import '../../shared/size_config.dart';
 
 class SearchResultScreen extends StatefulWidget {
   final String searchKeyword;

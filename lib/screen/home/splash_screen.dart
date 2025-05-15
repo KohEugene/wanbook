@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../login/login_screen.dart';
-import '../shared/size_config.dart';
+import '../../shared/size_config.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});

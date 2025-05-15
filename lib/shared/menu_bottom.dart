@@ -5,11 +5,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:wanbook/home/home_screen.dart';
-import 'package:wanbook/home/home_screen2.dart';
-import 'package:wanbook/library/library_screen.dart';
-import 'package:wanbook/profile/profile_screen.dart';
-import 'package:wanbook/search/search_screen.dart';
+import 'package:wanbook/screen/home/home_screen.dart';
+import 'package:wanbook/screen/home/home_screen2.dart';
+import 'package:wanbook/screen/library/library_screen.dart';
+import 'package:wanbook/screen/profile/profile_screen.dart';
+import 'package:wanbook/screen/search/search_screen.dart';
 
 class MenuBottom extends StatefulWidget {
   final int initialIndex;

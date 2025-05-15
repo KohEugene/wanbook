@@ -4,7 +4,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import '../shared/size_config.dart';
+import '../../shared/size_config.dart';
 
 class BadgeScreen extends StatefulWidget {
   const BadgeScreen({super.key});

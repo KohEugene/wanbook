@@ -2,12 +2,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:wanbook/aichat/chat_main_screen.dart';
+import 'package:wanbook/screen/aichat/chat_main_screen.dart';
 
 import 'dart:async';
 
 import 'package:wanbook/shared/menu_bottom.dart';
-import 'package:wanbook/ebook/pngframeanimation.dart';
+import 'package:wanbook/screen/ebook/pngframeanimation.dart';
 
 class BookScreen extends StatefulWidget {
   final String title;

@@ -1,29 +1,27 @@
-// 목적 선택 화면
-
 import 'package:flutter/material.dart';
-import 'package:wanbook/question/preknowledge_screen.dart';
-import 'package:wanbook/library/all_book_screen.dart';
+import 'package:wanbook/screen/question/collecting_screen.dart';
+import 'package:wanbook/screen/question/ready_screen.dart';
 
-class ReadingPurposeScreen extends StatefulWidget {
+class PreKnowledgeScreen extends StatefulWidget {
   final String title;
-  const ReadingPurposeScreen({super.key, required this.title});
+  const PreKnowledgeScreen({super.key, required this.title});
 
   @override
-  State<ReadingPurposeScreen> createState() => _ReadingPurposeScreenState();
+  State<PreKnowledgeScreen> createState() => _PreKnowledgeScreenState();
 }
 
-class _ReadingPurposeScreenState extends State<ReadingPurposeScreen> {
-  String selectedPurpose = '';
+class _PreKnowledgeScreenState extends State<PreKnowledgeScreen> {
+  String selectedPreKnowledge = '배경 지식';
 
-  final List<String> purposes = [
-    '지식 습득',
-    '공감 능력 향상',
-    '재미와 힐링',
-    '치매 예방',
-    '어려운 책 정복',
-    '독서 습관 형성',
-    '자아 성장',
-    '어휘력 향상',
+  final List<String> preknowledge = [
+    '배경 지식',
+    '독서 습관 갖는 법',
+    '전체적인 플룻',
+    '작가 정보',
+    '쉽게 읽는 법',
+    '줄거리 간단 요약',
+    '전문가 서평',
+    '책 후기',
   ];
 
   @override
@@ -40,7 +38,7 @@ class _ReadingPurposeScreenState extends State<ReadingPurposeScreen> {
             Navigator.pop(context);
           },
         ),
-        title: Text('독서 목적'),
+        title: Text('사전 지식'),
         centerTitle: true,
       ),
       body: SafeArea(
@@ -50,11 +48,11 @@ class _ReadingPurposeScreenState extends State<ReadingPurposeScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(height: 16),
-              buildProgressBar(currentStep: 0), // 진행도 표시 
+              buildProgressBar(currentStep: 1), // 진행도 표시 
               const SizedBox(height: 32),
               buildHeaderText(),
               const SizedBox(height: 76),
-              buildPurposeChips(),
+              buildPreKnowledgeChips(),
               const Spacer(),
               buildBottomButtons(),
               const SizedBox(height: 32),
@@ -71,13 +69,13 @@ class _ReadingPurposeScreenState extends State<ReadingPurposeScreen> {
       crossAxisAlignment: CrossAxisAlignment.center, // 텍스트 가운데 정렬
       children: [
         Text(
-          '주요 독서 목적은 무엇인가요?',
+          '원하시는 사전 지식이 있으신가요?',
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Colors.black),
           textAlign: TextAlign.center, // 줄 바꿈 시에도 중앙 정렬
         ),
         const SizedBox(height: 6),
         Text(
-          '알맞은 알림 설정을 위하여\n정보가 필요해요!',
+          '해당하는 것을 선택하시면\n책멍이가 알려드릴게요!',
           style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Color(0xff777777)),
           textAlign: TextAlign.center,
         ),
@@ -85,18 +83,60 @@ class _ReadingPurposeScreenState extends State<ReadingPurposeScreen> {
     );
   }
 
-  // 독서 목적 물어보는 목록
-  Widget buildPurposeChips() {
-    // 왼쪽, 오른쪽 나눠서 저장
+  // 사전지식 물어보는 목록
+  List<String> selectedPreKnowledgeList = []; // 선택한 거 저장하는 리스트트
+
+  Widget buildPreKnowledgeChips() {
     List<String> leftColumn = [];
     List<String> rightColumn = [];
 
-    for (int i = 0; i < purposes.length; i++) {
+    for (int i = 0; i < preknowledge.length; i++) {
       if (i % 2 == 0) {
-        leftColumn.add(purposes[i]);
+        leftColumn.add(preknowledge[i]);
       } else {
-        rightColumn.add(purposes[i]);
+        rightColumn.add(preknowledge[i]);
       }
+    }
+
+    Widget buildChip(String label) {
+      final bool isSelected = selectedPreKnowledgeList.contains(label);
+
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 24),
+        child: GestureDetector(
+          onTap: () {
+            setState(() {
+              if (isSelected) {
+                selectedPreKnowledgeList.remove(label);
+              } else {
+                selectedPreKnowledgeList.add(label);
+              }
+            });
+          },
+          child: Container(
+            height: 38,
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: isSelected ? Color(0xffCCE4FF) : Color(0xffE4E4E4),
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(24),
+                topRight: Radius.circular(24),
+                bottomLeft: Radius.circular(24),
+                bottomRight: Radius.circular(2),
+              ),
+            ),
+            alignment: Alignment.centerLeft,
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 14,
+                color: isSelected ? Color(0xff0077FF) : Color(0xff777777),
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+              ),
+            ),
+          ),
+        ),
+      );
     }
 
     return Center(
@@ -104,84 +144,14 @@ class _ReadingPurposeScreenState extends State<ReadingPurposeScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 왼쪽 Column
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: leftColumn.map((purpose) {
-              final bool isSelected = purpose == selectedPurpose;
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 24),
-                child: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      selectedPurpose = purpose;
-                    });
-                  },
-                  child: Container(
-                    height: 38,
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: isSelected ? Color(0xffCCE4FF) : Color(0xffE4E4E4),
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(24),
-                        topRight: Radius.circular(24),
-                        bottomLeft: Radius.circular(24),
-                        bottomRight: Radius.circular(2),
-                      ),
-                    ),
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      purpose,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: isSelected ? Color(0xff0077FF) : Color(0xff777777),
-                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            }).toList(),
+            children: leftColumn.map((e) => buildChip(e)).toList(),
           ),
-          const SizedBox(width: 40), // 열 사이 간격
-          // 오른쪽 Column
+          const SizedBox(width: 40),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: rightColumn.map((purpose) {
-              final bool isSelected = purpose == selectedPurpose;
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 24),
-                child: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      selectedPurpose = purpose;
-                    });
-                  },
-                  child: Container(
-                    height: 38,
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: isSelected ? Color(0xffCCE4FF) : Color(0xffE4E4E4),
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(24),
-                        topRight: Radius.circular(24),
-                        bottomLeft: Radius.circular(24),
-                        bottomRight: Radius.circular(2),
-                      ),
-                    ),
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      purpose,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: isSelected ? Color(0xff0077FF) : Color(0xff777777),
-                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            }).toList(),
+            children: rightColumn.map((e) => buildChip(e)).toList(),
           ),
         ],
       ),
@@ -200,7 +170,9 @@ class _ReadingPurposeScreenState extends State<ReadingPurposeScreen> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => PreKnowledgeScreen(title: widget.title)),
+                  MaterialPageRoute(
+                    builder: (context) => ReadyScreen(title: widget.title),
+                  ),
                 );
               },
               style: OutlinedButton.styleFrom(
@@ -224,9 +196,8 @@ class _ReadingPurposeScreenState extends State<ReadingPurposeScreen> {
           child: SizedBox(
             height: 50,
             child: OutlinedButton(
-              // 아무것도 선택x시 다음버튼 못 되게
-              onPressed: () {
-                if (selectedPurpose.isEmpty) {
+                onPressed: () {
+                if (selectedPreKnowledgeList.isEmpty) {
                   showDialog(
                     context: context,
                     builder: (context) {
@@ -244,7 +215,7 @@ class _ReadingPurposeScreenState extends State<ReadingPurposeScreen> {
                           ),
                         ),
                         content: Text(
-                          '하나의 독서 목적을 선택해 주세요.',
+                          '하나 이상의 사전 지식을 선택해 주세요.',
                           style: TextStyle(
                             fontSize: 16,
                             color: Color(0xff777777),
@@ -263,9 +234,13 @@ class _ReadingPurposeScreenState extends State<ReadingPurposeScreen> {
                     },
                   );
                 } else {
-                  Navigator.push(
+                Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => PreKnowledgeScreen(title: widget.title)),
+                    MaterialPageRoute(
+                      builder: (context) => CollectingScreen(
+                        selectedItems: selectedPreKnowledgeList, title: widget.title
+                      ),
+                    ),
                   );
                 }
               },

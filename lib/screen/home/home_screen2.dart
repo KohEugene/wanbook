@@ -5,10 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:wanbook/shared/menu_bottom.dart';
-import 'package:wanbook/search/search_result_screen.dart';
-import 'package:wanbook/home/ArcProgressPainter.dart';
+import 'package:wanbook/screen/search/search_result_screen.dart';
+import 'package:wanbook/screen/home/ArcProgressPainter.dart';
 
-import '../shared/size_config.dart';
+import '../../shared/size_config.dart';
 import 'dart:math';
 import 'dart:async';
 
@@ -54,7 +54,6 @@ class _HomeScreenState2 extends State<HomeScreen2> {
     "닉네임님\n지금의 한 페이지가\n완독을 만들어요!",
     "책멍이가 항상 응원해요!\n오늘도 한 걸음씩\n함께해요!",
     "조금씩 쌓이는 페이지가\n완독이라는\n큰 성취가 돼요!",
-    "책 속에서 발견하는 즐거움\n오늘도 책멍이와 함께해요!",
     "책멍이가 보고 있어요!\n닉네임님의 꾸준함\n정말 대단해요!",
     "닉네임님\n조금씩 차곡차곡,\n책 한 권 완성 중이에요!",
     "꾸준한 독서의 힘!\n책멍이가 끝까지 함께할게요!\n오늘도 한 장씩 함께 넘겨봐요!",
@@ -96,7 +95,7 @@ class _HomeScreenState2 extends State<HomeScreen2> {
 
   // 클릭x시에 애니메이션
   void _startIdleAnimation() {
-    _idleTimer = Timer.periodic(Duration(seconds: 2), (timer) {
+    _idleTimer = Timer.periodic(Duration(seconds: 1), (timer) {
       if (_isClicked) return;
       setState(() {
         _scale = _scale == 1.0 ? 1.05 : 1.0;

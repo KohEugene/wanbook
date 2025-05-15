@@ -3,7 +3,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:wanbook/aichat/chat_screen.dart';
+import 'package:wanbook/screen/aichat/chat_screen.dart';
 
 class ChatMainScreen extends StatefulWidget {
   final String title;

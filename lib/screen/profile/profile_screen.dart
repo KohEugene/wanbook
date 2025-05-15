@@ -4,11 +4,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:wanbook/aichat/chatlist_screen.dart';
-import 'package:wanbook/profile/badge_screen.dart';
+import 'package:wanbook/screen/aichat/chatlist_screen.dart';
+import 'package:wanbook/screen/profile/badge_screen.dart';
 import 'package:wanbook/shared/pop_up.dart';
 
-import '../shared/size_config.dart';
+import '../../shared/size_config.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});

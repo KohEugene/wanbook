@@ -6,10 +6,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:wanbook/login/join_screen.dart';
+import 'package:wanbook/screen/login/join_screen.dart';
 import 'package:wanbook/shared/size_config.dart';
 
-import '../shared/menu_bottom.dart';
+import '../../shared/menu_bottom.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});

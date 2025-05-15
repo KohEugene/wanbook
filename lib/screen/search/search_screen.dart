@@ -1,9 +1,10 @@
 // 검색 메인 화면
 import 'package:flutter/material.dart';
 import 'package:wanbook/shared/menu_bottom.dart';
-import 'package:wanbook/search/search_result_screen.dart'; 
+import 'package:wanbook/screen/search/search_result_screen.dart';
 
-import '../shared/size_config.dart';
+import '../../shared/size_config.dart';
+
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});

@@ -5,11 +5,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:wanbook/library/all_book_screen.dart';
-import 'package:wanbook/library/finish_book_screen.dart';
-import 'package:wanbook/library/reading_book_screen.dart';
+import 'package:wanbook/screen/library/all_book_screen.dart';
+import 'package:wanbook/screen/library/finish_book_screen.dart';
+import 'package:wanbook/screen/library/reading_book_screen.dart';
 
-import '../shared/size_config.dart';
+import '../../shared/size_config.dart';
 
 
 class LibraryScreen extends StatefulWidget {
