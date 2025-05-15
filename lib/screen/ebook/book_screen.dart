@@ -8,6 +8,10 @@ import 'dart:async';
 
 import 'package:wanbook/shared/menu_bottom.dart';
 import 'package:wanbook/screen/ebook/pngframeanimation.dart';
+import 'package:wanbook/screen/library/all_book_screen.dart';
+
+
+import 'package:pdfx/pdfx.dart';
 
 class BookScreen extends StatefulWidget {
   final String title;
@@ -19,12 +23,47 @@ class BookScreen extends StatefulWidget {
 }
 
 class _BookScreenState extends State<BookScreen> {
-  double progress = 0.51;
-  final int totalPages = 500;
+  double progress = 0.0;
+  int? totalPages;
+
+  // ebook 변수
+  PdfController? _pdfController;
+  PdfDocument? _pdfDocument;
 
   // UI 표시 여부
   bool showUI = true;
 
+  // 한글 제목 -> 영어로 매핑
+  String get pdfFileName {
+    final Map<String, String> fileMap = {
+      '데미안': 'demian.pdf',
+      //어쩌꾸쩌어ㅉ우ㅉ뭄ㅈ검ㄱㅇㅁㅈㅇㅈㅁ
+    };
+
+    return fileMap[widget.title] ?? 'default.pdf';
+  }
+  
+  @override
+  void initState() {
+    super.initState();
+    loadPdf();
+  }
+
+  // pdf 페이지 수 로딩
+  Future<void> loadPdf() async {
+    _pdfDocument = await PdfDocument.openAsset('assets/pdf/$pdfFileName');
+    final count = await _pdfDocument!.pagesCount;
+
+    setState(() {
+      totalPages = count;
+      _pdfController = PdfController(
+        document: PdfDocument.openAsset('assets/pdf/$pdfFileName'),
+        initialPage: 1,
+      );
+    });
+  }
+
+  // UI 사라졌다가 생겼다가
   void toggleUI() {
     setState(() {
       showUI = !showUI;
@@ -45,7 +84,7 @@ class _BookScreenState extends State<BookScreen> {
   void startInactivityTimer() {
     _inactivityTimer?.cancel();
     if (!showUI) {
-      _inactivityTimer = Timer(Duration(seconds: 5), () {
+      _inactivityTimer = Timer(Duration(seconds: 10), () {
         setState(() {
           showHint = true;
         });
@@ -57,14 +96,6 @@ class _BookScreenState extends State<BookScreen> {
   void cancelInactivityTimer() {
     _inactivityTimer?.cancel();
     _inactivityTimer = null;
-  }
-
-  @override
-  void initState() {
-      super.initState();
-      if (!showUI) {
-        startInactivityTimer();
-      }
   }
 
   @override
@@ -98,7 +129,7 @@ class _BookScreenState extends State<BookScreen> {
       child: AppBar(
         backgroundColor: Theme.of(context).appBarTheme.backgroundColor ?? Colors.white,
         elevation: Theme.of(context).appBarTheme.elevation ?? 0,
-        title: Text(widget.title),
+        title: Text(widget.title), // 한글 제목 그대로 사용띠
         centerTitle: true,
         leading: IconButton(
           onPressed: () {
@@ -116,7 +147,8 @@ class _BookScreenState extends State<BookScreen> {
   // 멈춤 트래킹 책멍 아이콘
   Widget buildHintChaekmeongIcon(BuildContext context, String title) {
     return Positioned(
-      right: 24,
+      // 여백없이 화면 오른쪽
+      right: 0,
       bottom: 120,
       child: GestureDetector(
         onTap: () {
@@ -127,38 +159,49 @@ class _BookScreenState extends State<BookScreen> {
             ),
           );
         },
-        child: PngFrameAnimation(
-          basePath: 'assets/images/frames_/hint_Chaekmeong',
-          frameCount: 7, // 프레임 수에 맞게 설정
-          interval: Duration(milliseconds: 80),
-          width: 100,
-          height: 100,
+        child: Container(
+          margin: const EdgeInsets.only(right: 0),
+          child: PngFrameAnimation(
+            basePath: 'assets/images/frames_/hint_Chaekmeong',
+            frameCount: 7,
+            interval: Duration(milliseconds: 80),
+            width: 100,
+            height: 100,
+          ),
         ),
       ),
     );
   }
 
-
-  // 뒤에 텍스트 이미지
+  // pdf
   Widget buildBackground() {
-    final screenHeight = MediaQuery.of(context).size.height;
+    // pdf 없는 애들은 동글뱅이
+    if (_pdfController == null || totalPages == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
     return Positioned.fill(
-      child: Center(
-        child: Image.asset(
-          'assets/images/t_damian2.png',
-          height: screenHeight,
-          fit: BoxFit.fitHeight, // 세로 기준 꽉 채우기
-          width: MediaQuery.of(context).size.width,
-        ),
+      child: PdfView(
+        controller: _pdfController!,
+        scrollDirection: Axis.horizontal,
+        onPageChanged: (page) {
+          setState(() {
+            progress = page / totalPages!;
+          });
+        },
       ),
     );
   }
 
   // 책 진행도 바
   Widget buildProgressSection(BuildContext context) {
+    if (totalPages == null || _pdfController == null) {
+      return const SizedBox.shrink(); // 진행도 바 숨기기 (로딩 중일 때)
+    }
+
+    // 구글이 clamp로 해야 버그 안 난대서 함,,,
     double horizontalPadding = MediaQuery.of(context).size.width * 0.05;
-    int currentPage = (progress * totalPages).round();
+    int currentPage = (progress * totalPages!).round().clamp(1, totalPages!);
 
     return Positioned(
       left: 0,
@@ -171,10 +214,14 @@ class _BookScreenState extends State<BookScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Slider(
-              value: progress,
+              value: currentPage.toDouble(),
+              min: 1,
+              max: totalPages!.toDouble(),
               onChanged: (value) {
+                final page = value.round().clamp(1, totalPages!);
                 setState(() {
-                  progress = value;
+                  progress = page / totalPages!;
+                  _pdfController?.jumpToPage(page);
                 });
               },
               activeColor: Color(0xff0077FF),

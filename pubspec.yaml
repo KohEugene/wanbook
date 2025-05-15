@@ -26,6 +26,9 @@ dependencies:
   flutter_svg: ^2.1.0
   provider: ^6.1.5
 
+  pdfx: ^2.4.0
+  shared_preferences: ^2.2.2
+
 flutter_icons:
   android: true
   ios: true
@@ -43,6 +46,7 @@ flutter:
   assets:
      - assets/images/
      - assets/images/frames_/
+     - assets/pdf/
 
   fonts:
     - family: Pretendard
