@@ -3,11 +3,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 
 import 'package:wanbook/shared/menu_bottom.dart';
 import 'package:wanbook/screen/search/search_result_screen.dart';
 import 'package:wanbook/screen/home/ArcProgressPainter.dart';
 
+import '../../provider/user_provider.dart';
 import '../../shared/size_config.dart';
 import 'dart:math';
 import 'dart:async';
@@ -48,25 +50,25 @@ class _HomeScreenState2 extends State<HomeScreen2> {
   // 책멍이 메시지
   final List<String> messages = [
     "오늘도 한 페이지씩\n완독 향해 가볼까요?\n아자아자!",
-    "닉네임님\n한 페이지씩 차근차근\n책멍이와 독서해요!",
-    "독서하는 닉네임님의 모습은\n언제나 멋져요!\n오늘도 파이팅!",
-    "닉네임님\n지금까지 3권 읽었어요!\n멋져요!",
-    "닉네임님\n지금의 한 페이지가\n완독을 만들어요!",
+    "{nickname}님\n한 페이지씩 차근차근\n책멍이와 독서해요!",
+    "독서하는 {nickname}님의 모습은\n언제나 멋져요!\n오늘도 파이팅!",
+    "{nickname}님\n지금까지 3권 읽었어요!\n멋져요!",
+    "{nickname}님\n지금의 한 페이지가\n완독을 만들어요!",
     "책멍이가 항상 응원해요!\n오늘도 한 걸음씩\n함께해요!",
     "조금씩 쌓이는 페이지가\n완독이라는\n큰 성취가 돼요!",
-    "책멍이가 보고 있어요!\n닉네임님의 꾸준함\n정말 대단해요!",
-    "닉네임님\n조금씩 차곡차곡,\n책 한 권 완성 중이에요!",
+    "책멍이가 보고 있어요!\n{nickname}님의 꾸준함\n정말 대단해요!",
+    "{nickname}님\n조금씩 차곡차곡,\n책 한 권 완성 중이에요!",
     "꾸준한 독서의 힘!\n책멍이가 끝까지 함께할게요!\n오늘도 한 장씩 함께 넘겨봐요!",
   ];
 
   final Random random = Random();
-  late String currentMessage;
+  String? currentMessage;
+  String nickname = '사용자';
   int? selectedIndex;
 
   @override
   void initState() {
     super.initState();
-    currentMessage = messages[random.nextInt(messages.length)];
 
     // 미완독 도서 중 랜덤 1권 고정
     List<int> incompleteIndexes = [];
@@ -80,6 +82,14 @@ class _HomeScreenState2 extends State<HomeScreen2> {
     }
 
     _startIdleAnimation();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      setState(() {
+        nickname = userProvider.user?.nickname ?? '사용자';
+        currentMessage = getRandomMessage();
+      });
+    });
   }
 
   @override
@@ -117,9 +127,14 @@ class _HomeScreenState2 extends State<HomeScreen2> {
       setState(() {
         _scale = 1.0;
         _isClicked = false;
-        currentMessage = messages[random.nextInt(messages.length)];
+        currentMessage = getRandomMessage();
       });
     });
+  }
+
+  String getRandomMessage() {
+    final raw = messages[random.nextInt(messages.length)];
+    return raw.replaceAll('{nickname}', nickname);
   }
 
   @override
@@ -208,7 +223,7 @@ class _HomeScreenState2 extends State<HomeScreen2> {
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  currentMessage,
+                  currentMessage ?? '',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontSize: 14,
@@ -401,7 +416,7 @@ class _HomeScreenState2 extends State<HomeScreen2> {
             ),
           ],
         ),
-        Text("닉네임님은 현재 독서량 ‘n권’으로 상위 n%예요!",
+        Text("$nickname님은 현재 독서량 ‘n권’으로 상위 n%예요!",
             style: TextStyle(fontSize: 14, color: Color(0xff777777), fontWeight: FontWeight.w400)),
         SizedBox(height: 10),
         Container(

@@ -1,6 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:wanbook/firebase_options.dart';
+import 'package:wanbook/provider/user_provider.dart';
 import 'package:wanbook/screen/home/splash_screen.dart';
 import 'package:wanbook/shared/size_config.dart';
 
@@ -9,7 +11,14 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const MyApp());
+  runApp(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (context) => UserProvider(),)
+        ],
+        child: const MyApp(),
+      )
+  );
 }
 
 class MyApp extends StatelessWidget {

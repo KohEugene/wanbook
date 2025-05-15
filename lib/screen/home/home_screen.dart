@@ -2,13 +2,16 @@
 
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 
 import 'package:wanbook/shared/menu_bottom.dart';
 import 'package:wanbook/screen/ebook/book_screen.dart';
 import 'package:wanbook/screen/home/ArcProgressPainter.dart';
 import 'package:wanbook/shared/alarm.dart';
 
+import '../../provider/user_provider.dart';
 import '../../shared/size_config.dart';
 import 'dart:async';
 
@@ -20,6 +23,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+
   final List<String> titleList = [
     '데미안', '오만과 편견', '소년이 온다', '변신', '노인과 바다', '인간실격', '이방인', '아몬드', '눈먼 자들의 도시'
   ];
@@ -42,26 +46,25 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final List<String> messages = [
     "오늘도 한 페이지씩\n완독 향해 가볼까요?\n아자아자!",
-    "닉네임님\n한 페이지씩 차근차근\n책멍이와 독서해요!",
-    "독서하는 닉네임님의 모습은\n언제나 멋져요!\n오늘도 파이팅!",
-    "닉네임님\n지금까지 3권 읽었어요!\n멋져요!",
-    "닉네임님\n지금의 한 페이지가\n완독을 만들어요!",
+    "{nickname}님\n한 페이지씩 차근차근\n책멍이와 독서해요!",
+    "독서하는 {nickname}님의 모습은\n언제나 멋져요!\n오늘도 파이팅!",
+    "{nickname}님\n지금까지 3권 읽었어요!\n멋져요!",
+    "{nickname}님\n지금의 한 페이지가\n완독을 만들어요!",
     "책멍이가 항상 응원해요!\n오늘도 한 걸음씩\n함께해요!",
     "조금씩 쌓이는 페이지가\n완독이라는\n큰 성취가 돼요!",
-    "책멍이가 보고 있어요!\n닉네임님의 꾸준함\n정말 대단해요!",
-    "닉네임님\n조금씩 차곡차곡,\n책 한 권 완성 중이에요!",
+    "책멍이가 보고 있어요!\n{nickname}님의 꾸준함\n정말 대단해요!",
+    "{nickname}님\n조금씩 차곡차곡,\n책 한 권 완성 중이에요!",
     "꾸준한 독서의 힘!\n책멍이가 끝까지 함께할게요!\n오늘도 한 장씩 함께 넘겨봐요!",
   ];
 
   final Random random = Random();
-  late String currentMessage;
+  String? currentMessage;
+  String nickname = '사용자';
   int? selectedIndex;
 
   @override
   void initState() {
     super.initState();
-    currentMessage =
-      messages[random.nextInt(messages.length)];
 
     // 미완독 도서 중 랜덤 1권 고정
     List<int> incompleteIndexes = [];
@@ -76,13 +79,21 @@ class _HomeScreenState extends State<HomeScreen> {
 
     _startIdleAnimation();
 
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      setState(() {
+        nickname = userProvider.user?.nickname ?? '사용자';
+        currentMessage = getRandomMessage();
+      });
+    });
+
     // 알림
     // 초기화
     FlutterLocalNotification.init();
     // 권한 요청
     Future.delayed(
       const Duration(seconds: 3),
-      () => FlutterLocalNotification.requestNotificationPermission(),
+          () => FlutterLocalNotification.requestNotificationPermission(),
     );
   }
 
@@ -121,9 +132,14 @@ class _HomeScreenState extends State<HomeScreen> {
       setState(() {
         _scale = 1.0;
         _isClicked = false;
-        currentMessage = messages[random.nextInt(messages.length)];
+        currentMessage = getRandomMessage();
       });
     });
+  }
+
+  String getRandomMessage() {
+    final raw = messages[random.nextInt(messages.length)];
+    return raw.replaceAll('{nickname}', nickname);
   }
 
   @override
@@ -145,7 +161,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 24),
                 buildAttendanceSection(context),
                 const SizedBox(height: 24),
-
                 // 알림
                 TextButton(
                   onPressed: () {
@@ -173,7 +188,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // 진행바 + 책멍 + 문구구
+  // 진행바 + 책멍 + 문구
   Widget buildChaekmeongImage() {
     return SizedBox(
       height: 220,
@@ -216,7 +231,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  currentMessage,
+                  currentMessage ?? '',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontSize: 14,
@@ -360,7 +375,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
-        const Text("닉네임님은 현재 독서량 ‘n권’으로 상위 n%예요!",
+        Text("$nickname님은 현재 독서량 ‘n권’으로 상위 n%예요!",
             style: TextStyle(fontSize: 14, color: Color(0xff777777))),
         const SizedBox(height: 10),
         Container(

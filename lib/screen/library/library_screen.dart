@@ -1,14 +1,14 @@
 
 // 서재 메인 화면
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:wanbook/screen/library/all_book_screen.dart';
 import 'package:wanbook/screen/library/finish_book_screen.dart';
 import 'package:wanbook/screen/library/reading_book_screen.dart';
 
+import '../../provider/user_provider.dart';
 import '../../shared/size_config.dart';
 
 
@@ -21,18 +21,23 @@ class LibraryScreen extends StatefulWidget {
 
 class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProviderStateMixin{
 
+  String? nickname;
   late TabController tabController = TabController(
       length: 3,
       vsync: this,
       initialIndex: 0
   );
-  String? nickname;
 
   @override
   void initState() {
     tabController.addListener(() {
     },);
-    loadNickname();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      setState(() {
+        nickname = userProvider.user?.nickname ?? '사용자';
+      });
+    });
     super.initState();
   }
 
@@ -40,20 +45,6 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
   void dispose() {
     tabController.dispose();
     super.dispose();
-  }
-
-  Future<void> loadNickname() async {
-    final email = FirebaseAuth.instance.currentUser?.email;
-
-    final querySnapshot = await FirebaseFirestore.instance
-      .collection('users').where('email', isEqualTo: email).limit(1).get();
-
-    if (querySnapshot.docs.isNotEmpty) {
-      final userDoc = querySnapshot.docs.first;
-      setState(() {
-        nickname = userDoc.data()['nickname'] ?? '사용자';
-      });
-    }
   }
 
   final List<Widget> _pages = [
@@ -71,7 +62,7 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
           TextSpan(
             children: [
               TextSpan(
-                text: '${nickname ?? '사용자'}',
+                text: nickname,
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w400,

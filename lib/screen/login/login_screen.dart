@@ -6,9 +6,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:wanbook/model/user_model.dart';
 import 'package:wanbook/screen/login/join_screen.dart';
 import 'package:wanbook/shared/size_config.dart';
 
+import '../../provider/user_provider.dart';
 import '../../shared/menu_bottom.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -225,6 +228,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 });
                 return;
               }
+
+              final userData = userDoc.data()!;
+              final userModel = UserModel.fromMap(userData, userId);
+
+              final userProvider = Provider.of<UserProvider>(context, listen: false);
+              userProvider.setUser(userModel);
 
               Navigator.push(context, MaterialPageRoute(
                 builder: (context) {

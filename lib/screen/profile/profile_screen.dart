@@ -4,10 +4,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 import 'package:wanbook/screen/aichat/chatlist_screen.dart';
 import 'package:wanbook/screen/profile/badge_screen.dart';
 import 'package:wanbook/shared/pop_up.dart';
 
+import '../../provider/user_provider.dart';
 import '../../shared/size_config.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -19,6 +21,9 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
 
+  String nickname = '사용자 명';
+  String userId = '사용자 아이디';
+
   final Map<String, Map<String, String>> bookInfoMap = {
     '아몬드': {
       'author': '손원평',
@@ -29,6 +34,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
       'image': 'assets/images/b_eye.png',
     },
   };
+
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      setState(() {
+        nickname = userProvider.user?.nickname ?? '사용자';
+        userId = userProvider.user?.userId ?? '사용자 아이디';
+      });
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -118,13 +135,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('사용자 명', style: TextStyle(
+                Text(nickname, style: TextStyle(
                     color: Colors.black,
                     fontWeight: FontWeight.w600,
                     fontSize: 16)
                 ),
                 SizedBox(height: 4,),
-                Text('@사용자 아이디', style: TextStyle(
+                Text('@$userId', style: TextStyle(
                     color: Color(0xff777777),
                     fontWeight: FontWeight.w400,
                     fontSize: 14)
