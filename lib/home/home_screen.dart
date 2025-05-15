@@ -39,10 +39,10 @@ class _HomeScreenState extends State<HomeScreen> {
   };
 
   final List<String> messages = [
-    "오늘도 한 페이지씩 완독 향해 가볼까요? 아자아자!",
-    "책멍이는 언제나 옆에 있어요! 한 페이지씩 차근차근 같이 가요!",
-    "독서하는 닉네임님의 모습은 언제나 멋져요! 오늘도 파이팅!",
-    "닉네임님, 지금까지 3권 읽었어요! 멋져요!",
+    "오늘도 한 페이지씩\n완독 향해 가볼까요? 아자아자!",
+    "닉네임님\n한 페이지씩 차근차근\n책멍이와 독서 해해요!",
+    "독서하는 닉네임님의 모습은\n언제나 멋져요! 오늘도 파이팅!",
+    "닉네임님\n지금까지 3권 읽었어요! 멋져요!",
   ];
 
   final Random random = Random();
@@ -66,6 +66,20 @@ class _HomeScreenState extends State<HomeScreen> {
     if (incompleteIndexes.isNotEmpty) {
       selectedIndex = incompleteIndexes[random.nextInt(incompleteIndexes.length)];
     }
+
+    _startIdleAnimation();
+  }
+
+  // 클릭x시에 애니메이션
+  void _startIdleAnimation() {
+    Future.doWhile(() async {
+      if (_isClicked) return true; // 클릭 중이면 스킵
+      await Future.delayed(Duration(milliseconds: 800));
+      setState(() => _scale = 1.05);
+      await Future.delayed(Duration(milliseconds: 800));
+      setState(() => _scale = 1.0);
+      return true;
+    });
   }
 
   // 책멍이 말풍선 문구에서 문장부호 줄바꿈 함수
@@ -75,11 +89,25 @@ class _HomeScreenState extends State<HomeScreen> {
         .trim();
   }
 
+  // 책멍 이미지 애니메이션
+  double _scale = 1.0;
+  bool _isClicked = false;
+
+  // 애니메이션 + 랜덤문구
   void updateMessage() {
     setState(() {
-      currentMessage = splitMessageByPunctuation(
-        messages[random.nextInt(messages.length)],
-      );
+      _isClicked = true;
+      _scale = 1.2;
+    });
+
+    Future.delayed(Duration(milliseconds: 150), () {
+      setState(() {
+        _scale = 1.0;
+        _isClicked = false;
+        currentMessage = splitMessageByPunctuation(
+          messages[random.nextInt(messages.length)],
+        );
+      });
     });
   }
 
@@ -95,7 +123,7 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 const SizedBox(height: 24),
                 buildGreeting(),
-                const SizedBox(height: 8),
+                const SizedBox(height: 16),
                 buildChaekmeongImage(),
                 const SizedBox(height: 24),
                 buildReadingSection(context),
@@ -140,12 +168,21 @@ class _HomeScreenState extends State<HomeScreen> {
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                GestureDetector(
-                  onTap: updateMessage,
-                  child: SvgPicture.asset(
-                    'assets/images/home_Chaekmeong.svg',
-                    height: 120,
-                  ),
+                TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 1.0, end: _scale),
+                  duration: Duration(milliseconds: 200),
+                  builder: (context, value, child) {
+                    return Transform.scale(
+                      scale: value,
+                      child: GestureDetector(
+                        onTap: updateMessage,
+                        child: SvgPicture.asset(
+                          'assets/images/home_Chaekmeong.svg',
+                          height: 110,
+                        ),
+                      ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 10),
                 Text(

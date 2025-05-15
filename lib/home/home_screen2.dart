@@ -56,19 +56,58 @@ class _HomeScreenState2 extends State<HomeScreen2> {
   late String currentMessage;
   int? selectedIndex;
 
-    @override
+  @override
   void initState() {
     super.initState();
     currentMessage = splitMessageByPunctuation(
       messages[random.nextInt(messages.length)],
     );
+
+    // 미완독 도서 중 랜덤 1권 고정
+    List<int> incompleteIndexes = [];
+    for (int i = 0; i < percentList.length; i++) {
+      if (percentList[i] != '100%') {
+        incompleteIndexes.add(i);
+      }
+    }
+    if (incompleteIndexes.isNotEmpty) {
+      selectedIndex = incompleteIndexes[random.nextInt(incompleteIndexes.length)];
+    }
+
+    _startIdleAnimation();
   }
 
+  // 클릭x시에 애니메이션
+  void _startIdleAnimation() {
+    Future.doWhile(() async {
+      if (_isClicked) return true; // 클릭 중이면 스킵
+      await Future.delayed(Duration(milliseconds: 800));
+      setState(() => _scale = 1.05);
+      await Future.delayed(Duration(milliseconds: 800));
+      setState(() => _scale = 1.0);
+      return true;
+    });
+  }
+
+  // 책멍 이미지 애니메이션
+  double _scale = 1.0;
+  bool _isClicked = false;
+
+  // 애니메이션 + 랜덤문구
   void updateMessage() {
     setState(() {
-      currentMessage = splitMessageByPunctuation(
-        messages[random.nextInt(messages.length)],
-      );
+      _isClicked = true;
+      _scale = 1.2;
+    });
+
+    Future.delayed(Duration(milliseconds: 150), () {
+      setState(() {
+        _scale = 1.0;
+        _isClicked = false;
+        currentMessage = splitMessageByPunctuation(
+          messages[random.nextInt(messages.length)],
+        );
+      });
     });
   }
 
@@ -141,12 +180,21 @@ class _HomeScreenState2 extends State<HomeScreen2> {
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                GestureDetector(
-                  onTap: updateMessage,
-                  child: SvgPicture.asset(
-                    'assets/images/home_Chaekmeong.svg',
-                    height: 120,
-                  ),
+                TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 1.0, end: _scale),
+                  duration: Duration(milliseconds: 200),
+                  builder: (context, value, child) {
+                    return Transform.scale(
+                      scale: value,
+                      child: GestureDetector(
+                        onTap: updateMessage,
+                        child: SvgPicture.asset(
+                          'assets/images/home_Chaekmeong.svg',
+                          height: 110,
+                        ),
+                      ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 10),
                 Text(
@@ -164,7 +212,6 @@ class _HomeScreenState2 extends State<HomeScreen2> {
       ),
     );
   }
-
 
   // 추천 도서
   Widget buildBookSection(String title, {
