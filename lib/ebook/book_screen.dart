@@ -146,9 +146,10 @@ class _BookScreenState extends State<BookScreen> {
     return Positioned.fill(
       child: Center(
         child: Image.asset(
-          'assets/images/t_damian.png',
+          'assets/images/t_damian2.png',
           height: screenHeight,
-          fit: BoxFit.contain,
+          fit: BoxFit.fitHeight, // 세로 기준 꽉 채우기
+          width: MediaQuery.of(context).size.width,
         ),
       ),
     );
