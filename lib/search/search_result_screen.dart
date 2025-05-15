@@ -36,20 +36,20 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
       'imageAsset': 'assets/images/b_boycome.png',
       'description': '어느 도시의 아픔을 배경으로, 고통과 기억이 교차하는 목소리들이 등장하며 인간의 존엄과 슬픔을 마주하게 합니다. 담담한 서술 속에서도 깊은 울림을 전하며, 역사 속 개인의 흔적을 조용히 되새기게 합니다.',
     },
-    '종의 기원': {
-      'author': '정유정',
-      'imageAsset': 'assets/images/b_jong.png',
-      'description': '인간 본성의 이면을 파고드는 한 인물의 이야기를 통해, 냉정한 사고와 충동 사이에서 발생하는 복잡한 심리를 사실적으로 그려냅니다. 강렬한 분위기 속에서도 침착한 서사가 이어지며, 인간 존재에 대한 철학적 고찰을 던집니다.',
+    '오만과 편견': {
+      'author': '제인 오스틴',
+      'imageAsset': 'assets/images/b_op.png',
+      'description': '계급과 결혼, 자존심과 편견이 교차하는 가운데, 엘리자베스와 다아시의 관계를 통해 사랑과 성장의 진정한 의미를 섬세하게 그려냅니다. 재치 있는 대사와 풍자적 시선이 돋보이는 고전 로맨스입니다.',
     },
-    '침묵의 봄': {
-      'author': '레이첼 카슨',
-      'imageAsset': 'assets/images/b_spring.png',
-      'description': '자연이 점차 침묵에 잠기게 되는 배경 아래, 우리가 인식하지 못했던 일상의 위험성과 환경의 연관성을 통찰력 있게 풀어냅니다. 과학적 사실을 바탕으로 하되 그 표현은 매우 문학적이며, 경고와 성찰이 교차하는 목소리가 인상 깊습니다.',
+    '변신': {
+      'author': '프란츠 카프카',
+      'imageAsset': 'assets/images/b_change.png',
+      'description': '한순간에 벌레로 변해버린 사내의 이야기를 통해 인간 소외와 존재의 부조리를 상징적으로 묘사합니다. 현실과 환상의 경계를 허무는 상징성 강한 작품으로, 현대 문학의 대표적인 문제작입니다.',
     },
-    '이기적 유전자': {
-      'author': '리처드 도킨스',
-      'imageAsset': 'assets/images/b_gene.png',
-      'description': '진화의 핵심을 개체가 아닌 유전자로 바라보는 새로운 관점이 제시되며, 생명 현상을 설명하는 방식에 일대 전환을 불러옵니다. 어려운 개념이지만 명쾌한 비유와 설명을 통해 독자의 이해를 돕고, 존재의 의미에 대해 다시 생각하게 만듭니다.',
+    '노인과 바다': {
+      'author': '어니스트 헤밍웨이',
+      'imageAsset': 'assets/images/b_sea.png',
+      'description': '거대한 물고기와의 사투 속에서 한 노인의 끈기와 자존심, 인간 정신의 고귀함을 그려낸 작품입니다. 간결한 문체로 삶과 투쟁의 본질을 압축해낸 헤밍웨이 문학의 정수라 할 수 있습니다.',
     },
     '아몬드': {
       'author': '손원평',
@@ -61,10 +61,10 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
       'imageAsset': 'assets/images/b_eye.png',
       'description': '갑작스러운 실명 사태 속에서 인간 본성의 민낯이 드러나는 과정을 묘사하며, 문명과 윤리에 대한 통렬한 질문을 던집니다. 집단적 혼란과 절망을 넘어 희망을 향한 움직임이 은유적으로 표현된 작품입니다.',
     },
-    '싯다르타': {
-      'author': '헤르만 헤세',
-      'imageAsset': 'assets/images/b_shitda.png',
-      'description': '깨달음을 향한 여정을 따라가는 한 인물의 삶을 통해, 존재의 본질과 진정한 행복에 대한 사색을 담고 있습니다. 철학적 사유와 동양적 세계관이 어우러진 문장들이 깊은 울림을 전합니다.',
+    '인간실격': {
+      'author': '다자이 오사무',
+      'imageAsset': 'assets/images/b_human.png',
+      'description': '자기 존재에 대한 끊임없는 불신과 고통 속에서 삶의 의미를 찾지 못하는 한 인간의 기록을 통해, 내면의 허무와 소외를 적나라하게 드러냅니다. 인간성에 대한 깊은 고뇌가 녹아 있는 일본 문학의 명작입니다.',
     },
     '이방인': {
       'author': '알베르 카뮈',

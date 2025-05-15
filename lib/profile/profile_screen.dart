@@ -20,9 +20,9 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
 
   final Map<String, Map<String, String>> bookInfoMap = {
-    '침묵의 봄': {
-      'author': '레이첼 카슨',
-      'image': 'assets/images/b_spring.png',
+    '아몬드': {
+      'author': '손원평',
+      'image': 'assets/images/b_amond.png'
     },
     '눈먼 자들의 도시': {
       'author': '사라마구',
@@ -55,7 +55,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Expanded(child: readingCard('가장 빨리 읽었어요', '침묵의 봄', '3시간 독서')),
+                      Expanded(child: readingCard('가장 빨리 읽었어요', '아몬드', '3시간 독서')),
                       SizedBox(width: 16,),
                       Expanded(child: readingCard('가장 오래 읽었어요', '눈먼 자들의 도시', '1개월 독서'))
                     ],

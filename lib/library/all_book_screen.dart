@@ -16,7 +16,7 @@ class AllBookScreen extends StatefulWidget {
 
 class _AllBookScreenState extends State<AllBookScreen> {
   final List<String> titleList = [
-    '데미안', '종의 기원', '소년이 온다', '이기적 유전자', '싯다르타', '침묵의 봄', '이방인', '아몬드', '눈먼 자들의 도시'
+    '데미안', '오만과 편견', '소년이 온다', '변신', '노인과 바다', '인간실격', '이방인', '아몬드', '눈먼 자들의 도시'
   ];
 
   final List<String> percentList = [
@@ -28,42 +28,15 @@ class _AllBookScreenState extends State<AllBookScreen> {
   ];
 
   final Map<String, Map<String, String>> bookInfoMap = {
-    '데미안': {
-      'author': '헤르만 헤세',
-      'image': 'assets/images/b_damian.png',
-    },
-    '소년이 온다': {
-      'author': '한강',
-      'image': 'assets/images/b_boycome.png',
-    },
-    '종의 기원': {
-      'author': '정유정',
-      'image': 'assets/images/b_jong.png',
-    },
-    '이기적 유전자': {
-      'author': '리처드 도킨스',
-      'image': 'assets/images/b_gene.png',
-    },
-    '싯다르타': {
-      'author': '헤르만 헤세',
-      'image': 'assets/images/b_shitda.png',
-    },
-    '침묵의 봄': {
-      'author': '레이첼 카슨',
-      'image': 'assets/images/b_spring.png',
-    },
-    '이방인': {
-      'author': '알베르 카뮈',
-      'image': 'assets/images/b_gentile.png',
-    },
-    '아몬드': {
-      'author': '손원평',
-      'image': 'assets/images/b_amond.png',
-    },
-    '눈먼 자들의 도시': {
-      'author': '사라마구',
-      'image': 'assets/images/b_eye.png',
-    },
+    '데미안': {'author': '헤르만 헤세', 'image': 'assets/images/b_damian.png'},
+    '소년이 온다': {'author': '한강', 'image': 'assets/images/b_boycome.png'},
+    '오만과 편견': {'author': '제인 오스틴', 'image': 'assets/images/b_op.png'},
+    '변신': {'author': '프란츠 카프카', 'image': 'assets/images/b_change.png'},
+    '인간실격': {'author': '다자이 오사무', 'image': 'assets/images/b_human.png'},
+    '노인과 바다': {'author': '어니스트 헤밍웨이', 'image': 'assets/images/b_sea.png'},
+    '이방인': {'author': '알베르 카뮈', 'image': 'assets/images/b_gentile.png'},
+    '아몬드': {'author': '손원평', 'image': 'assets/images/b_amond.png'},
+    '눈먼 자들의 도시': {'author': '사라마구', 'image': 'assets/images/b_eye.png'},
   };
 
   @override

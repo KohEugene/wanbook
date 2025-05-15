@@ -14,8 +14,8 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
 
-  final recentSearches = ['데미안', '아몬드', '이기적 유전자', '이방인', '침묵의 봄'];
-  final recommendedSearches = ['종의 기원', '소년이 온다', '싯다르타', '눈먼 자들의 도시'];
+  final recentSearches = ['데미안', '아몬드', '노인과 바다', '이방인', '인간실격'];
+  final recommendedSearches = ['오만과 편견', '소년이 온다', '변신', '눈먼 자들의 도시'];
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -284,42 +284,42 @@ class _SearchScreenState extends State<SearchScreen> {
                 );
               } else if (index == 2) {
                 return buildBookItem(
-                  '종의 기원',
-                  '정유정',
-                  imageAsset: 'assets/images/b_jong.png',
+                  '아몬드',
+                  '손원평',
+                  imageAsset: 'assets/images/b_amond.png',
                   onTap: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => SearchResultScreen(searchKeyword: '종의 기원'),
+                        builder: (context) => SearchResultScreen(searchKeyword: '아몬드'),
                       ),
                     );
                   },
                 );
               } else if (index == 3) {
                 return buildBookItem(
-                  '이기적 유전자',
-                  '리처드 도킨스',
-                  imageAsset: 'assets/images/b_gene.png',
+                  '인간실격',
+                  '다자이 오사무',
+                  imageAsset: 'assets/images/b_human.png',
                   onTap: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => SearchResultScreen(searchKeyword: '이기적 유전자'),
+                        builder: (context) => SearchResultScreen(searchKeyword: '인간실격'),
                       ),
                     );
                   },
                 );
               } else if (index == 4) {
                 return buildBookItem(
-                  '침묵의 봄',
-                  '레이첼 카슨',
-                  imageAsset: 'assets/images/b_spring.png',
+                  '노인과 바다',
+                  '어니스트 헤밍웨이',
+                  imageAsset: 'assets/images/b_sea.png',
                   onTap: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => SearchResultScreen(searchKeyword: '침묵의 봄'),
+                        builder: (context) => SearchResultScreen(searchKeyword: '노인과 바다'),
                       ),
                     );
                   },
