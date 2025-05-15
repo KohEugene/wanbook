@@ -7,6 +7,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:wanbook/shared/menu_bottom.dart';
 import 'package:wanbook/screen/ebook/book_screen.dart';
 import 'package:wanbook/screen/home/ArcProgressPainter.dart';
+import 'package:wanbook/shared/alarm.dart';
 
 import '../../shared/size_config.dart';
 import 'dart:async';
@@ -74,11 +75,20 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     _startIdleAnimation();
+
+    // 알림
+    // 초기화
+    FlutterLocalNotification.init();
+    // 권한 요청
+    Future.delayed(
+      const Duration(seconds: 3),
+      () => FlutterLocalNotification.requestNotificationPermission(),
+    );
   }
 
   @override
   void dispose() {
-    _idleTimer?.cancel(); // 반드시 타이머 해제
+    _idleTimer?.cancel(); // 타이머 해제
     super.dispose();
   }
 
@@ -135,6 +145,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 24),
                 buildAttendanceSection(context),
                 const SizedBox(height: 24),
+
+                // 알림
+                TextButton(
+                  onPressed: () {
+                    print('알림 버튼 클릭됨!');
+                    FlutterLocalNotification.showNotification();
+                  },
+                  child: const Text("알림 보내기"),
+                ),
               ],
             ),
           ),

@@ -24,6 +24,8 @@ dependencies:
 
   flutter_svg: ^2.1.0
 
+  flutter_local_notifications: ^16.2.0
+
 flutter_icons:
   android: true
   ios: true
