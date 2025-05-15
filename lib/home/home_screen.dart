@@ -168,21 +168,32 @@ class _HomeScreenState extends State<HomeScreen> {
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TweenAnimationBuilder<double>(
-                  tween: Tween(begin: 1.0, end: _scale),
-                  duration: Duration(milliseconds: 200),
-                  builder: (context, value, child) {
-                    return Transform.scale(
-                      scale: value,
-                      child: GestureDetector(
-                        onTap: updateMessage,
-                        child: SvgPicture.asset(
-                          'assets/images/home_Chaekmeong.svg',
-                          height: 110,
-                        ),
-                      ),
-                    );
-                  },
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // 고정된 밑그림
+                    SvgPicture.asset(
+                      'assets/images/home_Chaekmeong_s.svg',
+                      height: 110, // 고정 크기
+                    ),
+                    // 애니메이션 적용된 책멍이
+                    TweenAnimationBuilder<double>(
+                      tween: Tween(begin: 1.0, end: _scale),
+                      duration: Duration(milliseconds: 200),
+                      builder: (context, value, child) {
+                        return Transform.scale(
+                          scale: value,
+                          child: GestureDetector(
+                            onTap: updateMessage,
+                            child: SvgPicture.asset(
+                              'assets/images/home_Chaekmeong.svg',
+                              height: 110,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 10),
                 Text(
