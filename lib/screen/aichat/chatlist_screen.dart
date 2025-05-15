@@ -4,7 +4,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import '../shared/size_config.dart';
+import '../../shared/size_config.dart';
 
 class ChatlistScreen extends StatefulWidget {
   const ChatlistScreen({super.key});

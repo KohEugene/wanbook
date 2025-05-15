@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:wanbook/question/ready_screen.dart';
+import 'package:wanbook/screen/question/ready_screen.dart';
 
 class CollectedScreen extends StatefulWidget {
   final List<String> selectedItems;

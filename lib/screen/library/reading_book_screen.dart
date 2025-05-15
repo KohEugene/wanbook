@@ -3,9 +3,9 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:wanbook/ebook/book_screen.dart';
+import 'package:wanbook/screen/ebook/book_screen.dart';
 
-import '../shared/size_config.dart';
+import '../../shared/size_config.dart';
 
 class ReadingBookScreen extends StatefulWidget {
   const ReadingBookScreen({super.key});

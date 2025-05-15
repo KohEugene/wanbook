@@ -5,10 +5,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:wanbook/login/login_screen.dart';
+import 'package:wanbook/screen/login/login_screen.dart';
 import 'package:wanbook/shared/menu_bottom.dart';
 
-import '../shared/size_config.dart';
+import '../../shared/size_config.dart';
 
 class JoinScreen extends StatefulWidget {
   const JoinScreen({super.key});
