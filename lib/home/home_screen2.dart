@@ -10,6 +10,7 @@ import 'package:wanbook/home/ArcProgressPainter.dart';
 
 import '../shared/size_config.dart';
 import 'dart:math';
+import 'dart:async';
 
 class HomeScreen2 extends StatefulWidget {
   const HomeScreen2({super.key});
@@ -77,30 +78,38 @@ class _HomeScreenState2 extends State<HomeScreen2> {
     _startIdleAnimation();
   }
 
+  @override
+  void dispose() {
+    _idleTimer?.cancel(); // 반드시 타이머 해제
+    super.dispose();
+  }
+
+  // 애니메이션 변수
+  double _scale = 1.0;
+  bool _isClicked = false;
+  Timer? _idleTimer;
+
   // 클릭x시에 애니메이션
   void _startIdleAnimation() {
-    Future.doWhile(() async {
-      if (_isClicked) return true; // 클릭 중이면 스킵
-      await Future.delayed(Duration(milliseconds: 800));
-      setState(() => _scale = 1.05);
-      await Future.delayed(Duration(milliseconds: 800));
-      setState(() => _scale = 1.0);
-      return true;
+    _idleTimer = Timer.periodic(Duration(seconds: 2), (timer) {
+      if (_isClicked) return;
+      setState(() {
+        _scale = _scale == 1.0 ? 1.05 : 1.0;
+      });
     });
   }
 
-  // 책멍 이미지 애니메이션
-  double _scale = 1.0;
-  bool _isClicked = false;
-
   // 애니메이션 + 랜덤문구
   void updateMessage() {
+    if (_isClicked || !mounted) return;
+
     setState(() {
       _isClicked = true;
       _scale = 1.2;
     });
 
-    Future.delayed(Duration(milliseconds: 150), () {
+    Future.delayed(const Duration(milliseconds: 150), () {
+      if (!mounted) return;
       setState(() {
         _scale = 1.0;
         _isClicked = false;
@@ -111,7 +120,7 @@ class _HomeScreenState2 extends State<HomeScreen2> {
     });
   }
 
-  // 책멍이 말풍선 문구에서 문장부호 줄바꿈 함수 
+    // 책멍이 말풍선 문구에서 문장부호 줄바꿈 함수
   String splitMessageByPunctuation(String message) {
     return message
         .replaceAllMapped(RegExp(r'([.?!])\s*'), (match) => '${match.group(1)}\n')
@@ -189,21 +198,16 @@ class _HomeScreenState2 extends State<HomeScreen2> {
                       height: 110, // 고정 크기
                     ),
                     // 애니메이션 적용된 책멍이
-                    TweenAnimationBuilder<double>(
-                      tween: Tween(begin: 1.0, end: _scale),
-                      duration: Duration(milliseconds: 200),
-                      builder: (context, value, child) {
-                        return Transform.scale(
-                          scale: value,
-                          child: GestureDetector(
-                            onTap: updateMessage,
-                            child: SvgPicture.asset(
-                              'assets/images/home_Chaekmeong.svg',
-                              height: 110,
-                            ),
-                          ),
-                        );
-                      },
+                    AnimatedScale(
+                      scale: _scale,
+                      duration: const Duration(milliseconds: 200),
+                      child: GestureDetector(
+                        onTap: updateMessage,
+                        child: SvgPicture.asset(
+                          'assets/images/home_Chaekmeong.svg',
+                          height: 110,
+                        ),
+                      ),
                     ),
                   ],
                 ),
