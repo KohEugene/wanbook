@@ -11,7 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  flutter_launcher_icons: ^0.13.1
+  flutter_launcher_icons: ^0.11.0
 
   cupertino_icons: ^1.0.8
   flutter_local_notifications: ^15.1.0
@@ -28,6 +28,9 @@ dependencies:
 
   pdfx: ^2.4.0
   shared_preferences: ^2.2.2
+
+  epub_view: ^3.1.0
+  flutter_html: ^3.0.0
 
 flutter_icons:
   android: true
@@ -46,7 +49,7 @@ flutter:
   assets:
      - assets/images/
      - assets/images/frames_/
-     - assets/pdf/
+     - assets/epub/
 
   fonts:
     - family: Pretendard
