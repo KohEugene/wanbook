@@ -128,8 +128,8 @@ Widget build(BuildContext context) {
                         padding: const EdgeInsets.only(bottom: 32),
                         child: SelectableText(
                           text,
-                          style: const TextStyle(fontSize: 16, height: 1.6),
-                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontSize: 18, height: 1.6),
+                          textAlign: TextAlign.left,
                         ),
                       );
                     },
@@ -231,7 +231,7 @@ Widget build(BuildContext context) {
               final index = (value * chapterCount).floor().clamp(0, chapterCount - 1);
               final target = chapters[index];
               final controller = ScrollController();
-              controller.jumpTo(index * 1000); // 간이 처리
+              controller.jumpTo(index * 1000);
             },
             activeColor: const Color(0xff0077FF),
             inactiveColor: const Color(0xffE4E4E4),
