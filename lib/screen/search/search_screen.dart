@@ -1,5 +1,7 @@
 // 검색 메인 화면
 import 'package:flutter/material.dart';
+import 'package:wanbook/model/book_model.dart';
+import 'package:wanbook/shared/book_basic.dart';
 import 'package:wanbook/shared/menu_bottom.dart';
 import 'package:wanbook/screen/search/search_result_screen.dart';
 
@@ -17,6 +19,15 @@ class _SearchScreenState extends State<SearchScreen> {
 
   final recentSearches = ['데미안', '아몬드', '노인과 바다', '이방인', '인간실격'];
   final recommendedSearches = ['오만과 편견', '소년이 온다', '변신', '눈먼 자들의 도시'];
+
+  List<BookModel> books = [
+    BookModel(title: '데미안', author: '헤르만 헤세', imagePath: 'assets/images/b_damian.png'),
+    BookModel(title: '소년이 온다', author: '한강', imagePath: 'assets/images/b_boycome.png'),
+    BookModel(title: '아몬드', author: '손원평', imagePath: 'assets/images/b_amond.png'),
+    BookModel(title: '인간실격', author: '다자이 오사무', imagePath: 'assets/images/b_human.png'),
+    BookModel(title: '노인과 바다', author: '어니스트 헤밍웨이', imagePath: 'assets/images/b_sea.png'),
+  ];
+
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -41,17 +52,9 @@ class _SearchScreenState extends State<SearchScreen> {
                     SizedBox(height: 24),
                     buildRecommendedSearchSection(),
                     SizedBox(height: 24),
-                    buildBookSection(
-                      '추천 도서',
-                      highlightTitle: '',
-                      highlightAuthor: '',
-                    ),
+                    buildBookSection('추천 도서'),
                     SizedBox(height: 24),
-                    buildBookSection(
-                      '인기 도서',
-                      highlightTitle: '',
-                      highlightAuthor: '',
-                    ),
+                    buildBookSection('인기 도서'),
                     SizedBox(height: 24),
                   ],
                 ),
@@ -92,6 +95,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   child: TextField(
                     controller: _searchController,
                     cursorColor: Color(0xff0077FF),
+                    textInputAction: TextInputAction.search,
                     decoration: InputDecoration(
                       hintText: '검색어를 입력해 주세요',
                       hintStyle: TextStyle(
@@ -147,7 +151,7 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  // 추천 검색어어
+  // 추천 검색어
   Widget buildRecommendedSearchSection() {
     return buildSearchSection(
       '추천 검색어',
@@ -240,14 +244,11 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   // 추천 도서, 인기 도서
-  Widget buildBookSection(String title, {
-    required String highlightTitle,
-    required String highlightAuthor,
-  }) {
+  Widget buildBookSection(String sectionTitle) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black)),
+        Text(sectionTitle, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black)),
         const SizedBox(height: 12),
         SizedBox(
           height: 190,
@@ -255,138 +256,15 @@ class _SearchScreenState extends State<SearchScreen> {
             scrollDirection: Axis.horizontal,
             itemCount: 5,
             itemBuilder: (context, index) {
-              if (index == 0) {
-                return buildBookItem(
-                  '데미안',
-                  '헤르만 헤세',
-                  imageAsset: 'assets/images/b_damian.png',
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SearchResultScreen(searchKeyword: '데미안'),
-                      ),
-                    );
-                  },
+              return BookBasic(book: books[index], onTap: () {
+                Navigator.push(context, MaterialPageRoute(
+                    builder: (context) => SearchResultScreen(searchKeyword: books[index].title),)
                 );
-              } else if (index == 1) {
-                return buildBookItem(
-                  '소년이 온다',
-                  '한강',
-                  imageAsset: 'assets/images/b_boycome.png',
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SearchResultScreen(searchKeyword: '소년이 온다'),
-                      ),
-                    );
-                  },
-                );
-              } else if (index == 2) {
-                return buildBookItem(
-                  '아몬드',
-                  '손원평',
-                  imageAsset: 'assets/images/b_amond.png',
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SearchResultScreen(searchKeyword: '아몬드'),
-                      ),
-                    );
-                  },
-                );
-              } else if (index == 3) {
-                return buildBookItem(
-                  '인간실격',
-                  '다자이 오사무',
-                  imageAsset: 'assets/images/b_human.png',
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SearchResultScreen(searchKeyword: '인간실격'),
-                      ),
-                    );
-                  },
-                );
-              } else if (index == 4) {
-                return buildBookItem(
-                  '노인과 바다',
-                  '어니스트 헤밍웨이',
-                  imageAsset: 'assets/images/b_sea.png',
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SearchResultScreen(searchKeyword: '노인과 바다'),
-                      ),
-                    );
-                  },
-                );
-              }  else {
-                return buildBookItem(
-                  '책 제목',
-                  '저자 명',
-                  imageAsset: null,
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SearchResultScreen(searchKeyword: '책 제목'),
-                      ),
-                    );
-                  },
-                );
-              }
+              },);
             },
           ),
         )
       ],
-    );
-  }
-
-  // 개별 책 항목
-  Widget buildBookItem(String title, String author, {String? imageAsset, VoidCallback? onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 93,
-        margin: const EdgeInsets.only(right: 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              height: 140,
-              width: 100,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: imageAsset != null
-                    ? Image.asset(
-                        imageAsset,
-                        fit: BoxFit.cover,
-                      )
-                    : Container(color: Color(0xffD9D9D9)),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Padding(
-              padding: const EdgeInsets.only(left: 4),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black)),
-                  Text(author, style: const TextStyle(color: Color(0xff777777), fontSize: 12, fontWeight: FontWeight.w400)),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

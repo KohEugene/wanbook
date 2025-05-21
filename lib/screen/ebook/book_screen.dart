@@ -65,9 +65,9 @@ class _BookScreenState extends State<BookScreen> {
 
       final allChapters = flattenChapters(book.Chapters ?? []);
 
-      print('📖 총 챕터 수 (flattened): ${allChapters.length}');
+      print('총 챕터 수 (flattened): ${allChapters.length}');
       for (int i = 0; i < allChapters.length; i++) {
-        print('📄 Chapter $i - 제목: ${allChapters[i].Title}, HTML 길이: ${allChapters[i].HtmlContent?.length ?? 0}');
+        print('Chapter $i - 제목: ${allChapters[i].Title}, HTML 길이: ${allChapters[i].HtmlContent?.length ?? 0}');
       }
 
       setState(() {
@@ -75,7 +75,7 @@ class _BookScreenState extends State<BookScreen> {
         isLoading = false;
       });
     } catch (e) {
-      print("❌ EPUB 로드 실패: $e");
+      print("EPUB 로드 실패: $e");
       setState(() {
         isLoading = false;
       });
@@ -115,7 +115,6 @@ Widget build(BuildContext context) {
     body: SafeArea(
       child: Stack(
         children: [
-          // 📚 텍스트는 맨 뒤에 배경처럼 깔림
           Positioned.fill(
             child: isLoading
                 ? const Center(child: CircularProgressIndicator())
@@ -137,7 +136,7 @@ Widget build(BuildContext context) {
                   ),
           ),
 
-          // 📱 UI 전체 토글용 투명 레이어
+          // UI 전체 토글용 투명 레이어
           Positioned.fill(
             child: GestureDetector(
               behavior: HitTestBehavior.translucent,
@@ -146,7 +145,7 @@ Widget build(BuildContext context) {
             ),
           ),
 
-          // ⬆️ AppBar 오버레이
+          // appbar
           if (showUI)
             Positioned(
               top: 0,
@@ -155,7 +154,7 @@ Widget build(BuildContext context) {
               child: buildAppBar(context),
             ),
 
-          // 📊 진행도 바 오버레이
+          // progress bar
           if (showUI)
             Positioned(
               left: 0,
@@ -164,14 +163,13 @@ Widget build(BuildContext context) {
               child: buildProgressBar(context),
             ),
 
-          // 🐶 책멍이 아이콘
+          // icon
           if (showUI)
-  Positioned(
-    right: 24,
-    bottom: 144,
-    child: buildFloatingChaekmeongIcon(), // ✅ 여기서만 Positioned 써야 함
-  ),
-
+            Positioned(
+              right: 24,
+              bottom: 144,
+              child: buildFloatingChaekmeongIcon(),
+            ),
 
           // 힌트용 책멍이 애니메이션
           if (showHint) buildHintChaekmeongIcon(context, widget.title),
@@ -181,31 +179,31 @@ Widget build(BuildContext context) {
   );
 }
 
-
-Widget buildAppBar(BuildContext context) {
-  return SafeArea(
-    child: Container(
-      color: Colors.white,
-      child: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: Text(widget.title),
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.chevron_left_rounded, color: Colors.black),
-          onPressed: () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => MenuBottom(initialIndex: 2)),
-            );
-          },
+  // 앱바
+  Widget buildAppBar(BuildContext context) {
+    return SafeArea(
+      child: Container(
+        color: Colors.white,
+        child: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          title: Text(widget.title),
+          centerTitle: true,
+          leading: IconButton(
+            icon: const Icon(Icons.chevron_left_rounded, color: Colors.black),
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => MenuBottom(initialIndex: 2)),
+              );
+            },
+          ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 
-
+  // 진행도바 (수정해야함)
   Widget buildProgressBar(BuildContext context) {
     if (chapters.isEmpty) return const SizedBox.shrink();
 
@@ -247,36 +245,37 @@ Widget buildAppBar(BuildContext context) {
     );
   }
 
-Widget buildFloatingChaekmeongIcon() {
-  return GestureDetector(
-    onTap: () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => ChatMainScreen(title: widget.title),
+  // 책멍 챗봇 아이콘콘
+  Widget buildFloatingChaekmeongIcon() {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ChatMainScreen(title: widget.title),
+          ),
+        );
+      },
+      child: Container(
+        width: 70,
+        height: 70,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: const Color(0xff777777)),
+          color: Colors.white,
         ),
-      );
-    },
-    child: Container(
-      width: 70,
-      height: 70,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: const Color(0xff777777)),
-        color: Colors.white,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(8),
-        child: SvgPicture.asset(
-          'assets/images/icon_Chaekmeong.svg',
-          fit: BoxFit.contain,
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: SvgPicture.asset(
+            'assets/images/icon_Chaekmeong.svg',
+            fit: BoxFit.contain,
+          ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 
-
+  // 힌트 책멍 아이콘
   Widget buildHintChaekmeongIcon(BuildContext context, String title) {
     return Positioned(
       right: 0,
