@@ -106,6 +106,7 @@ class _LoginScreenState extends State<LoginScreen> {
             controller: _idController,
             autovalidateMode: AutovalidateMode.onUserInteraction,
             cursorColor: Color(0xff0077FF),
+            textInputAction: TextInputAction.next,
             decoration: InputDecoration(
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.all(16),
@@ -156,6 +157,7 @@ class _LoginScreenState extends State<LoginScreen> {
             controller: _pwdController,
             autovalidateMode: AutovalidateMode.onUserInteraction,
             cursorColor: Color(0xff0077FF),
+            textInputAction: TextInputAction.done,
             decoration: InputDecoration(
               border: InputBorder.none,
               contentPadding: EdgeInsets.all(16),
@@ -277,7 +279,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // 아이디 저장 체크박스
+  // 로그인 유지 체크박스
   Widget checkSaveId() {
     return Row(
       children: [
@@ -291,7 +293,7 @@ class _LoginScreenState extends State<LoginScreen> {
             });
           },
         ),
-        Text('아이디 저장', style: TextStyle(
+        Text('로그인 유지하기', style: TextStyle(
             fontWeight: FontWeight.w400,
             fontSize: 14,
             color: Color(0xff777777)

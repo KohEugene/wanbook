@@ -37,7 +37,7 @@ class _BookScreenState extends State<BookScreen> {
   String get pdfFileName {
     final Map<String, String> fileMap = {
       '데미안': 'demian.pdf',
-      //어쩌꾸쩌어ㅉ우ㅉ뭄ㅈ검ㄱㅇㅁㅈㅇㅈㅁ
+      '변신': 'Metamorphosis.pdf'
     };
 
     return fileMap[widget.title] ?? 'default.pdf';
