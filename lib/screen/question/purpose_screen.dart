@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:wanbook/screen/question/preknowledge_screen.dart';
-import 'package:wanbook/screen/library/all_book_screen.dart';
 
 class ReadingPurposeScreen extends StatefulWidget {
   final String title;

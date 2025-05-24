@@ -37,33 +37,35 @@ class BookProgress extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final totalPages = book.totalPages ?? 1;
-
-    final progress = ((readingBook.lastPosition / totalPages) * 100).clamp(0, 100).toInt();
+    final progress = ((readingBook.lastPosition ?? 0.0) * 100).round();
     final progressStr = '$progress%';
 
     String lastReadTimeStr = formatElapsedTime(readingBook.updatedAt);
 
     return GestureDetector(
-      onTap: () {
-        final bookScreen = BookScreen(title: book.title);
-
-        if (progress == 0) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ReadingPurposeScreen(title: book.title),
-            ),
-          );
-        } else {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => bookScreen,
-            ),
-          );
-        }
-      },
+      onTap: onTap ??
+          () async {
+            // 마지막 위치가 null이거나 0.0일 때만 목적 선택 화면으로 이동
+            final lastPos = readingBook.lastPosition;
+            if (lastPos == null || lastPos == 0.0) {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ReadingPurposeScreen(title: book.title),
+                ),
+              );
+            } else {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => BookScreen(
+                    title: book.title,
+                    initialProgress: lastPos,
+                  ),
+                ),
+              );
+            }
+          },
       child: SizedBox(
         width: 100,
         height: 210,

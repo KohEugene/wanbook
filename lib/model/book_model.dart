@@ -22,7 +22,9 @@ class BookModel {
       title: data['title'] ?? '',
       author: data['author'] ?? '',
       imagePath: data['imagePath'],
-      totalPages: data['page_count'],
+      totalPages: (data['page_count'] is int)
+        ? data['page_count']
+        : (data['page_count'] as double).toInt(),
       description: data['description'],
     );
   }

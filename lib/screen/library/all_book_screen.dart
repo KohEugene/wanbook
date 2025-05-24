@@ -5,6 +5,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wanbook/shared/book_progress.dart';
+import 'package:wanbook/screen/ebook/book_screen.dart';
+import 'package:wanbook/screen/question/purpose_screen.dart';
+import 'package:wanbook/provider/user_provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import '../../model/book_model.dart';
 import '../../model/user_book_model.dart';
 import '../../provider/user_book_provider.dart';
@@ -49,7 +54,50 @@ class _AllBookScreenState extends State<AllBookScreen> {
           itemBuilder: (context, index) {
             final book = allBooks[index]['book'] as BookModel;
             final readingBook = allBooks[index]['userBook'] as UserBookModel;
-            return BookProgress(book: book, readingBook: readingBook);
+            
+            return BookProgress( 
+              book: book,
+              readingBook: readingBook,
+              onTap: () async {
+                final userProvider = Provider.of<UserProvider>(context, listen: false);
+                final userId = userProvider.user?.userId;
+
+                final snapshot = await FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(userId)
+                    .collection('reading_books')
+                    .doc(book.title)
+                    .get();
+
+                final latestProgress = (snapshot.data()?['last_position'] as num?)?.toDouble() ?? 0.0;
+
+                if (latestProgress == 0.0) {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ReadingPurposeScreen(title: book.title),
+                    ),
+                  );
+                } else {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => BookScreen(
+                        title: book.title,
+                        initialProgress: latestProgress,
+                      ),
+                    ),
+                  );
+                }
+
+                // 돌아왔을 때 책 다시 불러오기
+                final viewModel = Provider.of<UserBookProvider>(context, listen: false);
+                final booksData = await viewModel.fetchReadingBooks(context);
+                setState(() {
+                  allBooks = booksData;
+                });
+              },
+            );
           },
         ),
       ),

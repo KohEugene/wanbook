@@ -40,9 +40,17 @@ class _ChatScreenState extends State<ChatScreen> {
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
+@override
+Widget build(BuildContext context) {
+  return PopScope(
+    canPop: false,
+    onPopInvokedWithResult: (didPop, result) {
+      if (!didPop) {
+        int count = 0;
+        Navigator.popUntil(context, (route) => count++ == 2);
+      }
+    },
+    child: Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
         centerTitle: true,
@@ -55,31 +63,32 @@ class _ChatScreenState extends State<ChatScreen> {
           },
         ),
       ),
-      body: GestureDetector(
-        behavior: HitTestBehavior.translucent,
-        onTap: () {
-          FocusScope.of(context).unfocus();
-        },
-        child: Column(
-          children: [
-            Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                itemCount: _messages.length,
-                itemBuilder: (context, index) {
-                  final msg = _messages[index];
-                  return msg['sender'] == 'user'
-                      ? buildUserChat(msg['text']!)
-                      : buildBotChat(msg['text']!);
-                },
+        body: GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () {
+            FocusScope.of(context).unfocus();
+          },
+          child: Column(
+            children: [
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  itemCount: _messages.length,
+                  itemBuilder: (context, index) {
+                    final msg = _messages[index];
+                    return msg['sender'] == 'user'
+                        ? buildUserChat(msg['text']!)
+                        : buildBotChat(msg['text']!);
+                  },
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: buildMessageInputArea(),
-            ),
-            const SizedBox(height: 24),
-          ],
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: buildMessageInputArea(),
+              ),
+              const SizedBox(height: 24),
+            ],
+          ),
         ),
       ),
     );

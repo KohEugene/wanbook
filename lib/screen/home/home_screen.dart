@@ -22,7 +22,7 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin{
 
   final List<String> titleList = [
     '데미안', '오만과 편견', '소년이 온다', '변신', '노인과 바다', '인간실격', '이방인', '아몬드', '눈먼 자들의 도시'
@@ -62,9 +62,21 @@ class _HomeScreenState extends State<HomeScreen> {
   String nickname = '사용자';
   int? selectedIndex;
 
+  late AnimationController _scaleController;
+  late Animation<double> _scaleAnimation;
+
   @override
   void initState() {
     super.initState();
+
+    _scaleController = AnimationController(
+      duration: const Duration(milliseconds: 1000),
+      vsync: this,
+    )..repeat(reverse: true); // 반복 애니메이션
+
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.05).animate(
+      CurvedAnimation(parent: _scaleController, curve: Curves.easeInOut),
+    );
 
     // 미완독 도서 중 랜덤 1권 고정
     List<int> incompleteIndexes = [];
@@ -76,8 +88,6 @@ class _HomeScreenState extends State<HomeScreen> {
     if (incompleteIndexes.isNotEmpty) {
       selectedIndex = incompleteIndexes[random.nextInt(incompleteIndexes.length)];
     }
-
-    _startIdleAnimation();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
@@ -99,24 +109,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
-    _idleTimer?.cancel(); // 타이머 해제
+    _scaleController.dispose();
     super.dispose();
   }
 
   // 애니메이션 변수
-  double _scale = 1.0;
   bool _isClicked = false;
-  Timer? _idleTimer;
-
-  // 클릭x시에 애니메이션
-  void _startIdleAnimation() {
-    _idleTimer = Timer.periodic(Duration(seconds: 1), (timer) {
-      if (_isClicked) return;
-      setState(() {
-        _scale = _scale == 1.0 ? 1.05 : 1.0;
-      });
-    });
-  }
 
   // 애니메이션 + 랜덤문구
   void updateMessage() {
@@ -124,16 +122,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
     setState(() {
       _isClicked = true;
-      _scale = 1.2;
     });
+
+    _scaleController.stop(); // 클릭 시 일시 정지
+    _scaleController.forward(from: 0.0); // 커지기
 
     Future.delayed(const Duration(milliseconds: 150), () {
       if (!mounted) return;
       setState(() {
-        _scale = 1.0;
         _isClicked = false;
         currentMessage = getRandomMessage();
       });
+      _scaleController.repeat(reverse: true); // 다시 반복 시작
     });
   }
 
@@ -210,22 +210,24 @@ class _HomeScreenState extends State<HomeScreen> {
                 Stack(
                   alignment: Alignment.center,
                   children: [
-                    // 고정된 밑그림
                     SvgPicture.asset(
                       'assets/images/home_Chaekmeong_s.svg',
-                      height: 110, // 고정 크기
+                      height: 110,
                     ),
-                    // 애니메이션 적용된 책멍이
-                    AnimatedScale(
-                      scale: _scale,
-                      duration: const Duration(milliseconds: 200),
-                      child: GestureDetector(
-                        onTap: updateMessage,
-                        child: SvgPicture.asset(
-                          'assets/images/home_Chaekmeong.svg',
-                          height: 110,
-                        ),
-                      ),
+                    AnimatedBuilder(
+                      animation: _scaleAnimation,
+                      builder: (context, child) {
+                        return Transform.scale(
+                          scale: _scaleAnimation.value,
+                          child: GestureDetector(
+                            onTap: updateMessage,
+                            child: SvgPicture.asset(
+                              'assets/images/home_Chaekmeong.svg',
+                              height: 110,
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -233,10 +235,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Text(
                   currentMessage ?? '',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Color(0xff777777),
-                  ),
+                  style: const TextStyle(fontSize: 14, color: Color(0xff777777)),
                 ),
               ],
             ),
