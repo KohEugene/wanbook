@@ -3,6 +3,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:wanbook/provider/user_book_provider.dart';
 
 import '../../provider/search_provider.dart';
 import '../../shared/menu_bottom.dart';
@@ -74,7 +75,7 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
                     SizedBox(height: 24),
                     buildBookInfo(book?.title, book?.author, book?.description),
                     SizedBox(height: 24),
-                    buildAddButton(),
+                    buildAddButton(context, book!.title),
                     SizedBox(height: 24),
                   ],
                 ),
@@ -225,12 +226,15 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
   }
 
   // 내 서재 추가 버튼
-  Widget buildAddButton() {
+  Widget buildAddButton(BuildContext context, String bookId) {
     return SizedBox(
       width: double.infinity,
       height: 50,
       child: OutlinedButton(
-        onPressed: () {
+        onPressed: () async {
+          await Provider.of<UserBookProvider>(context, listen: false)
+            .addBook(context, bookId: bookId);
+
           showDialog(
             context: context,
             builder: (context) {

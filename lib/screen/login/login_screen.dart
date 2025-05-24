@@ -247,13 +247,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 setState(() {
                   _idError = '아이디가 존재하지 않아요';
                 });
-              } else if (e.code == 'wrong-password') {
-                setState(() {
-                  _pwdError = '비밀번호를 잘못 입력했어요';
-                });
               } else {
                 setState(() {
-                  _pwdError = '로그인 중 오류가 발생했어요';
+                  _pwdError = '비밀번호를 잘못 입력했어요';
                 });
               }
             }

@@ -3,23 +3,52 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../model/book_model.dart';
 import '../model/user_book_model.dart';
 import '../screen/ebook/book_screen.dart';
 import '../screen/question/purpose_screen.dart';
 
 class BookProgress extends StatelessWidget {
-  final UserBookModel book;
+  final BookModel book;
+  final UserBookModel readingBook;
   final VoidCallback? onTap;
 
-  const BookProgress({Key? key, required this.book, this.onTap}) : super(key: key);
+  const BookProgress({
+    Key? key,
+    required this.book,
+    required this.readingBook,
+    this.onTap,
+  }) : super(key: key);
+
+  String formatElapsedTime(DateTime updatedAt) {
+    final now = DateTime.now();
+    final difference = now.difference(updatedAt);
+
+    if (difference.inDays > 0) {
+      return '${difference.inDays}일 전';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours}시간 전';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes}분 전';
+    } else {
+      return '방금 전';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final totalPages = book.totalPages ?? 1;
+
+    final progress = ((readingBook.lastPosition / totalPages) * 100).clamp(0, 100).toInt();
+    final progressStr = '$progress%';
+
+    String lastReadTimeStr = formatElapsedTime(readingBook.updatedAt);
+
     return GestureDetector(
       onTap: () {
         final bookScreen = BookScreen(title: book.title);
 
-        if (book.percent == '0%') {
+        if (progress == 0) {
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -79,7 +108,7 @@ class BookProgress extends StatelessWidget {
                     const Icon(Icons.library_add_check_outlined,
                         color: Color(0xff777777), size: 12),
                     const SizedBox(width: 2),
-                    Text(book.percent!,
+                    Text(progressStr,
                         style: const TextStyle(
                           color: Color(0xff777777),
                           fontWeight: FontWeight.w400,
@@ -89,7 +118,7 @@ class BookProgress extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(width: 4),
-                Text(book.lastReadTime!,
+                Text(lastReadTimeStr,
                     style: const TextStyle(
                         color: Color(0xff777777),
                         fontWeight: FontWeight.w400,
@@ -103,3 +132,4 @@ class BookProgress extends StatelessWidget {
     );
   }
 }
+
