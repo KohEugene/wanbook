@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wanbook/firebase_options.dart';
 import 'package:wanbook/provider/search_provider.dart';
+import 'package:wanbook/provider/user_book_provider.dart';
 import 'package:wanbook/provider/user_provider.dart';
 import 'package:wanbook/screen/home/splash_screen.dart';
 import 'package:wanbook/shared/size_config.dart';
@@ -16,7 +17,8 @@ Future<void> main() async {
       MultiProvider(
         providers: [
           ChangeNotifierProvider(create: (context) => UserProvider(),),
-          ChangeNotifierProvider(create: (context) => SearchProvider())
+          ChangeNotifierProvider(create: (context) => SearchProvider()),
+          ChangeNotifierProvider(create: (context) => UserBookProvider(),),
         ],
         child: const MyApp(),
       )
