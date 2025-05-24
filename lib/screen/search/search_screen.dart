@@ -23,7 +23,7 @@ class _SearchScreenState extends State<SearchScreen> {
   List<BookModel> books = [
     BookModel(title: '데미안', author: '헤르만 헤세', imagePath: 'assets/images/b_damian.png'),
     BookModel(title: '소년이 온다', author: '한강', imagePath: 'assets/images/b_boycome.png'),
-    BookModel(title: '아몬드', author: '손원평', imagePath: 'assets/images/b_amond.png'),
+    BookModel(title: '아몬드', author: '손원평', imagePath: 'assets/images/b_almond.png'),
     BookModel(title: '인간실격', author: '다자이 오사무', imagePath: 'assets/images/b_human.png'),
     BookModel(title: '노인과 바다', author: '어니스트 헤밍웨이', imagePath: 'assets/images/b_sea.png'),
   ];
