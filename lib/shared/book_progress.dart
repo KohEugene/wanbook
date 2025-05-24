@@ -2,13 +2,13 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:wanbook/model/book_model.dart';
 
+import '../model/user_book_model.dart';
 import '../screen/ebook/book_screen.dart';
 import '../screen/question/purpose_screen.dart';
 
 class BookProgress extends StatelessWidget {
-  final BookModel book;
+  final UserBookModel book;
   final VoidCallback? onTap;
 
   const BookProgress({Key? key, required this.book, this.onTap}) : super(key: key);

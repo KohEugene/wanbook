@@ -27,7 +27,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final Map<String, Map<String, String>> bookInfoMap = {
     '아몬드': {
       'author': '손원평',
-      'image': 'assets/images/b_amond.png'
+      'image': 'assets/images/b_almond.png'
     },
     '눈먼 자들의 도시': {
       'author': '사라마구',

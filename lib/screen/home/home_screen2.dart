@@ -43,7 +43,7 @@ class _HomeScreenState2 extends State<HomeScreen2> {
     '인간실격': {'author': '다자이 오사무', 'image': 'assets/images/b_human.png'},
     '노인과 바다': {'author': '어니스트 헤밍웨이', 'image': 'assets/images/b_sea.png'},
     '이방인': {'author': '알베르 카뮈', 'image': 'assets/images/b_gentile.png'},
-    '아몬드': {'author': '손원평', 'image': 'assets/images/b_amond.png'},
+    '아몬드': {'author': '손원평', 'image': 'assets/images/b_almond.png'},
     '눈먼 자들의 도시': {'author': '사라마구', 'image': 'assets/images/b_eye.png'},
   };
 

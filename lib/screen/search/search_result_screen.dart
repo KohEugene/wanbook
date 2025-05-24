@@ -2,7 +2,9 @@
 // 검색 결과 화면
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../../provider/search_provider.dart';
 import '../../shared/menu_bottom.dart';
 import '../../shared/size_config.dart';
 
@@ -19,78 +21,18 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
 
   late TextEditingController _searchController;
 
-  late String bookTitle;
-  late String bookAuthor;
-  late String bookImageUrl;
-  late String bookDescription;
-
-  // 검색 예시용 책
-  final Map<String, Map<String, String>> books = {
-    '데미안': {
-      'author': '헤르만 헤세',
-      'imageAsset': 'assets/images/b_damian.png',
-      'description': '자아의 탄생과 성장을 주제로, 내면의 갈등과 깨달음을 통해 한 소년이 자신만의 세계를 인식하게 되는 과정을 그려냅니다. 모든 인간이 겪는 어둠과 빛의 경계를 마주하게 되는 여정 속에서, 삶에 대한 새로운 시각을 제시합니다.',
-    },
-    '소년이 온다': {
-      'author': '한강',
-      'imageAsset': 'assets/images/b_boycome.png',
-      'description': '어느 도시의 아픔을 배경으로, 고통과 기억이 교차하는 목소리들이 등장하며 인간의 존엄과 슬픔을 마주하게 합니다. 담담한 서술 속에서도 깊은 울림을 전하며, 역사 속 개인의 흔적을 조용히 되새기게 합니다.',
-    },
-    '오만과 편견': {
-      'author': '제인 오스틴',
-      'imageAsset': 'assets/images/b_op.png',
-      'description': '계급과 결혼, 자존심과 편견이 교차하는 가운데, 엘리자베스와 다아시의 관계를 통해 사랑과 성장의 진정한 의미를 섬세하게 그려냅니다. 재치 있는 대사와 풍자적 시선이 돋보이는 고전 로맨스입니다.',
-    },
-    '변신': {
-      'author': '프란츠 카프카',
-      'imageAsset': 'assets/images/b_change.png',
-      'description': '한순간에 벌레로 변해버린 사내의 이야기를 통해 인간 소외와 존재의 부조리를 상징적으로 묘사합니다. 현실과 환상의 경계를 허무는 상징성 강한 작품으로, 현대 문학의 대표적인 문제작입니다.',
-    },
-    '노인과 바다': {
-      'author': '어니스트 헤밍웨이',
-      'imageAsset': 'assets/images/b_sea.png',
-      'description': '거대한 물고기와의 사투 속에서 한 노인의 끈기와 자존심, 인간 정신의 고귀함을 그려낸 작품입니다. 간결한 문체로 삶과 투쟁의 본질을 압축해낸 헤밍웨이 문학의 정수라 할 수 있습니다.',
-    },
-    '아몬드': {
-      'author': '손원평',
-      'imageAsset': 'assets/images/b_amond.png',
-      'description': '감정을 느끼지 못하는 소년의 시선을 통해, 공감과 사랑이 무엇인지 되묻는 이야기입니다. 세상과 어긋난 채 살아가는 인물의 변화 과정을 담담하게 그려내며, 따뜻하면서도 묵직한 여운을 남깁니다.',
-    },
-    '눈먼 자들의 도시': {
-      'author': '사라마구',
-      'imageAsset': 'assets/images/b_eye.png',
-      'description': '갑작스러운 실명 사태 속에서 인간 본성의 민낯이 드러나는 과정을 묘사하며, 문명과 윤리에 대한 통렬한 질문을 던집니다. 집단적 혼란과 절망을 넘어 희망을 향한 움직임이 은유적으로 표현된 작품입니다.',
-    },
-    '인간실격': {
-      'author': '다자이 오사무',
-      'imageAsset': 'assets/images/b_human.png',
-      'description': '자기 존재에 대한 끊임없는 불신과 고통 속에서 삶의 의미를 찾지 못하는 한 인간의 기록을 통해, 내면의 허무와 소외를 적나라하게 드러냅니다. 인간성에 대한 깊은 고뇌가 녹아 있는 일본 문학의 명작입니다.',
-    },
-    '이방인': {
-      'author': '알베르 카뮈',
-      'imageAsset': 'assets/images/b_gentile.png',
-      'description': '부조리한 세상 앞에서 무관심하게 살아가는 주인공의 모습을 통해, 삶과 죽음, 존재의 의미에 대한 근본적인 질문을 던지는 작품입니다. 건조한 문체 속에 철학적 깊이가 응축되어 있습니다.',
-    },
-  };
-
   @override
   void initState() {
     super.initState();
+
     _searchController = TextEditingController(text: widget.searchKeyword);
 
-    final bookData = books[widget.searchKeyword];
-
-    if (bookData != null) {
-      bookTitle = widget.searchKeyword;
-      bookAuthor = bookData['author'] ?? '작가 미상';
-      bookImageUrl = bookData['imageAsset'] ?? '';
-      bookDescription = bookData['description'] ?? '';
-    } else {
-      bookTitle = '검색 결과 없음';
-      bookAuthor = '';
-      bookImageUrl = '';
-      bookDescription = '';
-    }
+    // 검색 실행
+    Future.microtask(() {
+      final viewModel = Provider.of<SearchProvider>(context, listen: false);
+      viewModel.clearResults();
+      viewModel.searchBooks(widget.searchKeyword);
+    });
   }
 
   @override
@@ -101,6 +43,10 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final searchProvider = Provider.of<SearchProvider>(context);
+    final isloading = searchProvider.isLoading;
+    final book = searchProvider.searchResult;
+
     return Scaffold(
       body: SafeArea(
         child: GestureDetector(
@@ -108,25 +54,32 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
           onTap: () {
             FocusScope.of(context).unfocus();
           },
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.05),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: 24),
-                  buildSearchBar(context),
-                  SizedBox(height: 24),
-                  buildBookCover(),
-                  SizedBox(height: 24),
-                  buildBookInfo(),
-                  SizedBox(height: 24),
-                  buildAddButton(),
-                  SizedBox(height: 24),
-                ],
+          child: isloading
+            ? Center(
+                child: CircularProgressIndicator(
+                  color: Color(0xff0077FF),
+                ),
+              )
+            :
+            SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.05),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: 24),
+                    buildSearchBar(context),
+                    SizedBox(height: 24),
+                    buildBookCover(book?.imagePath),
+                    SizedBox(height: 24),
+                    buildBookInfo(book?.title, book?.author, book?.description),
+                    SizedBox(height: 24),
+                    buildAddButton(),
+                    SizedBox(height: 24),
+                  ],
+                ),
               ),
             ),
-          ),
         ),
       ),
     );
@@ -214,7 +167,7 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
   }
 
   // 책 이미지
-  Widget buildBookCover() {
+  Widget buildBookCover(String? imagePath) {
     return Center(
       child: Container(
         width: 220,
@@ -222,9 +175,9 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
         decoration: BoxDecoration(
           color: Color(0xffD9D9D9),
           borderRadius: BorderRadius.circular(8),
-          image: bookImageUrl.isNotEmpty
+          image: imagePath != null
               ? DecorationImage(
-                  image: AssetImage(bookImageUrl),
+                  image: AssetImage(imagePath),
                   fit: BoxFit.cover,
                 )
               : null,
@@ -233,8 +186,8 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
     );
   }
 
-  // 책정보
-  Widget buildBookInfo() {
+  // 책 정보
+  Widget buildBookInfo(String? title, String? author, String? description) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
@@ -247,20 +200,21 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              bookTitle,
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
-            ),
-            SizedBox(height: 8),
-            if (bookAuthor.isNotEmpty)
+            if (title != null && title.isNotEmpty)
               Text(
-                '$bookAuthor 저자(글)',
+                title,
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
+              ),
+            SizedBox(height: 8),
+            if (author != null && author.isNotEmpty)
+              Text(
+                '$author 저자(글)',
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.black),
               ),
             SizedBox(height: 16),
             Text(
-              bookDescription.isNotEmpty
-                  ? bookDescription
+              (description != null && description.isNotEmpty)
+                  ? description
                   : '해당 도서에 대한 설명이 없습니다.',
               style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Color(0xff777777)),
             ),
@@ -347,5 +301,4 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
       ),
     );
   }
-
 }
