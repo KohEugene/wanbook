@@ -277,21 +277,23 @@ class _BookScreenState extends State<BookScreen> with WidgetsBindingObserver{
           children: [
             Positioned.fill(
               child: isLoading
-                  ? const Center(child: CircularProgressIndicator())
+                  ? const Center(child: CircularProgressIndicator(
+                      color: Color(0xff0077FF),)
+                  )
                   : ListView.builder(
-                controller: _scrollController,
-                padding: const EdgeInsets.all(16),
-                itemCount: chapters.length,
-                itemBuilder: (context, index) {
-                  final chapter = chapters[index];
-                  final text = parse(chapter.HtmlContent ?? '').body?.text ?? '';
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 32),
-                    child: SelectableText(
-                      text,
-                      style: const TextStyle(fontSize: 18, height: 1.6),
-                      textAlign: TextAlign.left,
-                    ),
+                      controller: _scrollController,
+                      padding: const EdgeInsets.all(16),
+                      itemCount: chapters.length,
+                      itemBuilder: (context, index) {
+                        final chapter = chapters[index];
+                        final text = parse(chapter.HtmlContent ?? '').body?.text ?? '';
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 32),
+                          child: SelectableText(
+                            text,
+                            style: const TextStyle(fontSize: 18, height: 1.6),
+                            textAlign: TextAlign.left,
+                          ),
                   );
                 },
               )

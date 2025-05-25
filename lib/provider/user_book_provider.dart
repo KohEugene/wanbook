@@ -1,6 +1,7 @@
 // 서재에 책 추가 & 사용자별 독서 정보 불러오기 함수
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 import 'package:wanbook/provider/user_provider.dart';
 
@@ -19,17 +20,28 @@ class UserBookProvider with ChangeNotifier {
 
     final now = DateTime.now();
 
+    final docRef = _firestore
+        .collection('users')
+        .doc(user?.userId)
+        .collection('reading_books')
+        .doc(bookId);
+
+    final docSnapshot = await docRef.get();
+
+    // 서재 중복 방지
+    if (docSnapshot.exists) {
+      Fluttertoast.showToast(
+        msg: '이미 서재에 책이 존재해요',
+        fontSize: 14,
+      );
+    }
+
     final newBook = UserBookModel(
         bookId: bookId, lastPosition: 0, isCompleted: false,
         startedAt: now, updatedAt: now, completedAt: null
     );
 
-    await _firestore
-      .collection('users')
-      .doc(user?.userId)
-      .collection('reading_books')
-      .doc(bookId)
-      .set(newBook.toMap(), SetOptions(merge: true));
+    await docRef.set(newBook.toMap(), SetOptions(merge: true));
   }
 
   // 유저의 독서 목록 불러오기
@@ -71,6 +83,4 @@ class UserBookProvider with ChangeNotifier {
 
     return books;
   }
-
-  // 독서 정보 업데이트
 }
