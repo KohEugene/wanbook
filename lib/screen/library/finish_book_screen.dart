@@ -40,7 +40,8 @@ class _FinishBookScreenState extends State<FinishBookScreen> {
     // 완독한 책만 필터링
     List<int> completedIndexes = [];
     for (int i = 0; i < allBooks.length; i++) {
-      if (allBooks[i]['userBook'].lastPosition == allBooks[i]['book'].totalPages) {
+      final userBook = allBooks[i]['userBook'] as UserBookModel;
+      if ((userBook.lastPosition ?? 0.0) >= 0.999) {
         completedIndexes.add(i);
       }
     }

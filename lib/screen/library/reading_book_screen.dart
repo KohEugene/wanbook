@@ -40,7 +40,8 @@ class _ReadingBookScreenState extends State<ReadingBookScreen> {
     // '100%'가 아닌 책
     List<int> readingIndexes = [];
     for (int i = 0; i < allBooks.length; i++) {
-      if (allBooks[i]['userBook'].lastPosition != allBooks[i]['book'].totalPages) {
+      final userBook = allBooks[i]['userBook'] as UserBookModel;
+      if ((userBook.lastPosition ?? 0.0) < 0.999) {
         readingIndexes.add(i);
       }
     }

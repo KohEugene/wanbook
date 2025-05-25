@@ -34,7 +34,6 @@ class _BookScreenState extends State<BookScreen> with WidgetsBindingObserver{
   List<EpubChapter> chapters = [];
   bool isLoading = true;
   bool _justJumped = false;
-  double pageCount = 1.0;
 
   double progress = 0.0;
   bool showUI = true;
@@ -138,31 +137,12 @@ class _BookScreenState extends State<BookScreen> with WidgetsBindingObserver{
       Uint8List bytes = data.buffer.asUint8List();
       EpubBook book = await EpubReader.readBook(bytes);
 
-      // Firestore에서 page_count 불러오기
-      final bookDoc = await FirebaseFirestore.instance
-          .collection('books')
-          .where('title', isEqualTo: widget.title)
-          .get();
-
-      if (bookDoc.docs.isNotEmpty) {
-        final data = bookDoc.docs.first.data();
-        final count = data['page_count'];
-
-        if (count is double) {
-          pageCount = count;
-        } else if (count is int) {
-          pageCount = count.toDouble();
-        } else {
-          pageCount = 1;
-        }
-      }
-
       setState(() {
         chapters = flattenChapters(book.Chapters ?? []);
         isLoading = false;
       });
 
-      // page_count 기준으로 스크롤 위치 이동
+      // 스크롤 위치 이동
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (_scrollController.hasClients) {
           final position = (_scrollController.position.maxScrollExtent * widget.initialProgress)
