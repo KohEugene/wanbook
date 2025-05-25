@@ -15,9 +15,8 @@ class UserBookProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
 
   // 서재에 책 추가하기
-  Future<void> addBook(BuildContext context, {required String bookId}) async {
+  Future<bool> addBook(BuildContext context, {required String bookId}) async {
     final user = Provider.of<UserProvider>(context, listen: false).user;
-
     final now = DateTime.now();
 
     final docRef = _firestore
@@ -30,18 +29,17 @@ class UserBookProvider with ChangeNotifier {
 
     // 서재 중복 방지
     if (docSnapshot.exists) {
-      Fluttertoast.showToast(
-        msg: '이미 서재에 책이 존재해요',
-        fontSize: 14,
+      return false;
+    } else {
+      final newBook = UserBookModel(
+          bookId: bookId, lastPosition: 0, isCompleted: false,
+          startedAt: now, updatedAt: now, completedAt: null
       );
+
+      await docRef.set(newBook.toMap(), SetOptions(merge: true));
     }
-
-    final newBook = UserBookModel(
-        bookId: bookId, lastPosition: 0, isCompleted: false,
-        startedAt: now, updatedAt: now, completedAt: null
-    );
-
-    await docRef.set(newBook.toMap(), SetOptions(merge: true));
+    notifyListeners();
+    return true;
   }
 
   // 유저의 독서 목록 불러오기

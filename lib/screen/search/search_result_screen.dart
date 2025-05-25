@@ -232,19 +232,24 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
       height: 50,
       child: OutlinedButton(
         onPressed: () async {
-          await Provider.of<UserBookProvider>(context, listen: false)
+          final success = await Provider.of<UserBookProvider>(context, listen: false)
             .addBook(context, bookId: bookId);
 
           showDialog(
             context: context,
             builder: (context) {
+              final title = success ? '추가 완료' : '이미 추가됨';
+              final content = success
+                  ? '해당 도서가 내 서재에 추가되었어요.'
+                  : '이미 서재에 도서가 있어요.';
+
               return AlertDialog(
                 backgroundColor: Color(0xffF8F8F8),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
                 title: Text(
-                  '추가 완료',
+                  title,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
@@ -252,7 +257,7 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
                   ),
                 ),
                 content: Text(
-                  '해당 도서가 내 서재에 추가되었어요.',
+                  content,
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w400,
