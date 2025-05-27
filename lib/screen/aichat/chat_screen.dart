@@ -1,5 +1,9 @@
+// AI 챗봇
+
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:http/http.dart' as http;
 
 class ChatScreen extends StatefulWidget {
   final String message;
@@ -13,14 +17,16 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
-  final List<Map<String, String>> _messages = []; // {'sender': 'user'|'bot', 'text': ...}
+  final List<Map<String, String>> _messages = [];
+  bool _isBotTyping = false;
 
   @override
   void initState() {
     super.initState();
-    // 초기 메시지 받아와서 사용자 봇 메시지로 구성
+    // 초기 메시지 표시
     _messages.add({'sender': 'user', 'text': widget.message});
-    _messages.add({'sender': 'bot', 'text': '${widget.message}에 대한 답변입니다.'});
+    _isBotTyping = true;
+    _getGPTResponse(widget.message);
   }
 
   void _sendMessage(String input) {
@@ -28,10 +34,60 @@ class _ChatScreenState extends State<ChatScreen> {
 
     setState(() {
       _messages.add({'sender': 'user', 'text': input.trim()});
-      _messages.add({'sender': 'bot', 'text': '${input.trim()}에 대한 답변입니다.'});
+      _isBotTyping = true;
     });
 
     _controller.clear();
+
+    _getGPTResponse(input.trim());
+  }
+
+  // GPT 3.5 API
+  // pubspec.yaml 에 http 추가햇음
+  // 터미널에 flutter pub get > flutter pub add http 입력
+  // api key넣고 실행하기 (github에서 보안 문제로 apikey있으면 push가 안됨..)
+  Future<void> _getGPTResponse(String prompt) async {
+    const apiKey = '';  // 여기 추가
+    const endpoint = 'https://api.openai.com/v1/chat/completions';
+
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $apiKey',
+    };
+
+    final body = json.encode({
+      "model": "gpt-3.5-turbo",
+      "messages": [
+        {"role": "system", "content": "당신은 독서 도우미 AI입니다."},
+        {"role": "user", "content": prompt},
+      ],
+      "temperature": 0.7,
+    });
+
+    try {
+      final response = await http.post(Uri.parse(endpoint), headers: headers, body: body);
+        print('GPT 상태코드: ${response.statusCode}');
+        print('GPT 응답: ${response.body}');
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final reply = data['choices'][0]['message']['content'].trim();
+
+        setState(() {
+          _isBotTyping = false;
+          _messages.add({'sender': 'bot', 'text': reply});
+        });
+      } else {
+        setState(() {
+          _isBotTyping = false;
+          _messages.add({'sender': 'bot', 'text': '오류가 발생했어요. 다시 시도해 주세요.'});
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _isBotTyping = false;
+        _messages.add({'sender': 'bot', 'text': '인터넷 연결을 확인해 주세요.'});
+      });
+    }
   }
 
   @override
@@ -40,61 +96,44 @@ class _ChatScreenState extends State<ChatScreen> {
     super.dispose();
   }
 
-@override
-Widget build(BuildContext context) {
-  return PopScope(
-    canPop: false,
-    onPopInvokedWithResult: (didPop, result) {
-      if (!didPop) {
-        int count = 0;
-        Navigator.popUntil(context, (route) => count++ == 2);
-      }
-    },
-    child: Scaffold(
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.chevron_left_rounded),
           color: Colors.black,
-          onPressed: () {
-            int count = 0;
-            Navigator.popUntil(context, (route) => count++ == 2);
-          },
+          onPressed: () => Navigator.pop(context),
         ),
       ),
-        body: GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onTap: () {
-            FocusScope.of(context).unfocus();
-          },
-          child: Column(
-            children: [
-              Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  itemCount: _messages.length,
-                  itemBuilder: (context, index) {
-                    final msg = _messages[index];
-                    return msg['sender'] == 'user'
-                        ? buildUserChat(msg['text']!)
-                        : buildBotChat(msg['text']!);
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: buildMessageInputArea(),
-              ),
-              const SizedBox(height: 24),
-            ],
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.all(20),
+              itemCount: _messages.length + (_isBotTyping ? 1 : 0),
+              itemBuilder: (context, index) {
+                if (_isBotTyping && index == _messages.length) {
+                  return buildBotChat("", isTyping: true);
+                }
+                final msg = _messages[index];
+                return msg['sender'] == 'user'
+                    ? buildUserChat(msg['text']!)
+                    : buildBotChat(msg['text']!);
+              },
+            ),
           ),
-        ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+            child: buildMessageInputArea(),
+          ),
+        ],
       ),
     );
   }
 
-  // 사용자 메시지
   Widget buildUserChat(String message) {
     return Align(
       alignment: Alignment.centerRight,
@@ -114,17 +153,14 @@ Widget build(BuildContext context) {
               bottomRight: Radius.circular(2),
             ),
           ),
-          child: Text(
-            message,
-            style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w400),
-          ),
+          child: Text(message, style: const TextStyle(color: Colors.white, fontSize: 14)),
         ),
       ),
     );
   }
 
-  // 챗봇 응답 메시지
-  Widget buildBotChat(String response) {
+  // 채팅
+  Widget buildBotChat(String response, {bool isTyping = false}) {
     return Align(
       alignment: Alignment.centerLeft,
       child: Row(
@@ -135,7 +171,7 @@ Widget build(BuildContext context) {
             width: 50,
             height: 50,
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 8),
           Flexible(
             child: ConstrainedBox(
               constraints: BoxConstraints(
@@ -153,10 +189,9 @@ Widget build(BuildContext context) {
                     bottomRight: Radius.circular(24),
                   ),
                 ),
-                child: Text(
-                  response,
-                  style: const TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.w400),
-                ),
+                child: isTyping
+                    ? const TypingDots()
+                    : Text(response, style: const TextStyle(fontSize: 14, color: Colors.black)),
               ),
             ),
           ),
@@ -165,7 +200,32 @@ Widget build(BuildContext context) {
     );
   }
 
-  // 입력창 + 화살표 버튼
+  // 답변 대기중
+  Widget buildTypingIndicator() {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SvgPicture.asset(
+            'assets/images/main_Chaekmeong_1.svg',
+            width: 50,
+            height: 50,
+          ),
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: const TypingDots(),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget buildMessageInputArea() {
     return Row(
       children: [
@@ -176,19 +236,11 @@ Widget build(BuildContext context) {
             cursorColor: const Color(0xff0077FF),
             decoration: InputDecoration(
               hintText: '책에 대해 궁금한 점을 물어보세요',
-              hintStyle: const TextStyle(
-                color: Color(0xff777777),
-                fontWeight: FontWeight.w400,
-                fontSize: 14,
-              ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              hintStyle: const TextStyle(color: Color(0xff777777), fontSize: 14),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: const BorderSide(color: Color(0xffE4E4E4)),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(color: Color(0xffE4E4E4)),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
@@ -207,5 +259,49 @@ Widget build(BuildContext context) {
         ),
       ],
     );
+  }
+}
+
+// ... 애니메이션
+class TypingDots extends StatefulWidget {
+  const TypingDots({Key? key}) : super(key: key);
+
+  @override
+  _TypingDotsState createState() => _TypingDotsState();
+}
+
+class _TypingDotsState extends State<TypingDots> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<int> _dotCount;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 900),
+      vsync: this,
+    )..repeat();
+
+    _dotCount = StepTween(begin: 1, end: 4).animate(_controller);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _dotCount,
+      builder: (_, __) {   
+        String dots = '.' * _dotCount.value;
+        return Text(
+          "답변 작성 중$dots",
+          style: const TextStyle(fontSize: 14, color: Colors.black),
+        );
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 }

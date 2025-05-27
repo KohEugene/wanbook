@@ -1,10 +1,10 @@
 // 홈 1 (진행도서 o)
-
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:wanbook/shared/menu_bottom.dart';
 import 'package:wanbook/screen/ebook/book_screen.dart';
@@ -13,6 +13,8 @@ import 'package:wanbook/shared/alarm.dart';
 
 import '../../provider/user_provider.dart';
 import '../../shared/size_config.dart';
+import '../../model/book_model.dart';
+import '../../model/user_book_model.dart';
 import 'dart:async';
 
 class HomeScreen extends StatefulWidget {
@@ -22,28 +24,7 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin{
-
-  final List<String> titleList = [
-    '데미안', '오만과 편견', '소년이 온다', '변신', '노인과 바다', '인간실격', '이방인', '아몬드', '눈먼 자들의 도시'
-  ];
-
-  final List<String> percentList = [
-    '0%', '7%', '100%', '23%', '75%', '100%', '0%', '42%', '100%'
-  ];
-
-  final Map<String, Map<String, String>> bookInfoMap = {
-    '데미안': {'author': '헤르만 헤세', 'image': 'assets/images/b_damian.png'},
-    '소년이 온다': {'author': '한강', 'image': 'assets/images/b_boycome.png'},
-    '오만과 편견': {'author': '제인 오스틴', 'image': 'assets/images/b_op.png'},
-    '변신': {'author': '프란츠 카프카', 'image': 'assets/images/b_change.png'},
-    '인간실격': {'author': '다자이 오사무', 'image': 'assets/images/b_human.png'},
-    '노인과 바다': {'author': '어니스트 헤밍웨이', 'image': 'assets/images/b_sea.png'},
-    '이방인': {'author': '알베르 카뮈', 'image': 'assets/images/b_gentile.png'},
-    '아몬드': {'author': '손원평', 'image': 'assets/images/b_almond.png'},
-    '눈먼 자들의 도시': {'author': '사라마구', 'image': 'assets/images/b_eye.png'},
-  };
-
+class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final List<String> messages = [
     "오늘도 한 페이지씩\n완독 향해 가볼까요?\n아자아자!",
     "{nickname}님\n한 페이지씩 차근차근\n책멍이와 독서해요!",
@@ -60,7 +41,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin{
   final Random random = Random();
   String? currentMessage;
   String nickname = '사용자';
-  int? selectedIndex;
+
+  BookModel? selectedBook;
+  UserBookModel? selectedUserBook;
 
   late AnimationController _scaleController;
   late Animation<double> _scaleAnimation;
@@ -72,38 +55,25 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin{
     _scaleController = AnimationController(
       duration: const Duration(milliseconds: 1000),
       vsync: this,
-    )..repeat(reverse: true); // 반복 애니메이션
+    )..repeat(reverse: true);
 
     _scaleAnimation = Tween<double>(begin: 1.0, end: 1.05).animate(
       CurvedAnimation(parent: _scaleController, curve: Curves.easeInOut),
     );
 
-    // 미완독 도서 중 랜덤 1권 고정
-    List<int> incompleteIndexes = [];
-    for (int i = 0; i < percentList.length; i++) {
-      if (percentList[i] != '100%') {
-        incompleteIndexes.add(i);
-      }
-    }
-    if (incompleteIndexes.isNotEmpty) {
-      selectedIndex = incompleteIndexes[random.nextInt(incompleteIndexes.length)];
-    }
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
+      nickname = userProvider.user?.nickname ?? '사용자';
+      fetchProgress(userProvider.user?.userId ?? 'guest');
       setState(() {
-        nickname = userProvider.user?.nickname ?? '사용자';
         currentMessage = getRandomMessage();
       });
     });
 
-    // 알림
-    // 초기화
     FlutterLocalNotification.init();
-    // 권한 요청
     Future.delayed(
       const Duration(seconds: 3),
-          () => FlutterLocalNotification.requestNotificationPermission(),
+      () => FlutterLocalNotification.requestNotificationPermission(),
     );
   }
 
@@ -113,10 +83,50 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin{
     super.dispose();
   }
 
-  // 애니메이션 변수
+  Future<void> fetchProgress(String uid) async {
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .collection('reading_books')
+          .get();
+
+      final docs = snapshot.docs.where((doc) {
+        final pos = (doc.data() as Map<String, dynamic>)['last_position'] ?? 0.0;
+        return pos < 0.999;
+      }).toList();
+
+      if (docs.isNotEmpty) {
+        final selected = docs[Random().nextInt(docs.length)];
+        final bookId = selected.id;
+        final userBook = UserBookModel.fromDocument(selected);
+
+        // books 컬렉션에서 title == bookId로 검색
+        final bookQuery = await FirebaseFirestore.instance
+            .collection('books')
+            .where('title', isEqualTo: bookId)
+            .limit(1)
+            .get();
+
+        if (bookQuery.docs.isNotEmpty) {
+          final bookModel = BookModel.fromDocument(bookQuery.docs.first);
+
+          setState(() {
+            selectedBook = bookModel;
+            selectedUserBook = userBook;
+          });
+        } else {
+          print('책 정보가 존재하지 않음');
+        }
+      }
+    } catch (e) {
+      print('진행률 불러오기 실패: $e');
+    }
+  }
+
+  // 책멍이 애니메이션
   bool _isClicked = false;
 
-  // 애니메이션 + 랜덤문구
   void updateMessage() {
     if (_isClicked || !mounted) return;
 
@@ -124,8 +134,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin{
       _isClicked = true;
     });
 
-    _scaleController.stop(); // 클릭 시 일시 정지
-    _scaleController.forward(from: 0.0); // 커지기
+    _scaleController.stop();
+    _scaleController.forward(from: 0.0);
 
     Future.delayed(const Duration(milliseconds: 150), () {
       if (!mounted) return;
@@ -133,7 +143,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin{
         _isClicked = false;
         currentMessage = getRandomMessage();
       });
-      _scaleController.repeat(reverse: true); // 다시 반복 시작
+      _scaleController.repeat(reverse: true);
     });
   }
 
@@ -161,12 +171,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin{
                 const SizedBox(height: 24),
                 buildAttendanceSection(context),
                 const SizedBox(height: 24),
-                // 알림
                 TextButton(
-                  onPressed: () {
-                    print('알림 버튼 클릭됨!');
-                    FlutterLocalNotification.showNotification();
-                  },
+                  onPressed: () => FlutterLocalNotification.showNotification(),
                   child: const Text("알림 보내기"),
                 ),
               ],
@@ -177,22 +183,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin{
     );
   }
 
+  // 문구
   Widget buildGreeting() {
     return const Text(
       "오늘 하루도 책멍이와 함께\n완독해봐요!",
-      style: TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.w600,
-        color: Colors.black,
-      ),
+      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black),
     );
   }
 
-  // 진행바 + 책멍 + 문구
+  // 책멍이 + 완독 도서 비율
   Widget buildChaekmeongImage() {
     return SizedBox(
       height: 220,
-      width: double.infinity,
       child: Center(
         child: Stack(
           alignment: Alignment.bottomCenter,
@@ -210,10 +212,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin{
                 Stack(
                   alignment: Alignment.center,
                   children: [
-                    SvgPicture.asset(
-                      'assets/images/home_Chaekmeong_s.svg',
-                      height: 110,
-                    ),
+                    SvgPicture.asset('assets/images/home_Chaekmeong_s.svg', height: 110),
                     AnimatedBuilder(
                       animation: _scaleAnimation,
                       builder: (context, child) {
@@ -221,10 +220,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin{
                           scale: _scaleAnimation.value,
                           child: GestureDetector(
                             onTap: updateMessage,
-                            child: SvgPicture.asset(
-                              'assets/images/home_Chaekmeong.svg',
-                              height: 110,
-                            ),
+                            child: SvgPicture.asset('assets/images/home_Chaekmeong.svg', height: 110),
                           ),
                         );
                       },
@@ -232,11 +228,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin{
                   ],
                 ),
                 const SizedBox(height: 10),
-                Text(
-                  currentMessage ?? '',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 14, color: Color(0xff777777)),
-                ),
+                Text(currentMessage ?? '', textAlign: TextAlign.center, style: const TextStyle(fontSize: 14, color: Color(0xff777777))),
               ],
             ),
           ],
@@ -245,15 +237,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin{
     );
   }
 
-
+  // 진행중인 도서
   Widget buildReadingSection(BuildContext context) {
-    if (selectedIndex == null) return const SizedBox.shrink();
+    if (selectedBook == null || selectedUserBook == null) return const SizedBox.shrink();
 
-    String title = titleList[selectedIndex!];
-    String author = bookInfoMap[title]?['author'] ?? '알 수 없음';
-    String? coverImage = bookInfoMap[title]?['image'];
-    String percentText = percentList[selectedIndex!];
-    double percentValue = double.parse(percentText.replaceAll('%', '')) / 100;
+    String title = selectedBook!.title;
+    String author = selectedBook!.author;
+    String? coverImage = selectedBook!.imagePath;
+    double percentValue = selectedUserBook!.lastPosition ?? 0.0;
+    String percentText = "${(percentValue * 100).round()}%";
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -261,15 +253,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin{
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text('아직 완독할 도서가 남았어요!',
-                style: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600)),
+            const Text('아직 완독할 도서가 남았어요!', style: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600)),
             TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => BookScreen(title: title)),
-                );
-              },
+              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => BookScreen(title: title))),
               child: Row(
                 children: const [
                   Text('독서하기', style: TextStyle(color: Color(0xff777777), fontSize: 14)),
@@ -333,10 +319,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin{
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Text(
-                          percentText,
-                          style: const TextStyle(fontSize: 12, color: Color(0xff0077FF)),
-                        ),
+                        Text(percentText, style: const TextStyle(fontSize: 12, color: Color(0xff0077FF))),
                       ],
                     ),
                   ],
@@ -349,6 +332,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin{
     );
   }
 
+  // 출석체크
   Widget buildAttendanceSection(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -356,15 +340,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin{
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text('출석 체크',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black)),
+            const Text('출석 체크', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black)),
             TextButton(
-              onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (_) => MenuBottom(initialIndex: 3)),
-                );
-              },
+              onPressed: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => MenuBottom(initialIndex: 3))),
               child: Row(
                 children: const [
                   Text('더보기', style: TextStyle(color: Color(0xff777777), fontSize: 14)),
@@ -374,8 +352,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin{
             ),
           ],
         ),
-        Text("$nickname님은 현재 독서량 ‘n권’으로 상위 n%예요!",
-            style: TextStyle(fontSize: 14, color: Color(0xff777777))),
+        Text("$nickname님은 현재 독서량 ‘n권’으로 상위 n%예요!", style: const TextStyle(fontSize: 14, color: Color(0xff777777))),
         const SizedBox(height: 10),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -399,14 +376,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin{
                   shape: BoxShape.circle,
                   border: Border.all(color: borderColor),
                 ),
-                child: Text(
-                  days[index],
-                  style: TextStyle(color: textColor, fontSize: 10),
-                ),
+                child: Text(days[index], style: TextStyle(color: textColor, fontSize: 10)),
               );
             }),
           ),
-        )
+        ),
       ],
     );
   }
