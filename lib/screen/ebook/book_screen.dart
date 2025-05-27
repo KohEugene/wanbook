@@ -11,6 +11,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:wanbook/shared/menu_bottom.dart';
 import 'package:wanbook/screen/aichat/chat_main_screen.dart';
 import 'package:wanbook/screen/ebook/pngframeanimation.dart';
+import 'package:wanbook/screen/ebook/book_menu.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -36,6 +37,11 @@ class _BookScreenState extends State<BookScreen> with WidgetsBindingObserver{
   bool _justJumped = false;
 
   double progress = 0.0;
+  double fontSize = 18.0; // 기본 글씨 크기: 18px
+  TextAlign textAlign = TextAlign.left; // 기본 정렬: 왼쪽
+  double lineHeight = 1.6; // 기본 자간: 1.6
+  bool isDarkMode = false; // 기본 화면: 화이트
+
   bool showUI = true;
   bool showHint = false;
   Timer? _inactivityTimer;
@@ -252,6 +258,7 @@ class _BookScreenState extends State<BookScreen> with WidgetsBindingObserver{
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: isDarkMode ? Colors.black : Colors.white,
       body: SafeArea(
         child: Stack(
           children: [
@@ -271,8 +278,12 @@ class _BookScreenState extends State<BookScreen> with WidgetsBindingObserver{
                           padding: const EdgeInsets.only(bottom: 32),
                           child: SelectableText(
                             text,
-                            style: const TextStyle(fontSize: 18, height: 1.6),
-                            textAlign: TextAlign.left,
+                            style: TextStyle(
+                              fontSize: fontSize,
+                              height: lineHeight,
+                              color: isDarkMode ? Colors.white : Colors.black,
+                            ),
+                            textAlign: textAlign,
                           ),
                   );
                 },
@@ -328,12 +339,17 @@ class _BookScreenState extends State<BookScreen> with WidgetsBindingObserver{
       child: Container(
         color: Colors.white,
         child: AppBar(
-          backgroundColor: Colors.white,
+          backgroundColor: isDarkMode ? Colors.black : Colors.white,
           elevation: 0,
-          title: Text(widget.title),
+          title: Text(
+            widget.title,
+            style: TextStyle(
+              color: isDarkMode ? Colors.white : Colors.black,
+            ),
+          ),
           centerTitle: true,
           leading: IconButton(
-            icon: const Icon(Icons.chevron_left_rounded, color: Colors.black),
+            icon: Icon(Icons.chevron_left_rounded, color: isDarkMode ? Colors.white : Colors.black),
             onPressed: () {
               Navigator.pushReplacement(
                 context,
@@ -341,19 +357,58 @@ class _BookScreenState extends State<BookScreen> with WidgetsBindingObserver{
               );
             },
           ),
+          actions: [
+            IconButton(
+              icon: Icon(Icons.menu, color: isDarkMode ? Colors.white : Colors.black),
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                  ),
+                  isScrollControlled: true,
+                  builder: (_) => ReaderSettingsBottomSheet(
+                    fontSize: fontSize,
+                    textAlign: textAlign,
+                    lineHeight: lineHeight,
+                    isDarkMode: isDarkMode,
+                    onFontSizeChanged: (newSize) {
+                      setState(() {
+                        fontSize = newSize;
+                      });
+                    },
+                    onTextAlignChanged: (newAlign) {
+                      setState(() {
+                        textAlign = newAlign;
+                      });
+                    },
+                    onLineHeightChanged: (newHeight) {
+                      setState(() {
+                        lineHeight = newHeight;
+                      });
+                    },
+                    onThemeModeChanged: (newMode) {
+                      setState(() {
+                        isDarkMode = newMode;
+                      });
+                    },
+                  ),
+                );
+              },
+            ),
+          ],
         ),
       ),
     );
   }
 
+
   // 진행도바
   Widget buildProgressBar(BuildContext context) {
     if (chapters.isEmpty) return const SizedBox.shrink();
 
-    final chapterCount = chapters.length;
-
     return Container(
-      color: Colors.white,
+      color: isDarkMode ? Colors.black : Colors.white,
       padding: EdgeInsets.symmetric(
         horizontal: MediaQuery.of(context).size.width * 0.05,
         vertical: 24,
@@ -371,15 +426,20 @@ class _BookScreenState extends State<BookScreen> with WidgetsBindingObserver{
               });
             },
             onChangeEnd: (value) {
-              final index = (value * chapterCount).floor().clamp(0, chapterCount - 1);
-              _scrollController.jumpTo(index * 1000);
+              final max = _scrollController.position.maxScrollExtent;
+              final targetOffset = (value * max).clamp(0.0, max);
+              _scrollController.jumpTo(targetOffset);
+              _justJumped = true; // 저장x
             },
             activeColor: const Color(0xff0077FF),
             inactiveColor: const Color(0xffE4E4E4),
           ),
           Text(
             '${(progress * 100).round()}%',
-            style: const TextStyle(color: Color(0xff777777), fontSize: 12),
+            style: TextStyle(
+              color: isDarkMode ? Colors.white : Color(0xff777777),
+              fontSize: 12,
+            ),
           ),
         ],
       ),
@@ -403,7 +463,7 @@ class _BookScreenState extends State<BookScreen> with WidgetsBindingObserver{
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           border: Border.all(color: const Color(0xff777777)),
-          color: Colors.white,
+          color: isDarkMode ? Color(0xffE4E4E4) : Colors.white,
         ),
         child: Padding(
           padding: const EdgeInsets.all(8),
