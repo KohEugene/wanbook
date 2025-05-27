@@ -1,11 +1,14 @@
 
 // 내 프로필 메인 화면
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:wanbook/screen/aichat/chatlist_screen.dart';
+import 'package:wanbook/screen/login/login_screen.dart';
 import 'package:wanbook/screen/profile/badge_screen.dart';
 import 'package:wanbook/shared/pop_up.dart';
 
@@ -20,6 +23,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  final storage = FlutterSecureStorage();
 
   String nickname = '사용자 명';
   String userId = '사용자 아이디';
@@ -153,7 +157,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
         SizedBox(
             width: 90,
             height: 36,
-            child: OutlinedButton(onPressed: (){},
+            child: OutlinedButton(
+                onPressed: () async {
+                  await FirebaseAuth.instance.signOut();
+                  await storage.delete(key: 'keepLogin');
+                  Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(builder: (context) => LoginScreen(),),
+                      (Route<dynamic> route) => false,
+                  );
+                },
                 style: OutlinedButton.styleFrom(
                     foregroundColor: Color(0xff777777),
                     backgroundColor: Color(0xffF8F8F8),
@@ -167,7 +179,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: Text('로그아웃', style: TextStyle(
                     fontWeight: FontWeight.w400,
                     fontSize: 12),
-                )
+                ),
             )
         ),
       ],

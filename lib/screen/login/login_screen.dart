@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
 import 'package:wanbook/model/user_model.dart';
 import 'package:wanbook/screen/login/join_screen.dart';
@@ -22,7 +23,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-
+  final storage = FlutterSecureStorage();
   final _formKey = GlobalKey<FormState>();
   final _idController = TextEditingController();
   final _pwdController = TextEditingController();
@@ -236,6 +237,12 @@ class _LoginScreenState extends State<LoginScreen> {
 
               final userProvider = Provider.of<UserProvider>(context, listen: false);
               userProvider.setUser(userModel);
+
+              if (saveId) {
+                await storage.write(key: 'keepLogin', value: userModel.userId);
+              } else {
+                await storage.delete(key: 'keepLogin');
+              }
 
               Navigator.push(context, MaterialPageRoute(
                 builder: (context) {
