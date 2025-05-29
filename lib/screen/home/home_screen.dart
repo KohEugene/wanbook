@@ -1,10 +1,8 @@
 // 홈 1 (진행도서 o)
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:wanbook/shared/menu_bottom.dart';
 import 'package:wanbook/screen/ebook/book_screen.dart';
@@ -15,7 +13,7 @@ import '../../provider/user_provider.dart';
 import '../../shared/size_config.dart';
 import '../../model/book_model.dart';
 import '../../model/user_book_model.dart';
-import 'dart:async';
+import '../../provider/user_book_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -61,14 +59,26 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       CurvedAnimation(parent: _scaleController, curve: Curves.easeInOut),
     );
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
-      nickname = userProvider.user?.nickname ?? '사용자';
-      fetchProgress(userProvider.user?.userId ?? 'guest');
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userBookProvider = Provider.of<UserBookProvider>(context, listen: false);
+    nickname = userProvider.user?.nickname ?? '사용자';
+
+    userBookProvider.fetchReadingBooks(context).then((books) {
+      if (books.isEmpty) return;
+
+      final selected = books[Random().nextInt(books.length)];
+
       setState(() {
-        currentMessage = getRandomMessage();
+        selectedBook = selected['book'];
+        selectedUserBook = selected['userBook'];
       });
     });
+
+    setState(() {
+      currentMessage = getRandomMessage();
+    });
+  });
 
     FlutterLocalNotification.init();
     Future.delayed(
@@ -83,48 +93,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  Future<void> fetchProgress(String uid) async {
-    try {
-      final snapshot = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(uid)
-          .collection('reading_books')
-          .get();
-
-      final docs = snapshot.docs.where((doc) {
-        final pos = (doc.data() as Map<String, dynamic>)['last_position'] ?? 0.0;
-        return pos < 0.999;
-      }).toList();
-
-      if (docs.isNotEmpty) {
-        final selected = docs[Random().nextInt(docs.length)];
-        final bookId = selected.id;
-        final userBook = UserBookModel.fromDocument(selected);
-
-        // books 컬렉션에서 title == bookId로 검색
-        final bookQuery = await FirebaseFirestore.instance
-            .collection('books')
-            .where('title', isEqualTo: bookId)
-            .limit(1)
-            .get();
-
-        if (bookQuery.docs.isNotEmpty) {
-          final bookModel = BookModel.fromDocument(bookQuery.docs.first);
-
-          setState(() {
-            selectedBook = bookModel;
-            selectedUserBook = userBook;
-          });
-        } else {
-          print('책 정보가 존재하지 않음');
-        }
-      }
-    } catch (e) {
-      print('진행률 불러오기 실패: $e');
-    }
-  }
-
-  // 책멍이 애니메이션
   bool _isClicked = false;
 
   void updateMessage() {
@@ -183,7 +151,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  // 문구
   Widget buildGreeting() {
     return const Text(
       "오늘 하루도 책멍이와 함께\n완독해봐요!",
@@ -191,7 +158,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  // 책멍이 + 완독 도서 비율
   Widget buildChaekmeongImage() {
     return SizedBox(
       height: 220,
@@ -237,7 +203,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  // 진행중인 도서
   Widget buildReadingSection(BuildContext context) {
     if (selectedBook == null || selectedUserBook == null) return const SizedBox.shrink();
 
@@ -255,7 +220,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           children: [
             const Text('아직 완독할 도서가 남았어요!', style: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600)),
             TextButton(
-              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => BookScreen(title: title))),
+              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => BookScreen(title: selectedBook!.title,
+                          initialProgress: selectedUserBook?.lastPosition ?? 0.0,))),
               child: Row(
                 children: const [
                   Text('독서하기', style: TextStyle(color: Color(0xff777777), fontSize: 14)),
@@ -291,7 +257,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     Text(author, style: const TextStyle(color: Color(0xff777777), fontSize: 14)),
                     const SizedBox(height: 16),
                     const Text(
-                      "이 책의 내용 또는 다른 무언가가가가가다람쥐지지지지지지이 책의 내용 또는 다른 무언가가가가가다람쥐지지지지지지이 책의 내용 또는 다른 무언가가가가가다람쥐지지지지지지",
+                      "책 설명 요약이 이곳에 들어갑니다람쥐쥐다람쥐쥐다람쥐쥐다람쥐쥐다람쥐쥐다람쥐쥐다람쥐쥐다람쥐쥐다람쥐쥐다람쥐쥐다람쥐쥐다람쥐쥐다람쥐쥐다람쥐쥐다람쥐쥐.",
                       style: TextStyle(color: Color(0xff777777), fontSize: 12),
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
@@ -332,7 +298,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  // 출석체크
   Widget buildAttendanceSection(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -366,15 +331,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               List<String> days = ['일', '월', '화', '수', '목', '금', '토'];
               bool isSelected = index < 2;
               Color textColor = isSelected ? const Color(0xff0077FF) : const Color(0xff777777);
-              Color borderColor = textColor;
-
               return Container(
                 width: 30,
                 height: 30,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: borderColor),
+                  border: Border.all(color: textColor),
                 ),
                 child: Text(days[index], style: TextStyle(color: textColor, fontSize: 10)),
               );
