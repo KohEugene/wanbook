@@ -5,9 +5,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:wanbook/model/user_model.dart';
 import 'package:wanbook/screen/login/login_screen.dart';
 import 'package:wanbook/shared/menu_bottom.dart';
 
+import '../../provider/user_provider.dart';
 import '../../shared/size_config.dart';
 
 class JoinScreen extends StatefulWidget {
@@ -359,10 +362,10 @@ class _JoinScreenState extends State<JoinScreen> {
               String phoneValue = _phoneController.text.toString();
               String nicknameValue = _nicknameController.text.toString();
 
-              Account newAccount = Account(
+              UserModel newAccount = UserModel(
                 email: emailValue, userId: userIdValue,
                 userPwd: pwdValue, name: nameValue,
-                phonenumber: phoneValue, nickname: nicknameValue,
+                phonenumber: phoneValue, nickname: nicknameValue, joinedAt: DateTime.now(),
               );
               
               if (!newAccount.isEmpty()) {
@@ -380,8 +383,12 @@ class _JoinScreenState extends State<JoinScreen> {
                     "nickname": newAccount.nickname,
                     "phone_number": newAccount.phonenumber,
                     "profile_image_url": '',
+                    "join_date": newAccount.joinedAt
                   });
-                  FirebaseAuth.instance.signOut();
+                  //FirebaseAuth.instance.signOut();
+                  final userProvider = Provider.of<UserProvider>(context, listen: false);
+                  userProvider.setUser(newAccount);
+
                   Navigator.push(context, MaterialPageRoute(builder: (context) => MenuBottom()));
                 } on FirebaseAuthException catch (e) {
                   if (e.code == 'email-already-in-use') {
@@ -406,52 +413,5 @@ class _JoinScreenState extends State<JoinScreen> {
             )
         )
     );
-  }
-}
-
-class Account {
-  final String email;
-  final String userId;
-  final String userPwd;
-  final String name;
-  final String phonenumber;
-  final String nickname;
-  final String profileImageUrl;
-
-  Account({
-    required this.email,
-    required this.userId,
-    required this.userPwd,
-    required this.name,
-    required this.phonenumber,
-    required this.nickname,
-    this.profileImageUrl = '',
-  });
-
-  Map<String, dynamic> toMap() {
-    return {
-      'email': email,
-      'user_id': userId,
-      'name': name,
-      'nickname': nickname,
-      'phone_number': phonenumber,
-      'profile_image_url': profileImageUrl,
-    };
-  }
-
-  factory Account.fromMap(Map<String, dynamic> map) {
-    return Account(
-      email: map['email'] ?? '',
-      userId: map['user_id'] ?? '',
-      userPwd: '',
-      name: map['name'] ?? '',
-      phonenumber: map['phone_number'] ?? '',
-      nickname: map['nickname'] ?? '',
-      profileImageUrl: map['profile_image_url'] ?? '',
-    );
-  }
-
-  bool isEmpty() {
-    return email.isEmpty || userId.isEmpty || userPwd.isEmpty;
   }
 }

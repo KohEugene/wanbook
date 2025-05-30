@@ -12,6 +12,7 @@ import 'package:wanbook/screen/login/login_screen.dart';
 import 'package:wanbook/screen/profile/badge_screen.dart';
 import 'package:wanbook/shared/pop_up.dart';
 
+import '../../provider/user_book_provider.dart';
 import '../../provider/user_provider.dart';
 import '../../shared/size_config.dart';
 
@@ -27,6 +28,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   String nickname = '사용자 명';
   String userId = '사용자 아이디';
+  DateTime? joinDate;
+  int howManyBook = 0;
 
   final Map<String, Map<String, String>> bookInfoMap = {
     '아몬드': {
@@ -41,14 +44,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   void initState() {
+    super.initState();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
       setState(() {
         nickname = userProvider.user?.nickname ?? '사용자';
         userId = userProvider.user?.userId ?? '사용자 아이디';
+        joinDate = userProvider.user?.joinedAt;
       });
     });
-    super.initState();
+
+    Future.microtask(() async {
+      final viewModel = Provider.of<UserBookProvider>(context, listen: false);
+      final booksData = await viewModel.fetchReadingBooks(context);
+      setState(() {
+        howManyBook = booksData.length;
+      });
+    });
+  }
+
+  String formatElapsedTime(DateTime joinedAt) {
+    final now = DateTime.now();
+    final difference = now.difference(joinedAt);
+
+    final elapsedDays = difference.inDays + 1;
+
+    return '${elapsedDays}일째';
   }
 
   @override
@@ -187,6 +209,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget readingStatus() {
+    String elapsedDaysStr = formatElapsedTime(joinDate!);
+
     return Container(
       width: SizeConfig.screenWidth * 0.9,
       height: 50,
@@ -199,7 +223,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           Icon(Icons.menu_book_rounded, color: Color(0xff777777)),
           SizedBox(width: 16,),
-          Text('15일째 5권', style: TextStyle(
+          Text(elapsedDaysStr, style: TextStyle(
+              color: Color(0xff0077FF),
+              fontWeight: FontWeight.w600,
+              fontSize: 16),
+          ),
+          Text(' $howManyBook권', style: TextStyle(
               color: Color(0xff0077FF),
               fontWeight: FontWeight.w600,
               fontSize: 16),

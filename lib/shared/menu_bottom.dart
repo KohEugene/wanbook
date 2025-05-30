@@ -1,15 +1,17 @@
 
 // 하단 메뉴바
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:provider/provider.dart';
 import 'package:wanbook/screen/home/home_screen.dart';
 import 'package:wanbook/screen/home/home_screen2.dart';
 import 'package:wanbook/screen/library/library_screen.dart';
 import 'package:wanbook/screen/profile/profile_screen.dart';
 import 'package:wanbook/screen/search/search_screen.dart';
+
+import '../provider/user_book_provider.dart';
 
 class MenuBottom extends StatefulWidget {
   final int initialIndex;
@@ -23,25 +25,34 @@ class _MenuBottomState extends State<MenuBottom> {
 
   DateTime? backPressedTime;
   late int selectedIndex;
+  bool? showAlternateHome;
 
-  final List<Widget> _pages = [
-  HomeScreen(),
-  // 진행도서X 홈 확인용
-  //HomeScreen2(),
-  SearchScreen(),
-  LibraryScreen(),
-  ProfileScreen()
-  ];
+  late final List<Widget> _pages;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     selectedIndex = widget.initialIndex;
+
+    Future.microtask(() async {
+      final viewModel = Provider.of<UserBookProvider>(context, listen: false);
+      final booksData = await viewModel.fetchReadingBooks(context);
+      setState(() {
+        showAlternateHome = booksData.isEmpty;
+      });
+    });
   }
   
   @override
   Widget build(BuildContext context) {
+    final List<Widget> _pages = [
+      showAlternateHome! ? HomeScreen2() : HomeScreen(),
+      SearchScreen(),
+      LibraryScreen(),
+      ProfileScreen(),
+    ];
+
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {

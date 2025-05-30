@@ -4,7 +4,7 @@ class UserBookModel {
   final String bookId;
   final double? lastPosition;
   final bool isCompleted;
-  final double? maxScroll; // ✅ 추가된 필드
+  final double? maxScroll;
   final DateTime startedAt;
   final DateTime updatedAt;
   final DateTime? completedAt;

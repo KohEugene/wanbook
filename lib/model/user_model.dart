@@ -1,15 +1,52 @@
 // 사용자 모델 정의
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class UserModel {
-  final String userId;     // 사용자 아이디 (문서 ID)
+  final String email;
+  final String userId;
+  final String userPwd;
+  final String name;
+  final String phonenumber;
   final String nickname;
+  final String profileImageUrl;
+  final DateTime joinedAt;
 
-  UserModel({required this.userId, required this.nickname});
+  UserModel({required this.email,
+    required this.userId,
+    required this.userPwd,
+    required this.name,
+    required this.phonenumber,
+    required this.nickname,
+    this.profileImageUrl = '',
+    required this.joinedAt
+  });
 
-  factory UserModel.fromMap(Map<String, dynamic> data, String docId) {
+  factory UserModel.fromMap(Map<String, dynamic> map, String docId) {
     return UserModel(
-      userId: docId,
-      nickname: data['nickname'] ?? '',
+      email: map['email'] ?? '',
+      userId: map['user_id'] ?? '',
+      userPwd: '',
+      name: map['name'] ?? '',
+      phonenumber: map['phone_number'] ?? '',
+      nickname: map['nickname'] ?? '',
+      profileImageUrl: map['profile_image_url'] ?? '',
+      joinedAt: (map['join_date'] as Timestamp).toDate()
     );
   }
-}
 
+  Map<String, dynamic> toMap() {
+    return {
+      'email': email,
+      'user_id': userId,
+      'name': name,
+      'nickname': nickname,
+      'phone_number': phonenumber,
+      'profile_image_url': profileImageUrl,
+      'join_date': joinedAt
+    };
+  }
+
+  bool isEmpty() {
+    return email.isEmpty || userId.isEmpty || userPwd.isEmpty;
+  }
+}
