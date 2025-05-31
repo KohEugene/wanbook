@@ -46,6 +46,12 @@ class _MenuBottomState extends State<MenuBottom> {
   
   @override
   Widget build(BuildContext context) {
+    if (showAlternateHome == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator(color: Color(0xff0077FF))),
+      );
+    }
+
     final List<Widget> _pages = [
       showAlternateHome! ? HomeScreen2() : HomeScreen(),
       SearchScreen(),
