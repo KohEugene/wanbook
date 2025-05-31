@@ -43,7 +43,7 @@ class _MenuBottomState extends State<MenuBottom> {
       });
     });
   }
-  
+
   @override
   Widget build(BuildContext context) {
     if (showAlternateHome == null) {
@@ -71,8 +71,8 @@ class _MenuBottomState extends State<MenuBottom> {
             nowTime.difference(backPressedTime!) > const Duration(seconds: 2)) {
           backPressedTime = nowTime;
           Fluttertoast.showToast(
-              msg: '앱을 끄려면 한 번 더 눌러주세요.',
-              fontSize: 14,
+            msg: '앱을 끄려면 한 번 더 눌러주세요.',
+            fontSize: 14,
           );
         } else {
           SystemNavigator.pop(); // 앱 종료
@@ -85,19 +85,19 @@ class _MenuBottomState extends State<MenuBottom> {
         ),
         bottomNavigationBar: Theme(
           data: Theme.of(context).copyWith(
-            splashColor: Colors.transparent,
-            highlightColor: Colors.transparent,
-            hoverColor: Colors.transparent,
-            splashFactory: NoSplash.splashFactory
+              splashColor: Colors.transparent,
+              highlightColor: Colors.transparent,
+              hoverColor: Colors.transparent,
+              splashFactory: NoSplash.splashFactory
           ),
           child: Container(
             decoration: BoxDecoration(
-              boxShadow: <BoxShadow>[
-                BoxShadow(
-                  color: Color(0xffE4E4E4),
-                  blurRadius: 4
-                )
-              ]
+                boxShadow: <BoxShadow>[
+                  BoxShadow(
+                      color: Color(0xffE4E4E4),
+                      blurRadius: 4
+                  )
+                ]
             ),
             child: BottomNavigationBar(
               currentIndex: selectedIndex,
@@ -105,7 +105,7 @@ class _MenuBottomState extends State<MenuBottom> {
                 setState(() {
                   selectedIndex = value;
                 });
-                },
+              },
 
               type: BottomNavigationBarType.fixed,
               selectedFontSize: 10,

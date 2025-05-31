@@ -70,7 +70,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     final elapsedDays = difference.inDays + 1;
 
-    return '${elapsedDays}일째';
+    return '$elapsedDays일째';
   }
 
   @override

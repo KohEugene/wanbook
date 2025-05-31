@@ -27,7 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _idController = TextEditingController();
   final _pwdController = TextEditingController();
-  
+
   // 비밀번호 obscure 여부
   bool obscurePwd = true;
 
@@ -58,7 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   SizeConfig.screenWidth*0.05, SizeConfig.screenHeight*0.05
               ),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text('완북', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 22, color: Colors.black)),
                     SizedBox(height: 24),
@@ -109,31 +109,31 @@ class _LoginScreenState extends State<LoginScreen> {
             cursorColor: Color(0xff0077FF),
             textInputAction: TextInputAction.next,
             decoration: InputDecoration(
-                border: InputBorder.none,
-                contentPadding: EdgeInsets.all(16),
-                hintText: '아이디를 입력해 주세요',
-                hintStyle: TextStyle(
-                    color: Color(0xff777777),
-                    fontWeight: FontWeight.w400,
-                    fontSize: 16,
-                ),
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.all(16),
+              hintText: '아이디를 입력해 주세요',
+              hintStyle: TextStyle(
+                color: Color(0xff777777),
+                fontWeight: FontWeight.w400,
+                fontSize: 16,
+              ),
             ),
           ),
         ),
         if (_idError != null)
           Padding(
-              padding: EdgeInsets.only(left: 8, top: 4),
-              child: Row(
-                children: [
-                  Icon(Icons.error_outline_rounded, size: 12, color: Color(0xffFF4F4F),),
-                  SizedBox(width: 2,),
-                  Text(_idError!, style: TextStyle(
+            padding: EdgeInsets.only(left: 8, top: 4),
+            child: Row(
+              children: [
+                Icon(Icons.error_outline_rounded, size: 12, color: Color(0xffFF4F4F),),
+                SizedBox(width: 2,),
+                Text(_idError!, style: TextStyle(
                     color: Color(0xffFF4F4F),
                     fontWeight: FontWeight.w400,
                     fontSize: 12),
-                  ),
-                ],
-              ),
+                ),
+              ],
+            ),
           )
       ],
     );
@@ -149,9 +149,9 @@ class _LoginScreenState extends State<LoginScreen> {
           height: 54,
           padding: EdgeInsets.only(right: 12),
           decoration: ShapeDecoration(
-            color: Color(0xffF8F8F8),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16))
+              color: Color(0xffF8F8F8),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16))
           ),
           child: TextFormField(
             obscureText: obscurePwd,
@@ -160,23 +160,23 @@ class _LoginScreenState extends State<LoginScreen> {
             cursorColor: Color(0xff0077FF),
             textInputAction: TextInputAction.done,
             decoration: InputDecoration(
-              border: InputBorder.none,
-              contentPadding: EdgeInsets.all(16),
-              hintText: '비밀번호를 입력해 주세요',
-              hintStyle: TextStyle(
-                color: Color(0xff777777),
-                fontWeight: FontWeight.w400,
-                fontSize: 16
-              ),
-              suffixIcon: IconButton(
-                icon: Icon(obscurePwd ? Icons.visibility_outlined : Icons.visibility_off_outlined),
-                onPressed: () {
-                  setState(() {
-                    obscurePwd = !obscurePwd;
-                  });},
-                iconSize: 24,
-                color: Color(0xff777777),
-              )
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.all(16),
+                hintText: '비밀번호를 입력해 주세요',
+                hintStyle: TextStyle(
+                    color: Color(0xff777777),
+                    fontWeight: FontWeight.w400,
+                    fontSize: 16
+                ),
+                suffixIcon: IconButton(
+                  icon: Icon(obscurePwd ? Icons.visibility_outlined : Icons.visibility_off_outlined),
+                  onPressed: () {
+                    setState(() {
+                      obscurePwd = !obscurePwd;
+                    });},
+                  iconSize: 24,
+                  color: Color(0xff777777),
+                )
             ),
           ),
         ),
@@ -221,9 +221,9 @@ class _LoginScreenState extends State<LoginScreen> {
               );
 
               final userDoc = await FirebaseFirestore.instance
-                .collection('users')
-                .doc(userId)
-                .get();
+                  .collection('users')
+                  .doc(userId)
+                  .get();
 
               if (!userDoc.exists) {
                 setState(() {
@@ -237,7 +237,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
               final userProvider = Provider.of<UserProvider>(context, listen: false);
               userProvider.setUser(userModel);
-              
+
               if (saveId) {
                 await storage.write(key: 'keepLogin', value: userModel.userId);
               } else {
@@ -276,7 +276,7 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Text('로그인', style: TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 18
-              ),
+            ),
             )
         )
     );

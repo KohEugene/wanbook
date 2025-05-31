@@ -59,7 +59,7 @@ class _SplashScreenState extends State<SplashScreen> {
       await loadUserData(context, userId);
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => MenuBottom(initialIndex: 0,)),
+        MaterialPageRoute(builder: (_) => MenuBottom(initialIndex: 0)),
       );
     } else {
       Navigator.pushReplacement(
