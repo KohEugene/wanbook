@@ -8,9 +8,11 @@ import 'package:provider/provider.dart';
 import 'package:wanbook/shared/menu_bottom.dart';
 import 'package:wanbook/screen/search/search_result_screen.dart';
 import 'package:wanbook/screen/home/ArcProgressPainter.dart';
+import 'package:wanbook/shared/alarm.dart';
 
 import '../../model/book_model.dart';
 import '../../provider/user_provider.dart';
+import '../../provider/attendance_provider.dart';
 import '../../shared/book_basic.dart';
 import '../../shared/size_config.dart';
 import 'dart:math';
@@ -38,6 +40,9 @@ class _HomeScreenState2 extends State<HomeScreen2> with TickerProviderStateMixin
     "꾸준한 독서의 힘!\n책멍이가 끝까지 함께할게요!\n오늘도 한 장씩 함께 넘겨봐요!",
   ];
 
+  final Random random = Random();
+  String? currentMessage;
+
   // 인기도서 목록 예시용
   List<BookModel> books = [
     BookModel(title: '데미안', author: '헤르만 헤세', imagePath: 'assets/images/b_damian.png'),
@@ -47,13 +52,13 @@ class _HomeScreenState2 extends State<HomeScreen2> with TickerProviderStateMixin
     BookModel(title: '노인과 바다', author: '어니스트 헤밍웨이', imagePath: 'assets/images/b_sea.png'),
   ];
 
-  final Random random = Random();
-  String? currentMessage;
   String nickname = '사용자';
   int? selectedIndex;
 
   late AnimationController _scaleController;
   late Animation<double> _scaleAnimation;
+
+  double completedRatio = 0.0;
 
   @override
   void initState() {
@@ -68,13 +73,28 @@ class _HomeScreenState2 extends State<HomeScreen2> with TickerProviderStateMixin
       CurvedAnimation(parent: _scaleController, curve: Curves.easeInOut),
     );
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
-      setState(() {
-        nickname = userProvider.user?.nickname ?? '사용자';
-        currentMessage = getRandomMessage();
-      });
+      final attendanceProvider = Provider.of<AttendanceProvider>(context, listen: false);
+
+      final userId = userProvider.user?.userId;
+      nickname = userProvider.user?.nickname ?? '사용자';
+
+      if (userId != null) {
+        await attendanceProvider.markAttendance(userId);
+        await attendanceProvider.fetchThisWeekAttendance(userId);
+
+        setState(() {
+          currentMessage = getRandomMessage();
+        });
+      }
     });
+
+    FlutterLocalNotification.init();
+    Future.delayed(
+      const Duration(seconds: 3),
+      () => FlutterLocalNotification.requestNotificationPermission(),
+    );
   }
 
   @override
@@ -112,6 +132,10 @@ class _HomeScreenState2 extends State<HomeScreen2> with TickerProviderStateMixin
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+    final userId = userProvider.user?.userId ?? '';
+    final nickname = userProvider.user?.nickname ?? '사용자';
+    final attendanceProvider = Provider.of<AttendanceProvider>(context);
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -123,14 +147,18 @@ class _HomeScreenState2 extends State<HomeScreen2> with TickerProviderStateMixin
                 SizedBox(height: 24),
                 buildGreeting(),
                 SizedBox(height: 8),
-                buildChaekmeongImage(),
+                buildChaekmeongImage(completedRatio),
                 SizedBox(height: 30),
                   buildBookSection(
                     '이런 책은 어떠신가요? 인기도서 목록',
                   ),
                 SizedBox(height: 24),
-                buildAttendanceSection(context),
+                buildAttendanceSection(userId, nickname, attendanceProvider),
                 SizedBox(height: 24),
+                TextButton(
+                  onPressed: () => FlutterLocalNotification.showNotification(),
+                  child: const Text("알림 보내기"),
+                ),
               ],
             ),
           ),
@@ -146,7 +174,7 @@ class _HomeScreenState2 extends State<HomeScreen2> with TickerProviderStateMixin
     );
   }
 
-  Widget buildChaekmeongImage() {
+  Widget buildChaekmeongImage(double completedRatio) {
     return SizedBox(
       height: 220,
       child: Center(
@@ -157,7 +185,7 @@ class _HomeScreenState2 extends State<HomeScreen2> with TickerProviderStateMixin
               width: 200,
               height: 200,
               child: CustomPaint(
-                painter: ArcProgressPainter(progress: 0.75),
+                painter: ArcProgressPainter(completedRatio: completedRatio),
               ),
             ),
             Column(
@@ -216,7 +244,10 @@ class _HomeScreenState2 extends State<HomeScreen2> with TickerProviderStateMixin
     );
   }
 
-  Widget buildAttendanceSection(BuildContext context) {
+  Widget buildAttendanceSection(String userId, String nickname, AttendanceProvider provider) {
+    final status = provider.attendanceStatus;
+    final days = ['일', '월', '화', '수', '목', '금', '토'];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -225,7 +256,12 @@ class _HomeScreenState2 extends State<HomeScreen2> with TickerProviderStateMixin
           children: [
             const Text('출석 체크', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.black)),
             TextButton(
-              onPressed: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => MenuBottom(initialIndex: 3))),
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => MenuBottom(initialIndex: 3)),
+                );
+              },
               child: Row(
                 children: const [
                   Text('더보기', style: TextStyle(color: Color(0xff777777), fontSize: 14)),
@@ -235,7 +271,7 @@ class _HomeScreenState2 extends State<HomeScreen2> with TickerProviderStateMixin
             ),
           ],
         ),
-        Text("$nickname님은 현재 독서량 ‘n권’으로 상위 n%예요!", style: const TextStyle(fontSize: 14, color: Color(0xff777777))),
+        Text("$nickname님 오늘도 출석하셨네요!", style: const TextStyle(fontSize: 14, color: Color(0xff777777))),
         const SizedBox(height: 10),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -246,16 +282,18 @@ class _HomeScreenState2 extends State<HomeScreen2> with TickerProviderStateMixin
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: List.generate(7, (index) {
-              List<String> days = ['일', '월', '화', '수', '목', '금', '토'];
-              bool isSelected = index < 2;
-              Color textColor = isSelected ? const Color(0xff0077FF) : const Color(0xff777777);
+              final isChecked = status[index];
+              final bgColor = isChecked ? const Color(0xff0077FF) : Colors.transparent;
+              final borderColor = isChecked ? const Color(0xff0077FF) : const Color(0xff777777);
+              final textColor = isChecked ? Colors.white : const Color(0xff777777);
               return Container(
                 width: 30,
                 height: 30,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
+                  color: bgColor,
                   shape: BoxShape.circle,
-                  border: Border.all(color: textColor),
+                  border: Border.all(color: borderColor),
                 ),
                 child: Text(days[index], style: TextStyle(color: textColor, fontSize: 10)),
               );

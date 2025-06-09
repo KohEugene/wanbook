@@ -5,6 +5,9 @@ import 'package:wanbook/firebase_options.dart';
 import 'package:wanbook/provider/search_provider.dart';
 import 'package:wanbook/provider/user_book_provider.dart';
 import 'package:wanbook/provider/user_provider.dart';
+import 'package:wanbook/provider/attendance_provider.dart';
+import 'package:wanbook/provider/recentsearch_provider.dart';
+import 'package:wanbook/provider/chat_provider.dart';
 import 'package:wanbook/screen/home/splash_screen.dart';
 import 'package:wanbook/shared/size_config.dart';
 
@@ -19,6 +22,9 @@ Future<void> main() async {
           ChangeNotifierProvider(create: (context) => UserProvider(),),
           ChangeNotifierProvider(create: (context) => SearchProvider()),
           ChangeNotifierProvider(create: (context) => UserBookProvider(),),
+          ChangeNotifierProvider(create: (_) => AttendanceProvider(),),
+          ChangeNotifierProvider(create: (_) => RecentSearchProvider()),
+          ChangeNotifierProvider(create: (_) => ChatProvider()),
         ],
         child: const MyApp(),
       )
