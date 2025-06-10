@@ -1,15 +1,20 @@
 // AI 챗봇
-
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:http/http.dart' as http;
+import '../../provider/user_provider.dart';
+import '../../provider/chat_provider.dart';
+import '../../model/chatmessage_model.dart';
+import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ChatScreen extends StatefulWidget {
   final String message;
   final String title;
+  final bool isFromHistory;
 
-  const ChatScreen({super.key, required this.message, required this.title});
+  const ChatScreen({super.key, required this.message, required this.title, this.isFromHistory = false,});
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -19,18 +24,54 @@ class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
   final List<Map<String, String>> _messages = [];
   bool _isBotTyping = false;
+  bool _hasSentInitialQuestion = false;
 
   @override
   void initState() {
     super.initState();
-    // 초기 메시지 표시
-    _messages.add({'sender': 'user', 'text': widget.message});
-    _isBotTyping = true;
-    _getGPTResponse(widget.message);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadChatHistory();
+    });
   }
 
-  void _sendMessage(String input) {
+  void _loadChatHistory() async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userId = userProvider.user?.userId ?? '';
+
+    final snapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('chats')
+        .doc(widget.title)
+        .collection('messages')
+        .orderBy('timestamp')
+        .get();
+
+    setState(() {
+      _messages.addAll(snapshot.docs.map((doc) => {
+        'sender': doc['senderId'] == 'bot' ? 'bot' : 'user',
+        'text': doc['text'] ?? '',
+      }));
+    });
+
+    if (!_hasSentInitialQuestion && !widget.isFromHistory) {
+      _hasSentInitialQuestion = true;
+      _sendMessage(widget.message);
+    }
+  }
+
+  void _sendMessage(String input) async {
     if (input.trim().isEmpty) return;
+
+    final userId = Provider.of<UserProvider>(context, listen: false).user?.userId ?? '';
+    final chatProvider = Provider.of<ChatProvider>(context, listen: false);
+
+    final userMessage = ChatMessageModel(
+      senderId: userId,
+      text: input.trim(),
+      timestamp: DateTime.now(),
+      bookTitle: widget.title,
+    );
 
     setState(() {
       _messages.add({'sender': 'user', 'text': input.trim()});
@@ -38,6 +79,17 @@ class _ChatScreenState extends State<ChatScreen> {
     });
 
     _controller.clear();
+
+    await chatProvider.sendMessage(userId, widget.title, userMessage);
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('chats')
+        .doc(widget.title)
+        .set({
+          'lastMessage': userMessage.text,
+          'timestamp': userMessage.timestamp,
+        }, SetOptions(merge: true));
 
     _getGPTResponse(input.trim());
   }
@@ -50,7 +102,7 @@ class _ChatScreenState extends State<ChatScreen> {
     const apiKey = '';  // 여기 추가
     const endpoint = 'https://api.openai.com/v1/chat/completions';
 
-    final headers = {
+     final headers = {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $apiKey',
     };
@@ -66,27 +118,41 @@ class _ChatScreenState extends State<ChatScreen> {
 
     try {
       final response = await http.post(Uri.parse(endpoint), headers: headers, body: body);
-        print('GPT 상태코드: ${response.statusCode}');
-        print('GPT 응답: ${response.body}');
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         final reply = data['choices'][0]['message']['content'].trim();
+
+        final userId = Provider.of<UserProvider>(context, listen: false).user?.userId ?? '';
+        final chatProvider = Provider.of<ChatProvider>(context, listen: false);
+
+        final botMessage = ChatMessageModel(
+          senderId: 'bot',
+          text: reply,
+          timestamp: DateTime.now(),
+          bookTitle: widget.title,
+        );
 
         setState(() {
           _isBotTyping = false;
           _messages.add({'sender': 'bot', 'text': reply});
         });
+
+        await chatProvider.sendMessage(userId, widget.title, botMessage);
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userId)
+            .collection('chats')
+            .doc(widget.title)
+            .set({
+              'lastMessage': botMessage.text,
+              'timestamp': botMessage.timestamp,
+            }, SetOptions(merge: true));
       } else {
-        setState(() {
-          _isBotTyping = false;
-          _messages.add({'sender': 'bot', 'text': '오류가 발생했어요. 다시 시도해 주세요.'});
-        });
+        _showError("오류가 발생했어요. 다시 시도해 주세요.");
       }
     } catch (e) {
-      setState(() {
-        _isBotTyping = false;
-        _messages.add({'sender': 'bot', 'text': '인터넷 연결을 확인해 주세요.'});
-      });
+      _showError("인터넷 연결을 확인해 주세요.");
     }
   }
 
@@ -96,43 +162,50 @@ class _ChatScreenState extends State<ChatScreen> {
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.chevron_left_rounded),
-          color: Colors.black,
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(20),
-              itemCount: _messages.length + (_isBotTyping ? 1 : 0),
-              itemBuilder: (context, index) {
-                if (_isBotTyping && index == _messages.length) {
-                  return buildBotChat("", isTyping: true);
-                }
-                final msg = _messages[index];
-                return msg['sender'] == 'user'
-                    ? buildUserChat(msg['text']!)
-                    : buildBotChat(msg['text']!);
-              },
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-            child: buildMessageInputArea(),
-          ),
-        ],
-      ),
-    );
+  void _showError(String message) {
+    setState(() {
+      _isBotTyping = false;
+      _messages.add({'sender': 'bot', 'text': message});
+    });
   }
+
+  @override
+    Widget build(BuildContext context) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(widget.title),
+          centerTitle: true,
+          leading: IconButton(
+            icon: const Icon(Icons.chevron_left_rounded),
+            color: Colors.black,
+            onPressed: () => Navigator.pop(context),
+          ),
+        ),
+        body: Column(
+          children: [
+            Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.all(20),
+                itemCount: _messages.length + (_isBotTyping ? 1 : 0),
+                itemBuilder: (context, index) {
+                  if (_isBotTyping && index == _messages.length) {
+                    return buildBotChat("", isTyping: true);
+                  }
+                  final msg = _messages[index];
+                  return msg['sender'] == 'user'
+                      ? buildUserChat(msg['text']!)
+                      : buildBotChat(msg['text']!);
+                },
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+              child: buildMessageInputArea(),
+            ),
+          ],
+        ),
+      );
+    }
 
   Widget buildUserChat(String message) {
     return Align(

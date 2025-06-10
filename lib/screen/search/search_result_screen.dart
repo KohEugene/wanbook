@@ -1,11 +1,12 @@
-
 // 검색 결과 화면
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wanbook/provider/user_book_provider.dart';
-
+import 'package:wanbook/provider/recentsearch_provider.dart';
+import 'package:wanbook/provider/user_provider.dart';
 import '../../provider/search_provider.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../shared/menu_bottom.dart';
 import '../../shared/size_config.dart';
 
@@ -28,11 +29,16 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
 
     _searchController = TextEditingController(text: widget.searchKeyword);
 
-    // 검색 실행
-    Future.microtask(() {
+    Future.microtask(() async {
       final viewModel = Provider.of<SearchProvider>(context, listen: false);
       viewModel.clearResults();
       viewModel.searchBooks(widget.searchKeyword);
+
+      // 최근 검색어 저장
+      final userId = Provider.of<UserProvider>(context, listen: false).user?.userId ?? '';
+      final recentSearchProvider = Provider.of<RecentSearchProvider>(context, listen: false);
+      recentSearchProvider.setUserId(userId);
+      await recentSearchProvider.saveRecentSearch(widget.searchKeyword);
     });
   }
 
@@ -56,31 +62,53 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
             FocusScope.of(context).unfocus();
           },
           child: isloading
-            ? Center(
-                child: CircularProgressIndicator(
-                  color: Color(0xff0077FF),
+              ? Center(
+                  child: CircularProgressIndicator(
+                    color: Color(0xff0077FF),
+                  ),
+                )
+              : SingleChildScrollView(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.05),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        SizedBox(height: 24),
+                        buildSearchBar(context),
+                        
+                        if (book == null) ...[
+                          SizedBox(height: 140),
+                          Container(
+                            width: double.infinity,
+                            color: Colors.white,
+                            child: Column(
+                              children: [
+                                SvgPicture.asset('assets/images/no_result.svg', height: 170),
+                                const SizedBox(height: 16),
+                                const Text(
+                                  '검색 결과가 없습니다',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xff777777),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ] else ...[
+                          SizedBox(height: 24),
+                          buildBookCover(book.imagePath),
+                          SizedBox(height: 24),
+                          buildBookInfo(book.title, book.author, book.description),
+                          SizedBox(height: 24),
+                          buildAddButton(context, book.title),
+                        ],
+                        SizedBox(height: 24),
+                      ],
+                    ),
+                  ),
                 ),
-              )
-            :
-            SingleChildScrollView(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.05),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(height: 24),
-                    buildSearchBar(context),
-                    SizedBox(height: 24),
-                    buildBookCover(book?.imagePath),
-                    SizedBox(height: 24),
-                    buildBookInfo(book?.title, book?.author, book?.description),
-                    SizedBox(height: 24),
-                    buildAddButton(context, book!.title),
-                    SizedBox(height: 24),
-                  ],
-                ),
-              ),
-            ),
         ),
       ),
     );

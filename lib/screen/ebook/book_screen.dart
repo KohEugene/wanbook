@@ -197,19 +197,37 @@ class _BookScreenState extends State<BookScreen> with WidgetsBindingObserver{
     _justJumped = true;
 
     // Firestore에 유저마다 책 maxScrollExtent 저장
-    try {
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userId)
-          .collection('reading_books')
-          .doc(widget.title)
-          .update({
-            'max_scroll': max,
-            'update_date': FieldValue.serverTimestamp(),
-          });
-      print("Firestore에 max_scroll 저장됨: $max");
-    } catch (e) {
-      print("max_scroll 저장 실패: $e");
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('reading_books')
+        .doc(widget.title)
+        .update({
+          'max_scroll': max,
+          'update_date': FieldValue.serverTimestamp(),
+        });
+  }
+
+  // 책 완독했는 지 판단 
+  Future<void> checkAndMarkCompletion() async {
+    final docRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('reading_books')
+        .doc(widget.title);
+
+    if (progress >= 0.999) {
+      await docRef.update({
+        'is_completed': true,
+        'end_date': FieldValue.serverTimestamp(),
+        'update_date': FieldValue.serverTimestamp(),
+      });
+    } else {
+      await docRef.update({
+        'is_completed': false,
+        'end_date': null,
+        'update_date': FieldValue.serverTimestamp(),
+      });
     }
   }
 
@@ -350,7 +368,8 @@ class _BookScreenState extends State<BookScreen> with WidgetsBindingObserver{
           centerTitle: true,
           leading: IconButton(
             icon: Icon(Icons.chevron_left_rounded, color: isDarkMode ? Colors.white : Colors.black),
-            onPressed: () {
+            onPressed: () async {
+              await checkAndMarkCompletion();
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (_) => MenuBottom(initialIndex: 2)),
