@@ -1,4 +1,3 @@
-
 // 회원가입 화면
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -98,6 +97,41 @@ class _JoinScreenState extends State<JoinScreen> {
     });
   }
 
+  // Firestore에서 아이디 중복 확인
+  Future<bool> isUserIdDuplicate(String userId) async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .get();
+    return snapshot.exists;
+  }
+
+  Future<void> checkUserIdDuplicate() async {
+    String userId = _idController.text.trim();
+    if (userId.length < 6 || userId.length > 20) {
+      setState(() {
+        _idHasError = true;
+        _idError = '아이디는 6~20자여야 합니다';
+      });
+      return;
+    }
+
+    bool isDuplicate = await isUserIdDuplicate(userId);
+    if (isDuplicate) {
+      setState(() {
+        _idHasError = true;
+        _idError = '이미 존재하는 아이디입니다';
+      });
+    } else {
+      setState(() {
+        _idHasError = false;
+        _idError = '';
+      });
+    }
+
+    validateInputs();
+  }
+
   // 비밀번호 유효성 검사 함수
   void validatePassword() {
     setState(() {
@@ -178,10 +212,10 @@ class _JoinScreenState extends State<JoinScreen> {
                     child: Column(
                       children: [
                         buildFieldWithError(
-                            controller: _idController, focusNode: _idFocus,
-                            label: '아이디', hintText: '아이디 입력 (6~20자)',
-                            hasError: _idHasError, errorMessage: _idError,
-                            hasCheckButton: true
+                          controller: _idController, focusNode: _idFocus,
+                          label: '아이디', hintText: '아이디 입력 (6~20자)',
+                          hasError: _idHasError, errorMessage: _idError,
+                          hasCheckButton: true, onCheckPressed: checkUserIdDuplicate
                         ),
                         buildFieldWithError(
                             controller: _pwdController, focusNode: _pwdFocus,
@@ -201,11 +235,9 @@ class _JoinScreenState extends State<JoinScreen> {
                             controller: _phoneController,
                             label: '전화번호', hintText: "휴대폰 번호 입력 ('-' 제외 11자리 입력)"
                         ),
-                        buildFieldWithError(
-                            controller: _nicknameController, focusNode: _nicknameFocus,
+                        buildSimpleField(
+                            controller: _nicknameController,
                             label: '별명', hintText: '별명을 입력해 주세요',
-                            hasError: _nicknameHasError, errorMessage: _nicknameError,
-                            hasCheckButton: true
                         ),
                       ],
                     ),
@@ -231,6 +263,7 @@ class _JoinScreenState extends State<JoinScreen> {
     String errorMessage = '',
     bool obscure = false,
     bool hasCheckButton = false,
+    VoidCallback? onCheckPressed,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -282,7 +315,7 @@ class _JoinScreenState extends State<JoinScreen> {
                 child: SizedBox(
                     width: 94,
                     height: 36,
-                    child: OutlinedButton(onPressed: (){},
+                    child: OutlinedButton(onPressed: onCheckPressed,
                         style: OutlinedButton.styleFrom(
                             foregroundColor: Color(0xff777777),
                             backgroundColor: Color(0xffF8F8F8),
