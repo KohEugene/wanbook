@@ -84,7 +84,7 @@ class _JoinScreenState extends State<JoinScreen> {
     super.dispose();
   }
 
-  // 아이디 유효성 검사 함수 (중복 확인 절차 추가 필요)
+  // 아이디 유효성 검사 함수
   void validateId() {
     setState(() {
       if (_idController.text.length < 6 || _idController.text.length > 20) {
