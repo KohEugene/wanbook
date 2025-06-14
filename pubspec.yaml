@@ -53,6 +53,7 @@ flutter:
      - assets/images/
      - assets/images/frames_/
      - assets/epub/
+     - assets/books.json
 
   fonts:
     - family: Pretendard
