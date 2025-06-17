@@ -21,6 +21,28 @@ class UserModel {
     required this.joinedAt
   });
 
+  UserModel copyWith({
+    String? email,
+    String? userId,
+    String? userPwd,
+    String? name,
+    String? phonenumber,
+    String? nickname,
+    String? profileImageUrl,
+    DateTime? joinedAt,
+  }) {
+    return UserModel(
+      email: email ?? this.email,
+      userId: userId ?? this.userId,
+      userPwd: userPwd ?? this.userPwd,
+      name: name ?? this.name,
+      phonenumber: phonenumber ?? this.phonenumber,
+      nickname: nickname ?? this.nickname,
+      profileImageUrl: profileImageUrl ?? this.profileImageUrl,
+      joinedAt: joinedAt ?? this.joinedAt,
+    );
+  }
+
   factory UserModel.fromMap(Map<String, dynamic> map, String docId) {
     return UserModel(
       email: map['email'] ?? '',

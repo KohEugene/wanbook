@@ -13,6 +13,13 @@ class UserProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void updateUserNickname(String newNickname) {
+    if (_user != null) {
+      _user = _user!.copyWith(nickname: newNickname);
+      notifyListeners(); // UI 자동 갱신
+    }
+  }
+
   void clearUser() {
     _user = null;
     notifyListeners();

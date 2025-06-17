@@ -55,6 +55,9 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+    final nickname = userProvider.user?.nickname ?? '사용자';
+
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,

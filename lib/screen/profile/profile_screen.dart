@@ -118,93 +118,112 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   // 사용자 정보 섹션
   Widget userInfoSection() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
+    return Consumer<UserProvider>(
+      builder: (context, userProvider, _) {
+        final user = userProvider.user;
+
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  CircleAvatar(
-                    radius: 28,
-                    backgroundColor: Color(0xffD9D9D9),
-                  ),
-                  Positioned(
-                    right: -2,
-                    bottom: -2,
-                    child: Container(
-                      width: 20,
-                      height: 20,
-                      decoration: BoxDecoration(
+            Row(
+              children: [
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    CircleAvatar(
+                      radius: 28,
+                      backgroundColor: Color(0xffD9D9D9),
+                    ),
+                    Positioned(
+                      right: -2,
+                      bottom: -2,
+                      child: Container(
+                        width: 20,
+                        height: 20,
+                        decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Color(0xffBABABA)
-                      ),
-                      child: IconButton(
-                        padding: EdgeInsets.zero,
-                        onPressed: () {
-                          showDialog(
+                          color: Color(0xffBABABA),
+                        ),
+                        child: IconButton(
+                          padding: EdgeInsets.zero,
+                          onPressed: () {
+                            showDialog(
                               context: context,
                               barrierDismissible: false,
                               builder: (context) {
                                 return PopUp();
                               },
-                          );
-                        },
-                        icon: Icon(Icons.edit, color: Color(0xff777777), size: 12,),
+                            );
+                          },
+                          icon: Icon(
+                            Icons.edit,
+                            color: Color(0xff777777),
+                            size: 12,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ]
-            ),
-            SizedBox(width: 16,),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(nickname, style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16)
+                  ],
                 ),
-                SizedBox(height: 4,),
-                Text('@$userId', style: TextStyle(
-                    color: Color(0xff777777),
-                    fontWeight: FontWeight.w400,
-                    fontSize: 14)
-                )
+                SizedBox(width: 16),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      user?.nickname ?? '사용자 명',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      '@${user?.userId ?? '사용자 아이디'}',
+                      style: TextStyle(
+                        color: Color(0xff777777),
+                        fontWeight: FontWeight.w400,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
               ],
-            )
-          ],
-        ),
-        SizedBox(
-            width: 90,
-            height: 36,
-            child: OutlinedButton(
+            ),
+            SizedBox(
+              width: 90,
+              height: 36,
+              child: OutlinedButton(
                 onPressed: () async {
                   await FirebaseAuth.instance.signOut();
                   await storage.delete(key: 'keepLogin');
                   Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(builder: (context) => LoginScreen(),),
-                      (Route<dynamic> route) => false,
+                    MaterialPageRoute(builder: (context) => LoginScreen()),
+                        (Route<dynamic> route) => false,
                   );
                 },
                 style: OutlinedButton.styleFrom(
-                    foregroundColor: Color(0xff777777),
-                    backgroundColor: Color(0xffF8F8F8),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(32)
-                    ),
-                    side: BorderSide(color: Colors.transparent),
-                    shadowColor: Colors.transparent,
-                    elevation: 0,
+                  foregroundColor: Color(0xff777777),
+                  backgroundColor: Color(0xffF8F8F8),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(32),
+                  ),
+                  side: BorderSide(color: Colors.transparent),
+                  shadowColor: Colors.transparent,
+                  elevation: 0,
                 ),
-                child: Text('로그아웃', style: TextStyle(
+                child: Text(
+                  '로그아웃',
+                  style: TextStyle(
                     fontWeight: FontWeight.w400,
-                    fontSize: 12),
+                    fontSize: 12,
+                  ),
                 ),
-            )
-        ),
-      ],
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 

@@ -1,9 +1,13 @@
 
 // 팝업 메뉴
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:wanbook/shared/size_config.dart';
+import 'package:provider/provider.dart';
+
+import '../provider/user_provider.dart';
 
 class PopUp extends StatefulWidget {
   const PopUp({super.key});
@@ -13,6 +17,8 @@ class PopUp extends StatefulWidget {
 }
 
 class _PopUpState extends State<PopUp> {
+
+  final _nicknameController = TextEditingController();
 
   // 사용자 정보 수정 다이얼로그
   @override
@@ -75,6 +81,7 @@ class _PopUpState extends State<PopUp> {
                         borderRadius: BorderRadius.circular(16))
                 ),
                 child: TextFormField(
+                  controller: _nicknameController,
                   cursorColor: Color(0xff0077FF),
                   decoration: InputDecoration(
                       border: InputBorder.none,
@@ -120,7 +127,41 @@ class _PopUpState extends State<PopUp> {
                   Expanded(
                     child: SizedBox(
                         height: 46,
-                        child: OutlinedButton(onPressed: (){
+                        child: OutlinedButton(onPressed: () async {
+                          String newNickname = _nicknameController.text.trim();
+                          if (newNickname.isEmpty) return;
+
+                          try {
+                            final user = Provider.of<UserProvider>(context, listen: false).user;
+
+                            if (user != null) {
+                              await FirebaseFirestore.instance
+                                  .collection('users')
+                                  .doc(user.userId)
+                                  .update({'nickname': newNickname});
+
+                              Provider.of<UserProvider>(context, listen: false)
+                                  .updateUserNickname(newNickname);
+
+                              // 팝업 닫기
+                              Navigator.of(context).pop();
+
+                              // 사용자에게 알림 등 추가 가능
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('별명이 성공적으로 변경되었어요.'),
+                                    backgroundColor: Color(0xff0077FF),
+                                  )
+                              );
+                            }
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('별명 변경 중 오류가 발생했어요.'),
+                                    backgroundColor: Color(0xff0077FF)
+                                )
+                            );
+                          }
                         },
                             style: OutlinedButton.styleFrom(
                                 foregroundColor: Color(0xff0077FF),
