@@ -28,7 +28,7 @@ class BookBasic extends StatelessWidget {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: book.imagePath != null
-                    ? Image.asset(
+                    ? Image.network(
                   book.imagePath!,
                   fit: BoxFit.cover,
                 )

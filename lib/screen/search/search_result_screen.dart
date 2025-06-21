@@ -206,7 +206,7 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
           borderRadius: BorderRadius.circular(8),
           image: imagePath != null
               ? DecorationImage(
-                  image: AssetImage(imagePath),
+                  image: NetworkImage(imagePath),
                   fit: BoxFit.cover,
                 )
               : null,

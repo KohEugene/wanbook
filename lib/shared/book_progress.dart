@@ -80,7 +80,7 @@ class BookProgress extends StatelessWidget {
                 color: book.imagePath == null ? Color(0xffD9D9D9) : null,
                 image: book.imagePath != null
                     ? DecorationImage(
-                  image: AssetImage(book.imagePath!),
+                  image: NetworkImage(book.imagePath!),
                   fit: BoxFit.cover,
                 )
                     : null,

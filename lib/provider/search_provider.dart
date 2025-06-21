@@ -1,5 +1,6 @@
 // 검색 함수
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:convert';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/widgets.dart';
 import 'package:wanbook/model/book_model.dart';
 
@@ -10,22 +11,26 @@ class SearchProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   BookModel? get searchResult => _searchResult;
 
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  List<BookModel> _allBooks = [];
+
+  // json 파일 로드 함수
+  Future<void> loadBooksFromJson() async {
+    final String jsonString = await rootBundle.loadString('assets/book.json');
+    final List<dynamic> jsonList = json.decode(jsonString);
+    _allBooks = jsonList.map((e) => BookModel.fromJson(e)).toList();
+  }
 
   Future<void> searchBooks(String keyword) async {
     _isLoading = true;
     notifyListeners();
 
-    final querySnapshot = await _firestore
-        .collection('books')
-        .where('title', isEqualTo: keyword)
-        .get();
-
-    if (querySnapshot.docs.isNotEmpty) {
-      _searchResult = BookModel.fromDocument(querySnapshot.docs.first);
-    } else {
-      _searchResult = null;
+    if (_allBooks.isEmpty) {
+      await loadBooksFromJson();
     }
+
+    _searchResult = _allBooks.firstWhere(
+          (book) => book.title.contains(keyword),
+    );
 
     _isLoading = false;
     notifyListeners();
