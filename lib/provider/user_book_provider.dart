@@ -1,7 +1,8 @@
 // 서재에 책 추가 & 사용자별 독서 정보 불러오기 함수
+import 'dart:convert';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 import 'package:wanbook/provider/user_provider.dart';
 
@@ -55,20 +56,20 @@ class UserBookProvider with ChangeNotifier {
         .collection('reading_books')
         .get();
 
+    final jsonString = await rootBundle.loadString('assets/book.json');
+    final List<dynamic> jsonList = json.decode(jsonString);
+    final bookList = jsonList.map((e) => BookModel.fromJson(e)).toList();
+
     List<Map<String, dynamic>> books = [];
 
     for (var logDoc in readLogSnapshot.docs) {
       final userBook = UserBookModel.fromDocument(logDoc);
 
-      final querySnapshot = await _firestore
-          .collection('books')
-          .where('title', isEqualTo: userBook.bookId)
-          .get();
+      final book = bookList.firstWhere(
+            (b) => b.title == userBook.bookId,
+      );
 
-      if (querySnapshot.docs.isNotEmpty) {
-        // BookModel 생성
-        final book = BookModel.fromDocument(querySnapshot.docs.first);
-
+      if (book.title.isNotEmpty) {
         books.add({
           'book': book,
           'userBook': userBook,

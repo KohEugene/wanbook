@@ -258,7 +258,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: coverImage != null
-                    ? Image.asset(coverImage, width: 110, height: 150, fit: BoxFit.cover)
+                    ? Image.network(coverImage, width: 110, height: 150, fit: BoxFit.cover)
                     : Container(width: 110, height: 150, color: const Color(0xffD9D9D9)),
               ),
               const SizedBox(width: 24),
