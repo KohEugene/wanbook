@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wanbook/firebase_options.dart';
+import 'package:wanbook/provider/recommend_provider.dart';
 import 'package:wanbook/provider/search_provider.dart';
 import 'package:wanbook/provider/user_book_provider.dart';
 import 'package:wanbook/provider/user_provider.dart';
@@ -25,6 +26,7 @@ Future<void> main() async {
           ChangeNotifierProvider(create: (_) => AttendanceProvider(),),
           ChangeNotifierProvider(create: (_) => RecentSearchProvider()),
           ChangeNotifierProvider(create: (_) => ChatProvider()),
+          ChangeNotifierProvider(create: (_) => RecommendProvider()),
         ],
         child: const MyApp(),
       )

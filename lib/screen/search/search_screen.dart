@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wanbook/model/book_model.dart';
 import 'package:wanbook/provider/recentsearch_provider.dart';
+import 'package:wanbook/provider/recommend_provider.dart';
 import 'package:wanbook/provider/user_provider.dart';
 import 'package:wanbook/shared/book_basic.dart';
 import 'package:wanbook/shared/menu_bottom.dart';
@@ -19,15 +20,6 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   List<String> recentSearches = [];
-  final recommendedSearches = ['오만과 편견', '소년이 온다', '변신', '눈먼 자들의 도시'];
-
-  List<BookModel> books = [
-    BookModel(title: '데미안', author: '헤르만 헤세', imagePath: 'assets/images/b_damian.png'),
-    BookModel(title: '소년이 온다', author: '한강', imagePath: 'assets/images/b_boycome.png'),
-    BookModel(title: '아몬드', author: '손원평', imagePath: 'assets/images/b_almond.png'),
-    BookModel(title: '인간실격', author: '다자이 오사무', imagePath: 'assets/images/b_human.png'),
-    BookModel(title: '노인과 바다', author: '어니스트 헤밍웨이', imagePath: 'assets/images/b_sea.png'),
-  ];
 
   final TextEditingController _searchController = TextEditingController();
 
@@ -41,6 +33,12 @@ class _SearchScreenState extends State<SearchScreen> {
       final recentSearchProvider = Provider.of<RecentSearchProvider>(context, listen: false);
       recentSearchProvider.setUserId(userId);
       loadRecentSearches();
+
+      final recommendProvider = Provider.of<RecommendProvider>(context, listen: false);
+      recommendProvider.loadBooksFromJson().then((_) {
+        recommendProvider.fetchTagBasedBooks(userId);
+        recommendProvider.fetchPopularBooks();
+      });
     });
   }
 
@@ -69,6 +67,10 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final recommendProvider = Provider.of<RecommendProvider>(context);
+    final recommendBooks = recommendProvider.tagBasedBooks;
+    final popularBooks = recommendProvider.popularBooks;
+
     return Scaffold(
       body: SafeArea(
         child: GestureDetector(
@@ -85,11 +87,9 @@ class _SearchScreenState extends State<SearchScreen> {
                   const SizedBox(height: 24),
                   buildRecentSearchSection(),
                   const SizedBox(height: 24),
-                  buildRecommendedSearchSection(),
+                  buildBookSection('추천 도서', recommendBooks),
                   const SizedBox(height: 24),
-                  buildBookSection('추천 도서'),
-                  const SizedBox(height: 24),
-                  buildBookSection('인기 도서'),
+                  buildBookSection('인기 도서', popularBooks),
                   const SizedBox(height: 24),
                 ],
               ),
@@ -163,15 +163,6 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  // 추천 검색어
-  Widget buildRecommendedSearchSection() {
-    return buildSearchSection(
-      '추천 검색어',
-      recommendedSearches,
-      onWordTap: performSearch,
-    );
-  }
-
   // 검색어 chip
   Widget buildSearchSection(
     String title,
@@ -231,7 +222,9 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   // 도서 구성 UI
-  Widget buildBookSection(String sectionTitle) {
+  Widget buildBookSection(String sectionTitle, List<BookModel> books) {
+    if (books.isEmpty) return SizedBox.shrink();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -241,7 +234,7 @@ class _SearchScreenState extends State<SearchScreen> {
           height: 190,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            itemCount: 5,
+            itemCount: books.length,
             itemBuilder: (context, index) {
               return BookBasic(
                 book: books[index],
