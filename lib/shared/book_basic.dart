@@ -41,8 +41,10 @@ class BookBasic extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(book.title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xff000000))),
-                  Text(book.author, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: Color(0xff777777))),
+                  Text(book.title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xff000000)),
+                    maxLines: 1, overflow: TextOverflow.ellipsis,),
+                  Text(book.author, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: Color(0xff777777)),
+                    maxLines: 1, overflow: TextOverflow.ellipsis,),
                 ],
               ),
             ),
