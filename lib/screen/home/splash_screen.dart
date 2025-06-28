@@ -1,4 +1,3 @@
-
 // 접속 화면
 
 import 'dart:async';
@@ -16,6 +15,7 @@ import '../../provider/user_provider.dart';
 import '../../shared/menu_bottom.dart';
 import '../login/login_screen.dart';
 import '../../shared/size_config.dart';
+import '../aichat/question.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -26,11 +26,15 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   final storage = FlutterSecureStorage();
-
+  bool _hasUploaded = false;
+  
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
+    if (!_hasUploaded) {
+      _hasUploaded = true;
+      uploadDemianQuestionsToField();
+    }
     checkLoginStatus();
   }
 

@@ -221,7 +221,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     if (selectedBook == null || selectedUserBook == null) return const SizedBox.shrink();
 
     String title = selectedBook!.title;
-    String author = selectedBook!.author;
+    String author = selectedBook!.author.split(',').first;
     String? coverImage = selectedBook!.imagePath;
     double percentValue = selectedUserBook!.lastPosition ?? 0.0;
     String percentText = "${(percentValue * 100).round()}%";

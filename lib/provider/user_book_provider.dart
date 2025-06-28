@@ -34,7 +34,8 @@ class UserBookProvider with ChangeNotifier {
     } else {
       final newBook = UserBookModel(
           bookId: bookId, lastPosition: 0, isCompleted: false,
-          startedAt: now, updatedAt: now, completedAt: null
+          startedAt: now, updatedAt: now, completedAt: null,
+          chatClick: 0,
       );
 
       await docRef.set(newBook.toMap(), SetOptions(merge: true));
