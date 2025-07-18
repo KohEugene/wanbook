@@ -8,6 +8,7 @@ class UserBookModel {
   final DateTime startedAt;
   final DateTime updatedAt;
   final DateTime? completedAt;
+  final int chatClick;
 
   UserBookModel({
     required this.bookId,
@@ -17,6 +18,7 @@ class UserBookModel {
     required this.updatedAt,
     this.completedAt,
     this.maxScroll,
+    this.chatClick = 0,
   });
 
   factory UserBookModel.fromDocument(DocumentSnapshot doc) {
@@ -31,6 +33,7 @@ class UserBookModel {
       completedAt: data['end_date'] != null
           ? (data['end_date'] as Timestamp).toDate()
           : null,
+      chatClick: data['chat_click'] ?? 0,
     );
   }
 
@@ -43,6 +46,7 @@ class UserBookModel {
       'start_date': Timestamp.fromDate(startedAt),
       'update_date': Timestamp.fromDate(updatedAt),
       'end_date': completedAt != null ? Timestamp.fromDate(completedAt!) : null,
+      'chat_click': chatClick,
     };
   }
 }

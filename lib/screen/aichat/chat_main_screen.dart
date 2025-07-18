@@ -1,8 +1,9 @@
-
-// AI 챗봇 시작화면
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:wanbook/provider/user_provider.dart';
+import 'package:wanbook/provider/question_provider.dart';
 import 'package:wanbook/screen/aichat/chat_screen.dart';
 
 class ChatMainScreen extends StatefulWidget {
@@ -16,15 +17,83 @@ class ChatMainScreen extends StatefulWidget {
 
 class _ChatMainScreenState extends State<ChatMainScreen> {
   final TextEditingController _controller = TextEditingController();
+  List<String> hintQuestions = [];
+
+  int chatClick = 0;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadChatClickAndFetchQuestions();
+    });
+  }
+  
+  @override
   void dispose() {
-    _controller.dispose(); // 메모리 누수 방지
+    _controller.dispose();
     super.dispose();
   }
 
-  void navigateToChatScreen(String message) {
+  Future<void> _loadChatClickAndFetchQuestions() async {
+    final user = Provider.of<UserProvider>(context, listen: false).user;
+
+    final docRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(user?.userId)
+        .collection('reading_books')
+        .doc(widget.title);
+
+    final snapshot = await docRef.get();
+
+    if (snapshot.exists) {
+      final data = snapshot.data()!;
+      chatClick = (data['chat_click'] ?? 0) as int;
+
+      // 페이지 진입 시 chat_click 증가
+      await docRef.update({'chat_click': chatClick + 1});
+      chatClick += 1;
+    } else {
+      chatClick = 1;
+      await docRef.set({'chat_click': chatClick}, SetOptions(merge: true));
+    }
+
+    final level = chatClick < 3 ? 1 : (chatClick < 6 ? 2 : 3);
+
+    final questions = await Provider.of<QuestionProvider>(context, listen: false)
+        .fetchQuestionsByLevel(widget.title, level);
+
+    setState(() {
+      hintQuestions = questions.take(4).toList();
+    });
+  }
+
+  Future<void> _incrementChatClickAndNavigate(String message) async {
     if (message.trim().isEmpty) return;
+
+    final user = Provider.of<UserProvider>(context, listen: false).user;
+
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user?.userId)
+        .collection('reading_books')
+        .where('book_id', isEqualTo: widget.title)
+        .limit(1)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      final docRef = querySnapshot.docs.first.reference;
+      final current = querySnapshot.docs.first.data()['chat_click'] ?? 0;
+      await docRef.update({'chat_click': (current as int) + 1});
+    } else {
+      final newDoc = FirebaseFirestore.instance
+          .collection('users')
+          .doc(user?.userId)
+          .collection('reading_books')
+          .doc();
+      await newDoc.set({'book_id': widget.title, 'chat_click': 1});
+    }
+
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -50,9 +119,7 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
       ),
       body: GestureDetector(
         behavior: HitTestBehavior.translucent,
-        onTap: () {
-          FocusScope.of(context).unfocus();
-        },
+        onTap: () => FocusScope.of(context).unfocus(),
         child: Column(
           children: [
             Expanded(
@@ -61,11 +128,14 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
                 child: Column(
                   children: [
                     const SizedBox(height: 72),
-                    buildChaekmeongImage(),
+                    SvgPicture.asset('assets/images/main_Chaekmeong_1.svg', width: 180, height: 180),
                     const SizedBox(height: 16),
-                    buildMainTitle(),
+                    const Text('도움이 필요하신가요?', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
                     const SizedBox(height: 8),
-                    buildSubTitle(),
+                    const Text(
+                      '아래는 많은 독서가들이 궁금해하는 것들이에요!',
+                      style: TextStyle(fontSize: 14, color: Color(0xff777777)),
+                    ),
                     const SizedBox(height: 16),
                     buildHintChips(),
                     const SizedBox(height: 24),
@@ -83,16 +153,13 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
     );
   }
 
-  // 힌트 목록
   Widget buildHintChips() {
-    final List<String> hints = ['데미안의 주제', '아브락사스의 의미', '오마주들', '헤르만 헤세에 대해'];
-
     return Wrap(
       spacing: 14,
       runSpacing: 4,
-      children: hints.map((hint) {
+      children: hintQuestions.map((hint) {
         return GestureDetector(
-          onTap: () => navigateToChatScreen(hint),
+          onTap: () => _incrementChatClickAndNavigate(hint),
           child: Chip(
             label: Text(hint),
             backgroundColor: const Color(0xffE4E4E4),
@@ -113,75 +180,31 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
     );
   }
 
-  // 책멍이 이미지
-  Widget buildChaekmeongImage() {
-    return SvgPicture.asset(
-      'assets/images/main_Chaekmeong_1.svg',
-      width: 180,
-      height: 180,
-    );
-  }
-
-  // 문구
-  Widget buildMainTitle() {
-    return const Text(
-      '도움이 필요하신가요?',
-      style: TextStyle(
-        fontSize: 20,
-        fontWeight: FontWeight.w600,
-        color: Colors.black,
-      ),
-    );
-  }
-
-  // 글씨
-  Widget buildSubTitle() {
-    return const Text(
-      '아래는 많은 독서가들이 궁금해하는 것들이에요!',
-      textAlign: TextAlign.center,
-      style: TextStyle(
-        fontSize: 14,
-        fontWeight: FontWeight.w400,
-        color: Color(0xff777777),
-      ),
-    );
-  }
-
-  // 입력창 + 화살표 버튼
   Widget buildMessageInputArea() {
     return Row(
       children: [
         Expanded(
           child: TextField(
             controller: _controller,
-            cursorColor: const Color(0xff0077FF),
             decoration: InputDecoration(
               hintText: '책에 대해 궁금한 점을 물어보세요',
-              hintStyle: const TextStyle(
-                color: Color(0xff777777),
-                fontWeight: FontWeight.w400,
-                fontSize: 14,
-              ),
+              hintStyle: const TextStyle(color: Color(0xff777777), fontSize: 14),
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: const BorderSide(color: Color(0xffE4E4E4)),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(color: Color(0xffE4E4E4)),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: const BorderSide(color: Color(0xff0077FF), width: 2),
               ),
             ),
-            onSubmitted: navigateToChatScreen,
+            onSubmitted: _incrementChatClickAndNavigate,
           ),
         ),
         const SizedBox(width: 8),
         GestureDetector(
-          onTap: () => navigateToChatScreen(_controller.text),
+          onTap: () => _incrementChatClickAndNavigate(_controller.text),
           child: const CircleAvatar(
             backgroundColor: Color(0xff0077FF),
             child: Icon(Icons.arrow_upward_rounded, color: Colors.white),

@@ -9,8 +9,10 @@ import 'package:wanbook/provider/user_provider.dart';
 import 'package:wanbook/provider/attendance_provider.dart';
 import 'package:wanbook/provider/recentsearch_provider.dart';
 import 'package:wanbook/provider/chat_provider.dart';
+import 'package:wanbook/provider/question_provider.dart';
 import 'package:wanbook/screen/home/splash_screen.dart';
 import 'package:wanbook/shared/size_config.dart';
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,6 +29,7 @@ Future<void> main() async {
           ChangeNotifierProvider(create: (_) => RecentSearchProvider()),
           ChangeNotifierProvider(create: (_) => ChatProvider()),
           ChangeNotifierProvider(create: (_) => RecommendProvider()),
+          ChangeNotifierProvider(create: (_) => QuestionProvider()),
         ],
         child: const MyApp(),
       )
