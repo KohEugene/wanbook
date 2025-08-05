@@ -27,13 +27,45 @@ class BadgeProvider with ChangeNotifier {
 
     // 3. 업적 조건 정의 -> 업적명 이름 어떻게 할까?? 고민 필요,,,
     final Map<String, List<Map<String, dynamic>>> achievementRules = {
+      "한국소설": [
+        {"count": 1, "achievement": "판타지 입문자"},
+        {"count": 5, "achievement": "판타지 마스터"},
+      ],
+      "세계의 소설": [
+        {"count": 1, "achievement": "공포 입문자"},
+        {"count": 5, "achievement": "공포 즐겜러"},
+      ],
+      "추리/미스터리소설": [
+        {"count": 1, "achievement": "판타지 입문자"},
+        {"count": 5, "achievement": "판타지 마스터"},
+      ],
       "판타지/환상문학": [
-        {"count": 5, "achievement": "판타지 입문자"},
-        {"count": 10, "achievement": "판타지 마스터"},
+        {"count": 1, "achievement": "판타지 입문자"},
+        {"count": 5, "achievement": "판타지 마스터"},
+      ],
+      "역사소설": [
+        {"count": 1, "achievement": "판타지 입문자"},
+        {"count": 5, "achievement": "판타지 마스터"},
+      ],
+      "과학소설": [
+        {"count": 1, "achievement": "판타지 입문자"},
+        {"count": 5, "achievement": "판타지 마스터"},
       ],
       "호러.공포소설": [
-        {"count": 5, "achievement": "공포 입문자"},
-        {"count": 10, "achievement": "공포 즐겜러"},
+        {"count": 1, "achievement": "공포 입문자"},
+        {"count": 5, "achievement": "공포 즐겜러"},
+      ],
+      "무협소설": [
+        {"count": 1, "achievement": "판타지 입문자"},
+        {"count": 5, "achievement": "판타지 마스터"},
+      ],
+      "액션/스릴러소설": [
+        {"count": 1, "achievement": "판타지 입문자"},
+        {"count": 5, "achievement": "판타지 마스터"},
+      ],
+      "로맨스소설": [
+        {"count": 1, "achievement": "판타지 입문자"},
+        {"count": 5, "achievement": "판타지 마스터"},
       ],
     };
 
