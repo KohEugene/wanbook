@@ -1,12 +1,12 @@
-// 사용자 provider 정의
-import 'package:flutter/cupertino.dart';
-
+import 'package:flutter/material.dart';
 import '../model/user_model.dart';
 
 class UserProvider extends ChangeNotifier {
   UserModel? _user;
 
   UserModel? get user => _user;
+
+  String? get userId => _user?.userId;
 
   void setUser(UserModel user) {
     _user = user;
@@ -16,7 +16,7 @@ class UserProvider extends ChangeNotifier {
   void updateUserNickname(String newNickname) {
     if (_user != null) {
       _user = _user!.copyWith(nickname: newNickname);
-      notifyListeners(); // UI 자동 갱신
+      notifyListeners();
     }
   }
 

@@ -1,3 +1,4 @@
+// 서재 모델
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserBookModel {
@@ -9,8 +10,9 @@ class UserBookModel {
   final DateTime updatedAt;
   final DateTime? completedAt;
   final int chatClick;
+  final List<String> tags;
 
-  UserBookModel({
+  const UserBookModel({
     required this.bookId,
     required this.lastPosition,
     required this.isCompleted,
@@ -19,10 +21,17 @@ class UserBookModel {
     this.completedAt,
     this.maxScroll,
     this.chatClick = 0,
+    this.tags = const [],
   });
 
   factory UserBookModel.fromDocument(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
+    List<String> t = const [];
+    if (data['tags'] is List) {
+      t = List<String>.from(data['tags']);
+    } else if (data['tag'] is String) {
+      t = [data['tag'] as String];
+    }
     return UserBookModel(
       bookId: data['book_id'] ?? '',
       lastPosition: (data['last_position'] as num?)?.toDouble(),
@@ -34,6 +43,7 @@ class UserBookModel {
           ? (data['end_date'] as Timestamp).toDate()
           : null,
       chatClick: data['chat_click'] ?? 0,
+      tags: t,
     );
   }
 
@@ -47,6 +57,7 @@ class UserBookModel {
       'update_date': Timestamp.fromDate(updatedAt),
       'end_date': completedAt != null ? Timestamp.fromDate(completedAt!) : null,
       'chat_click': chatClick,
+      'tags': tags,
     };
   }
 }
