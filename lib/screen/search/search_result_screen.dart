@@ -20,25 +20,37 @@ class SearchResultScreen extends StatefulWidget {
 }
 
 class _SearchResultScreenState extends State<SearchResultScreen> {
-
   late TextEditingController _searchController;
+
+  /// 검색 Future (로딩/완료/에러 제어)
+  late Future<void> _searchFuture;
 
   @override
   void initState() {
     super.initState();
-
     _searchController = TextEditingController(text: widget.searchKeyword);
+    _runSearch(widget.searchKeyword); // 첫 진입 시 검색
+  }
 
+  /// 검색 실행(같은 화면에서 재사용)
+  void _runSearch(String keyword) {
+    final viewModel = context.read<SearchProvider>();
+    viewModel.clearResults();
+
+    // 검색 Future: timeout + catchError 로 무한 로딩/에러 팝업 방지
+    setState(() {
+      _searchFuture = viewModel
+          .searchBooks(keyword)
+          .timeout(const Duration(seconds: 8))
+          .catchError((_) {});
+    });
+
+    // 최근 검색어 저장 (비동기)
     Future.microtask(() async {
-      final viewModel = Provider.of<SearchProvider>(context, listen: false);
-      viewModel.clearResults();
-      viewModel.searchBooks(widget.searchKeyword);
-
-      // 최근 검색어 저장
-      final userId = Provider.of<UserProvider>(context, listen: false).user?.userId ?? '';
-      final recentSearchProvider = Provider.of<RecentSearchProvider>(context, listen: false);
-      recentSearchProvider.setUserId(userId);
-      await recentSearchProvider.saveRecentSearch(widget.searchKeyword);
+      final userId = context.read<UserProvider>().user?.userId ?? '';
+      final recent = context.read<RecentSearchProvider>();
+      recent.setUserId(userId);
+      await recent.saveRecentSearch(keyword);
     });
   }
 
@@ -50,88 +62,93 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final searchProvider = Provider.of<SearchProvider>(context);
-    final isloading = searchProvider.isLoading;
-    final book = searchProvider.searchResult;
+    final searchProvider = context.watch<SearchProvider>();
 
     return Scaffold(
       body: SafeArea(
         child: GestureDetector(
           behavior: HitTestBehavior.translucent,
-          onTap: () {
-            FocusScope.of(context).unfocus();
-          },
-          child: isloading
-              ? Center(
-                  child: CircularProgressIndicator(
-                    color: Color(0xff0077FF),
-                  ),
-                )
-              : SingleChildScrollView(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.05),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        SizedBox(height: 24),
-                        buildSearchBar(context),
-                        
-                        if (book == null) ...[
-                          SizedBox(height: 140),
-                          Container(
-                            width: double.infinity,
-                            color: Colors.white,
-                            child: Column(
-                              children: [
-                                SvgPicture.asset('assets/images/no_result.svg', height: 170),
-                                const SizedBox(height: 16),
-                                const Text(
-                                  '검색 결과가 없습니다',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w600,
-                                    color: Color(0xff777777),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ] else ...[
-                          SizedBox(height: 24),
-                          buildBookCover(book.imagePath),
-                          SizedBox(height: 24),
-                          buildBookInfo(book.title, book.author, book.description),
-                          SizedBox(height: 24),
-                          buildAddButton(context, book.title),
-                        ],
-                        SizedBox(height: 24),
+          onTap: () => FocusScope.of(context).unfocus(),
+          child: FutureBuilder<void>(
+            future: _searchFuture,
+            builder: (context, snapshot) {
+              // 1) 로딩
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child: CircularProgressIndicator(color: Color(0xff0077FF)),
+                );
+              }
+
+              // 2) 완료(또는 에러) → 결과 유무에 따라 분기
+              final book = searchProvider.searchResult;
+
+              return SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.05),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const SizedBox(height: 24),
+                      _buildSearchBar(),
+                      if (book == null) ...[
+                        const SizedBox(height: 140),
+                        _noResultBox(), // ← 에러여도/0건이어도 이 UI 노출
+                      ] else ...[
+                        const SizedBox(height: 24),
+                        _buildBookCover(book.imagePath),
+                        const SizedBox(height: 24),
+                        _buildBookInfo(book.title, book.author, book.description),
+                        const SizedBox(height: 24),
+                        _buildAddButton(context, book.title),
                       ],
-                    ),
+                      const SizedBox(height: 24),
+                    ],
                   ),
                 ),
+              );
+            },
+          ),
         ),
       ),
     );
   }
 
+  // ====== 공통 UI ======
+  Widget _noResultBox() => Container(
+        width: double.infinity,
+        color: Colors.white,
+        child: Column(
+          children: [
+            SvgPicture.asset('assets/images/no_result.svg', height: 170),
+            const SizedBox(height: 16),
+            const Text(
+              '검색 결과가 없습니다',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Color(0xff777777),
+              ),
+            ),
+          ],
+        ),
+      );
+
   // 검색창
-  Widget buildSearchBar(BuildContext context) {
+  Widget _buildSearchBar() {
     return Row(
       children: [
         IconButton(
-          icon: Icon(Icons.chevron_left_rounded),
+          icon: const Icon(Icons.chevron_left_rounded),
           color: Colors.black,
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          onPressed: () => Navigator.pop(context),
         ),
-        SizedBox(width: 8,),
+        const SizedBox(width: 8),
         Expanded(
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
             height: 56,
             decoration: BoxDecoration(
-              color: Color(0xffF8F8F8),
+              color: const Color(0xffF8F8F8),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
@@ -139,8 +156,8 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
                 Expanded(
                   child: TextField(
                     controller: _searchController,
-                    cursorColor: Color(0xff0077FF),
-                    decoration: InputDecoration(
+                    cursorColor: const Color(0xff0077FF),
+                    decoration: const InputDecoration(
                       hintText: '검색어를 입력해 주세요',
                       hintStyle: TextStyle(
                         color: Color(0xff777777),
@@ -150,41 +167,35 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
                       border: InputBorder.none,
                       contentPadding: EdgeInsets.symmetric(horizontal: 8),
                     ),
+                    onSubmitted: (value) {
+                      if (value.trim().isNotEmpty) {
+                        _runSearch(value.trim());
+                      }
+                    },
                   ),
                 ),
                 if (_searchController.text.isNotEmpty)
                   GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _searchController.clear();
-                      });
-                    },
+                    onTap: () => setState(_searchController.clear),
                     child: Container(
                       width: 24,
                       height: 24,
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         color: Color(0xffD9D9D9),
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(
-                        Icons.close_rounded,
-                        size: 16,
-                        color: Color(0xff777777),
-                      ),
+                      child: const Icon(Icons.close_rounded, size: 16, color: Color(0xff777777)),
                     ),
                   ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 IconButton(
-                  icon: Icon(Icons.search, color: Color(0xff777777)),
+                  icon: const Icon(Icons.search, color: Color(0xff777777)),
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SearchResultScreen(
-                          searchKeyword: _searchController.text,
-                        ),
-                      ),
-                    );
+                    final keyword = _searchController.text.trim();
+                    if (keyword.isNotEmpty) {
+                      FocusScope.of(context).unfocus();
+                      _runSearch(keyword); // ← 같은 화면에서 재검색
+                    }
                   },
                 ),
               ],
@@ -196,13 +207,13 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
   }
 
   // 책 이미지
-  Widget buildBookCover(String? imagePath) {
+  Widget _buildBookCover(String? imagePath) {
     return Center(
       child: Container(
         width: 220,
         height: 300,
         decoration: BoxDecoration(
-          color: Color(0xffD9D9D9),
+          color: const Color(0xffD9D9D9),
           borderRadius: BorderRadius.circular(8),
           image: imagePath != null
               ? DecorationImage(
@@ -216,36 +227,33 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
   }
 
   // 책 정보
-  Widget buildBookInfo(String? title, String? author, String? description) {
+  Widget _buildBookInfo(String? title, String? author, String? description) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
       decoration: BoxDecoration(
-        color: Color(0xffF8F8F8),
+        color: const Color(0xffF8F8F8),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Padding(
-        padding: EdgeInsets.only(left: 8),
+        padding: const EdgeInsets.only(left: 8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (title != null && title.isNotEmpty)
-              Text(
-                title,
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
-              ),
-            SizedBox(height: 8),
+              Text(title, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w600)),
+            const SizedBox(height: 8),
             if (author != null && author.isNotEmpty)
               Text(
                 '$author 저자(글)',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.black),
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Colors.black),
               ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Text(
               (description != null && description.isNotEmpty)
                   ? description
                   : '해당 도서에 대한 설명이 없습니다.',
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Color(0xff777777)),
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: Color(0xff777777)),
             ),
           ],
         ),
@@ -254,14 +262,13 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
   }
 
   // 내 서재 추가 버튼
-  Widget buildAddButton(BuildContext context, String bookId) {
+  Widget _buildAddButton(BuildContext context, String bookId) {
     return SizedBox(
       width: double.infinity,
       height: 50,
       child: OutlinedButton(
         onPressed: () async {
-          final success = await Provider.of<UserBookProvider>(context, listen: false)
-            .addBook(context, bookId: bookId);
+          final success = await context.read<UserBookProvider>().addBook(context, bookId: bookId);
 
           showDialog(
             context: context,
@@ -272,13 +279,13 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
                   : '이미 서재에 도서가 있어요.';
 
               return AlertDialog(
-                backgroundColor: Color(0xffF8F8F8),
+                backgroundColor: const Color(0xffF8F8F8),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
                 title: Text(
                   title,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
                     color: Color(0xff0077FF),
@@ -286,7 +293,7 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
                 ),
                 content: Text(
                   content,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w400,
                     color: Color(0xff777777),
@@ -294,24 +301,19 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
                 ),
                 actions: [
                   TextButton(
-                    onPressed: () {
-                      Navigator.pop(context); // 단순 닫기
-                    },
-                    style: TextButton.styleFrom(
-                      foregroundColor: Color(0xff777777),
-                    ),
-                    child: Text('머무르기'),
+                    onPressed: () => Navigator.pop(context),
+                    style: TextButton.styleFrom(foregroundColor: const Color(0xff777777)),
+                    child: const Text('머무르기'),
                   ),
                   TextButton(
                     onPressed: () {
-                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
-                        return MenuBottom(initialIndex: 2,);
-                      },));
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => const MenuBottom(initialIndex: 2)),
+                      );
                     },
-                    style: TextButton.styleFrom(
-                      foregroundColor: Color(0xff0077FF),
-                    ),
-                    child: Text('서재로 이동'),
+                    style: TextButton.styleFrom(foregroundColor: const Color(0xff0077FF)),
+                    child: const Text('서재로 이동'),
                   ),
                 ],
               );
@@ -319,21 +321,16 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
           );
         },
         style: OutlinedButton.styleFrom(
-          foregroundColor: Color(0xff0077FF),
-          backgroundColor: Color(0xffCCE4FF),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          foregroundColor: const Color(0xff0077FF),
+          backgroundColor: const Color(0xffCCE4FF),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           elevation: 0,
           shadowColor: Colors.transparent,
-          side: BorderSide(color: Colors.transparent)
+          side: const BorderSide(color: Colors.transparent),
         ),
-        child: Text(
+        child: const Text(
           '내 서재에 추가',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
       ),
     );
