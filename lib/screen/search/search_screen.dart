@@ -155,7 +155,7 @@ class _SearchScreenState extends State<SearchScreen> {
       recentSearches,
       showClear: true,
       onClear: () async {
-        final provider = RecentSearchProvider();
+        final provider = Provider.of<RecentSearchProvider>(context, listen: false);
         await provider.clearRecentSearches();
         await loadRecentSearches();
       },
