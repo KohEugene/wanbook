@@ -1,6 +1,8 @@
 
 // 내 프로필 메인 화면
 
+import 'dart:math' as math;
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +14,7 @@ import 'package:wanbook/screen/login/login_screen.dart';
 import 'package:wanbook/screen/profile/badge_screen.dart';
 import 'package:wanbook/shared/pop_up.dart';
 
+import '../../provider/badge_provider.dart';
 import '../../provider/user_book_provider.dart';
 import '../../provider/user_provider.dart';
 import '../../shared/size_config.dart';
@@ -41,6 +44,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
       'image': 'assets/images/b_eye.png',
     },
   };
+
+  late Future<List<BadgeItem>> _badgesFuture;
+  late Future<List<MonthlyRecordItem>> _monthlyFuture;
+
+  // 월간, 업적 배지 기본 UI 세팅
+  static const _monthlyCross      = 3;
+  static const _monthlyMainSpace  = 16.0;
+  static const _monthlyCrossSpace = 14.0;
+  static const _monthlyAspect     = 0.8;
+
+  static const _achieveCross      = 3;
+  static const _achieveMainSpace  = 16.0;
+  static const _achieveCrossSpace = 14.0;
+  static const _achieveAspect     = 0.53;
 
   @override
   void initState() {
@@ -374,6 +391,145 @@ class _ProfileScreenState extends State<ProfileScreen> {
           )
         ],
       ),
+    );
+  }
+
+  // 공통 UI
+  Widget _loadingBox() => Container(
+    width: SizeConfig.screenWidth * 0.9,
+    alignment: Alignment.center,
+    padding: const EdgeInsets.symmetric(vertical: 32),
+    child: const CircularProgressIndicator(),
+  );
+
+  Widget _errorBox(String message) => Container(
+    width: SizeConfig.screenWidth * 0.9,
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: const Color(0xffFCEBEA),
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: Text("배지를 불러오는 중 오류가 발생했습니다.\n$message"),
+  );
+
+  // 태그명 두줄 분리
+  (String, String?) _splitStageTitle(String title) {
+    final m = RegExp(r'\s+(입문자|베테랑|정복자)$').firstMatch(title);
+    if (m != null) {
+      final primary = title.substring(0, m.start).trim();
+      final secondary = m.group(1)!;
+      return (primary, secondary);
+    }
+    return (title, null);
+  }
+
+  // 공통 UI (SVG, 글씨)
+  Widget _iconOnlyTile(bool isLocked, {String? svgAsset, double scale = 1.0}) {
+    return LayoutBuilder(
+      builder: (context, c) {
+        final side = math.min(c.maxWidth, c.maxHeight);
+        final icon = side * scale;
+        return Center(
+          child: SizedBox(
+            width: side,
+            height: side,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                if (svgAsset != null)
+                  SvgPicture.asset(
+                    svgAsset,
+                    width: icon,
+                    height: icon,
+                    fit: BoxFit.contain,
+                    colorFilter: isLocked
+                        ? const ColorFilter.mode(Color(0xFF777777), BlendMode.srcIn)
+                        : null,
+                  ),
+                if (isLocked)
+                  const Icon(Icons.lock, size: 18, color: Color(0xFF555555)),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // 월간 기록 부분
+  Widget _monthlyTile(MonthlyRecordItem item) {
+    return Column(
+      children: [
+        Expanded(
+          flex: 8,
+          child: _iconOnlyTile(!item.unlocked, svgAsset: item.asset, scale: 0.9),
+        ),
+        const SizedBox(height: 4),
+        Expanded(
+          flex: 2,
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: Text(
+              item.title,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: Color(0xff777777),
+                fontWeight: FontWeight.w400,
+                fontSize: 11,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // 업적 배지 부분
+  Widget _achievementTile(BadgeItem b) {
+    final (primary, secondary) = _splitStageTitle(b.title);
+    final isLocked = !b.unlocked;
+
+    return Column(
+      children: [
+        Expanded(
+          flex: 8,
+          child: _iconOnlyTile(isLocked, svgAsset: b.asset, scale: 0.94),
+        ),
+        const SizedBox(height: 2),
+        Expanded(
+          flex: 2,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Text(
+                primary,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: Color(0xff777777),
+                  fontWeight: FontWeight.w500,
+                  fontSize: 11,
+                ),
+              ),
+              if (secondary != null)
+                Text(
+                  secondary,
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Color(0xff9A9A9A),
+                    fontWeight: FontWeight.w400,
+                    fontSize: 10,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 

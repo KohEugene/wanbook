@@ -267,8 +267,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 8),
-                    Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                    Text(author, style: const TextStyle(color: Color(0xff777777), fontSize: 14)),
+                    Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                      maxLines: 1, overflow: TextOverflow.ellipsis,),
+                    Text(author, style: const TextStyle(color: Color(0xff777777), fontSize: 14),
+                      maxLines: 1, overflow: TextOverflow.ellipsis,),
                     const SizedBox(height: 16),
                     Text(
                       selectedBook!.description ?? '책 설명이 없습니다.',

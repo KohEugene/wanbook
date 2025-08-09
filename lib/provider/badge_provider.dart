@@ -322,4 +322,18 @@ class BadgeProvider with ChangeNotifier {
 
     return result;
   }
+
+  // 월간 기록 분기별로 끊는 함수 (1-3/4-6/7-9/10-12)
+  List<MonthlyRecordItem> getCurrentQuarterRecords(List<MonthlyRecordItem> allRecords) {
+    final now = DateTime.now();
+    final currentMonth = now.month;
+
+    // 현재 월이 속한 분기 계산
+    int startMonth = ((currentMonth - 1) ~/ 3) * 3 + 1;
+    int endMonth = startMonth + 2;
+
+    return allRecords
+        .where((item) => item.month >= startMonth && item.month <= endMonth)
+        .toList();
+  }
 }
