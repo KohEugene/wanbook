@@ -294,7 +294,7 @@ class BadgeProvider with ChangeNotifier {
       counter[dt.month] = (counter[dt.month] ?? 0) + 1;
     }
 
-    // 각 월 달성 단계 계산(가장 높은 단계로 알아서 업데이트됨)
+    // 각 월 달성 단계 계산
     final List<MonthlyRecordItem> result = [];
     for (var m = 1; m <= 12; m++) {
       final c = counter[m] ?? 0;
@@ -336,4 +336,79 @@ class BadgeProvider with ChangeNotifier {
         .where((item) => item.month >= startMonth && item.month <= endMonth)
         .toList();
   }
+
+  // 프로필 화면에서 보이는 뱃지
+  Future<List<BadgeItem>> getRecentUnlockedBadgesSafe(
+    String userId, {
+    int limit = 3,
+    bool newestFirst = true,
+  }) async {
+    final fs = FirebaseFirestore.instance;
+    final achievementsRef =
+        fs.collection('users').doc(userId).collection('achievements');
+
+    await getUserAchievements(userId);
+
+    // 자물쇠 없는 과거 문서
+    final needBackfill = await achievementsRef
+        .where('unlocked', isEqualTo: true)
+        .where('unlockedAt', isNull: true)
+        .get();
+    if (needBackfill.docs.isNotEmpty) {
+      final batch = fs.batch();
+      for (final d in needBackfill.docs) {
+        batch.set(d.reference, {'unlockedAt': FieldValue.serverTimestamp()},
+            SetOptions(merge: true));
+      }
+      await batch.commit();
+    }
+
+    try {
+      final snap = await achievementsRef
+          .where('unlocked', isEqualTo: true)
+          .orderBy('unlockedAt', descending: newestFirst) // 최신순으로 업뎃됨
+          .limit(limit)
+          .get();
+
+      return snap.docs.map((d) {
+        final m = d.data();
+        return BadgeItem(
+          id: (m['id'] as String?) ?? d.id,
+          title: (m['title'] as String?) ?? '',
+          asset: (m['asset'] as String?) ?? '',
+          unlocked: true,
+          tag: (m['tag'] as String?) ?? '',
+          threshold: (m['threshold'] as num?)?.toInt() ?? 0,
+        );
+      }).toList();
+    } catch (e) {
+      final all = await achievementsRef.get();
+      final unlocked = all.docs
+          .map((d) => d.data())
+          .where((m) => (m['unlocked'] as bool?) == true)
+          .toList()
+        ..sort((a, b) {
+          final ta = (a['unlockedAt'] as Timestamp?);
+          final tb = (b['unlockedAt'] as Timestamp?);
+          int cmp;
+          if (ta == null && tb == null) cmp = 0;
+          else if (ta == null)         cmp = 1;
+          else if (tb == null)         cmp = -1;
+          else                         cmp = ta.compareTo(tb);
+          return newestFirst ? -cmp : cmp;
+        });
+
+      return unlocked.take(limit).map((m) {
+        return BadgeItem(
+          id: (m['id'] as String?) ?? '',
+          title: (m['title'] as String?) ?? '',
+          asset: (m['asset'] as String?) ?? '',
+          unlocked: true,
+          tag: (m['tag'] as String?) ?? '',
+          threshold: (m['threshold'] as num?)?.toInt() ?? 0,
+        );
+      }).toList();
+    }
+  }
+
 }

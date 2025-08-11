@@ -1,4 +1,3 @@
-
 // 내 프로필 메인 화면
 
 import 'dart:math' as math;
@@ -45,8 +44,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     },
   };
 
-  late Future<List<BadgeItem>> _badgesFuture;
-  late Future<List<MonthlyRecordItem>> _monthlyFuture;
+  // 뱃지에서 보여줄 아이템들
+  Future<List<BadgeItem>> _recentBadgesFuture = Future.value(const <BadgeItem>[]);
+  Future<List<MonthlyRecordItem>> _monthly3Future = Future.value(const <MonthlyRecordItem>[]);
 
   // 월간, 업적 배지 기본 UI 세팅
   static const _monthlyCross      = 3;
@@ -63,13 +63,69 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
       setState(() {
         nickname = userProvider.user?.nickname ?? '사용자';
-        userId = userProvider.user?.userId ?? '사용자 아이디';
+        userId = userProvider.user?.userId ?? userProvider.userId ?? '사용자 아이디';
         joinDate = userProvider.user?.joinedAt;
       });
+
+      // 최근 획득 배지 3개
+      final uid = userProvider.user?.userId ?? userProvider.userId ?? '';
+      if (uid.isNotEmpty) {
+        final badgeProvider = Provider.of<BadgeProvider>(context, listen: false);
+
+        // 연속 3개월
+        Future<List<MonthlyRecordItem>> buildMonthly3() async {
+          final now = DateTime.now();
+          final curY = now.year;
+          final curM = now.month;
+
+          int prevM = curM - 1, nextM = curM + 1;
+          int prevY = curY, nextY = curY;
+          if (prevM == 0) { prevM = 12; prevY = curY - 1; }
+          if (nextM == 13) { nextM = 1;  nextY = curY + 1; }
+
+          final thisYear = await badgeProvider.getMonthlyRecords(uid, year: curY);
+          List<MonthlyRecordItem> prevYearList = thisYear;
+          List<MonthlyRecordItem> nextYearList = thisYear;
+
+          if (prevY != curY) {
+            prevYearList = await badgeProvider.getMonthlyRecords(uid, year: prevY);
+          }
+          if (nextY != curY) {
+            nextYearList = await badgeProvider.getMonthlyRecords(uid, year: nextY);
+          }
+
+          MonthlyRecordItem pick(List<MonthlyRecordItem> list, int month) {
+            return list.firstWhere(
+              (e) => e.month == month,
+              orElse: () => MonthlyRecordItem(
+                month: month, count: 0, achieved: 0, unlocked: false, asset: null),
+            );
+          }
+
+          final a = pick(prevY == curY ? thisYear : prevYearList, prevM);
+          final b = pick(thisYear, curM);
+          final c = pick(nextY == curY ? thisYear : nextYearList, nextM);
+          
+          return [a, b, c];
+        }
+
+        final badgesF = badgeProvider.getRecentUnlockedBadgesSafe(uid, limit: 3);
+        final monthlyF = buildMonthly3();
+
+        setState(() {
+          _recentBadgesFuture = badgesF;
+          _monthly3Future = monthlyF;
+        });
+      } else {
+        setState(() {
+          _recentBadgesFuture = Future.value(const <BadgeItem>[]);
+          _monthly3Future = Future.value(const <MonthlyRecordItem>[]);
+        });
+      }
     });
 
     Future.microtask(() async {
@@ -245,7 +301,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget readingStatus() {
-    String elapsedDaysStr = formatElapsedTime(joinDate!);
+    String elapsedDaysStr = formatElapsedTime(joinDate ?? DateTime.now());
 
     return Container(
       width: SizeConfig.screenWidth * 0.9,
@@ -486,7 +542,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // 업적 배지 부분
+  // 뱃지 제목
   Widget _achievementTile(BadgeItem b) {
     final (primary, secondary) = _splitStageTitle(b.title);
     final isLocked = !b.unlocked;
@@ -495,7 +551,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       children: [
         Expanded(
           flex: 8,
-          child: _iconOnlyTile(isLocked, svgAsset: b.asset, scale: 0.94),
+          child: _iconOnlyTile(isLocked, svgAsset: b.asset, scale: 0.88),
         ),
         const SizedBox(height: 2),
         Expanded(
@@ -572,17 +628,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  // 월간 기록 뱃지
   Widget monthlyRecord() {
     return Container(
       width: SizeConfig.screenWidth * 0.9,
-      height: 166,
-      padding: EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
           color: Color(0xffF8F8F8),
           borderRadius: BorderRadius.circular(16)
       ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
@@ -617,82 +672,155 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ]
           ),
-          SizedBox(height: 8,),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                recordBadge('1월', false),
-                recordBadge('2월', false),
-                recordBadge('3월', false),
-                recordBadge('4월', true)
-              ],
-            ),
-          )
+          const SizedBox(height: 12),
+          // 현재 달 기준으로 연속 세 달
+          FutureBuilder<List<MonthlyRecordItem>>(
+            future: _monthly3Future,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return GridView.count(
+                  crossAxisCount: _monthlyCross,      
+                  mainAxisSpacing: _monthlyMainSpace,
+                  crossAxisSpacing: _monthlyCrossSpace,
+                  childAspectRatio: _monthlyAspect,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: const [SizedBox.shrink(), SizedBox.shrink(), SizedBox.shrink()],
+                );
+              }
+              if (snapshot.hasError) {
+                return Text(
+                  '월간 기록을 불러오는 중 오류가 발생했습니다.\n${snapshot.error}',
+                  style: const TextStyle(color: Color(0xff777777), fontSize: 12),
+                );
+              }
+
+              final items = snapshot.data ?? const <MonthlyRecordItem>[];
+              if (items.isEmpty) {
+                return const Text(
+                  '아직 월간 기록이 없어요.',
+                  style: TextStyle(color: Color(0xff777777), fontSize: 12),
+                );
+              }
+
+              return GridView.builder(
+                itemCount: items.length,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: _monthlyCross,
+                  mainAxisSpacing: _monthlyMainSpace,
+                  crossAxisSpacing: _monthlyCrossSpace,
+                  childAspectRatio: _monthlyAspect,
+                ),
+                itemBuilder: (_, i) => _monthlyTile(items[i]),
+              );
+            },
+          ),
         ],
       ),
     );
   }
 
+  // 업적 배지
   Widget achieveBadge() {
     return Container(
       width: SizeConfig.screenWidth * 0.9,
-      height: 166,
-      padding: EdgeInsets.symmetric(horizontal: 16),
+      constraints: const BoxConstraints(minHeight: 180),
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
       decoration: BoxDecoration(
-          color: Color(0xffF8F8F8),
-          borderRadius: BorderRadius.circular(16)
+        color: const Color(0xffF8F8F8),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('업적 배지', style: TextStyle(
+              const Text(
+                '업적 배지',
+                style: TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.w600,
-                  fontSize: 16),
+                  fontSize: 16,
+                ),
               ),
-              TextButton(onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) {
-                  return BadgeScreen();
-                },));
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const BadgeScreen()),
+                  );
                 },
                 style: ButtonStyle(
-                  overlayColor: WidgetStateColor.resolveWith((states) => Colors.transparent,)
+                  overlayColor: WidgetStateColor.resolveWith((_) => Colors.transparent),
                 ),
-                child: Row(
+                child: const Row(
                   children: [
-                    Text('더보기', style: TextStyle(
+                    Text('더보기',
+                      style: TextStyle(
                         color: Color(0xff777777),
                         fontWeight: FontWeight.w400,
-                        fontSize: 14),
+                        fontSize: 14,
+                      ),
                     ),
                     Icon(Icons.chevron_right_rounded,
-                      color: Color(0xff777777),
-                      size: 14,
-                    )
+                        color: Color(0xff777777), size: 14),
                   ],
                 ),
               ),
-            ]
+            ],
           ),
-          SizedBox(height: 8,),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                recordBadge('업적 명', false),
-                recordBadge('업적 명', false),
-                recordBadge('업적 명', false),
-                recordBadge('업적 명', true)
-              ],
-            ),
-          )
+          const SizedBox(height: 12),
+          FutureBuilder<List<BadgeItem>>(
+            future: _recentBadgesFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return GridView.count(
+                  crossAxisCount: 3,
+                  mainAxisSpacing: 16.0,
+                  crossAxisSpacing: 14.0,
+                  childAspectRatio: 0.50,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: const [
+                    SizedBox.shrink(), SizedBox.shrink(), SizedBox.shrink(),
+                  ],
+                );
+              }
+              if (snapshot.hasError) {
+                return Text(
+                  '배지를 불러오는 중 오류가 발생했습니다.\n${snapshot.error}',
+                  style: const TextStyle(color: Color(0xff777777), fontSize: 12),
+                );
+              }
+
+              final badges = (snapshot.data ?? const <BadgeItem>[]);
+              if (badges.isEmpty) {
+                // 아무 배지도 없으면 비워두거나 안내 문구
+                return const Text(
+                  '아직 획득한 배지가 없어요.',
+                  style: TextStyle(color: Color(0xff777777), fontSize: 12),
+                );
+              }
+
+              final view = badges.take(3).toList();
+
+              return GridView.builder(
+                itemCount: view.length,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: _achieveCross,        
+                  mainAxisSpacing: _achieveMainSpace,
+                  crossAxisSpacing: _achieveCrossSpace,
+                  childAspectRatio: _achieveAspect,        
+                ),
+                itemBuilder: (_, i) => _achievementTile(view[i]),
+              );
+            },
+          ),
         ],
       ),
     );
