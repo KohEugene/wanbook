@@ -13,6 +13,7 @@ import 'package:wanbook/screen/login/login_screen.dart';
 import 'package:wanbook/screen/profile/badge_screen.dart';
 import 'package:wanbook/shared/pop_up.dart';
 
+import '../../model/book_model.dart';
 import '../../provider/badge_provider.dart';
 import '../../provider/user_book_provider.dart';
 import '../../provider/user_provider.dart';
@@ -146,6 +147,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return '$elapsedDays일째';
   }
 
+  String formatDuration(Duration duration) {
+    if (duration.inDays > 0) {
+      return '${duration.inDays}일';
+    } else if (duration.inHours > 0) {
+      return '${duration.inHours}시간';
+    } else {
+      return '${duration.inMinutes}분';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -168,14 +179,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   SizedBox(height: 16,),
                   chatWithChackmeong(),
                   SizedBox(height: 16,),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(child: readingCard('가장 빨리 읽었어요', '아몬드', '3시간 독서')),
-                      SizedBox(width: 16,),
-                      Expanded(child: readingCard('가장 오래 읽었어요', '눈먼 자들의 도시', '1개월 독서'))
-                    ],
-                  ),
+                  readingCard(),
                   SizedBox(height: 16,),
                   monthlyRecord(),
                   SizedBox(height: 16,),
@@ -390,83 +394,129 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget readingCard(String section, String title, String duration) {
-    final bookData = bookInfoMap[title];
-    final author = bookData?['author'] ?? '작가 미상';
-    final imagePath = bookData?['image'];
+  Widget readingCard() {
+    final userBookProvider = Provider.of<UserBookProvider>(context);
+    BookModel? longestReadBook = userBookProvider.longestReadBook;
+    BookModel? shortestReadBook = userBookProvider.shortestReadBook;
 
-    return Container(
-      width: SizeConfig.screenWidth * 0.45,
-      height: 270,
-      padding: EdgeInsets.all(16),
-      decoration: BoxDecoration(
-          color: Color(0xffF8F8F8),
-          borderRadius: BorderRadius.circular(16)
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(section, style: TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.w600,
-              fontSize: 16),
+    // 둘 다 없는 경우
+    if (longestReadBook == null || shortestReadBook == null) {
+      return SizedBox.shrink();
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Container(
+          width: SizeConfig.screenWidth * 0.45,
+          height: 270,
+          padding: EdgeInsets.all(16),
+          decoration: BoxDecoration(
+              color: Color(0xffF8F8F8),
+              borderRadius: BorderRadius.circular(16)
           ),
-          SizedBox(height: 8,),
-          Container(
-            width: 100, height: 140,
-            decoration: BoxDecoration(
-                color: Color(0xffD9D9D9),
-                borderRadius: BorderRadius.circular(8),
-                image: imagePath != null
-                    ? DecorationImage(
-                  image: AssetImage(imagePath),
-                  fit: BoxFit.cover,
-                )
-                    : null,
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('가장 빨리 읽었어요', style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16),
+              ),
+              SizedBox(height: 8,),
+              Container(
+                width: 100, height: 140,
+                decoration: BoxDecoration(
+                    color: Color(0xffD9D9D9),
+                    borderRadius: BorderRadius.circular(8),
+                    image: shortestReadBook?.imagePath != null
+                        ? DecorationImage(
+                      image: AssetImage(shortestReadBook!.imagePath!),
+                      fit: BoxFit.cover,
+                    )
+                        : null,
+                ),
+              ),
+              SizedBox(height: 8,),
+              Text(shortestReadBook!.title, style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
+              Text(shortestReadBook!.author, style: TextStyle(
+                  color: Color(0xff777777),
+                  fontWeight: FontWeight.w400,
+                  fontSize: 12),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
+              Text(formatDuration(userBookProvider.shortestReadDuration!), style: TextStyle(
+                  color: Color(0xff777777),
+                  fontWeight: FontWeight.w400,
+                  fontSize: 11)
+              )
+            ],
           ),
-          SizedBox(height: 8,),
-          Text(title, style: TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.w600,
-              fontSize: 14),
-            overflow: TextOverflow.ellipsis,
-            maxLines: 1,
+        ),
+        SizedBox(width: 16,),
+        Container(
+          width: SizeConfig.screenWidth * 0.45,
+          height: 270,
+          padding: EdgeInsets.all(16),
+          decoration: BoxDecoration(
+              color: Color(0xffF8F8F8),
+              borderRadius: BorderRadius.circular(16)
           ),
-          Text(author, style: TextStyle(
-              color: Color(0xff777777),
-              fontWeight: FontWeight.w400,
-              fontSize: 12),
-            overflow: TextOverflow.ellipsis,
-            maxLines: 1,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('가장 오래 읽었어요', style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16),
+              ),
+              SizedBox(height: 8,),
+              Container(
+                width: 100, height: 140,
+                decoration: BoxDecoration(
+                  color: Color(0xffD9D9D9),
+                  borderRadius: BorderRadius.circular(8),
+                  image: longestReadBook?.imagePath != null
+                      ? DecorationImage(
+                    image: AssetImage(longestReadBook!.imagePath!),
+                    fit: BoxFit.cover,
+                  )
+                      : null,
+                ),
+              ),
+              SizedBox(height: 8,),
+              Text(longestReadBook!.title, style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
+              Text(longestReadBook!.author, style: TextStyle(
+                  color: Color(0xff777777),
+                  fontWeight: FontWeight.w400,
+                  fontSize: 12),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
+              Text(formatDuration(userBookProvider.longestReadDuration!), style: TextStyle(
+                  color: Color(0xff777777),
+                  fontWeight: FontWeight.w400,
+                  fontSize: 11)
+              )
+            ],
           ),
-          Text(duration, style: TextStyle(
-              color: Color(0xff777777),
-              fontWeight: FontWeight.w400,
-              fontSize: 11)
-          )
-        ],
-      ),
+        ),
+      ],
     );
   }
-
-  // 공통 UI
-  Widget _loadingBox() => Container(
-    width: SizeConfig.screenWidth * 0.9,
-    alignment: Alignment.center,
-    padding: const EdgeInsets.symmetric(vertical: 32),
-    child: const CircularProgressIndicator(),
-  );
-
-  Widget _errorBox(String message) => Container(
-    width: SizeConfig.screenWidth * 0.9,
-    padding: const EdgeInsets.all(16),
-    decoration: BoxDecoration(
-      color: const Color(0xffFCEBEA),
-      borderRadius: BorderRadius.circular(12),
-    ),
-    child: Text("배지를 불러오는 중 오류가 발생했습니다.\n$message"),
-  );
 
   // 태그명 두줄 분리
   (String, String?) _splitStageTitle(String title) {
@@ -632,7 +682,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget monthlyRecord() {
     return Container(
       width: SizeConfig.screenWidth * 0.9,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
       decoration: BoxDecoration(
           color: Color(0xffF8F8F8),
           borderRadius: BorderRadius.circular(16)
@@ -672,7 +722,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ]
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           // 현재 달 기준으로 연속 세 달
           FutureBuilder<List<MonthlyRecordItem>>(
             future: _monthly3Future,
@@ -727,7 +777,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Container(
       width: SizeConfig.screenWidth * 0.9,
       constraints: const BoxConstraints(minHeight: 180),
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
       decoration: BoxDecoration(
         color: const Color(0xffF8F8F8),
         borderRadius: BorderRadius.circular(16),
@@ -772,7 +822,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           FutureBuilder<List<BadgeItem>>(
             future: _recentBadgesFuture,
             builder: (context, snapshot) {

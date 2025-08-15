@@ -41,7 +41,7 @@ class _FinishBookScreenState extends State<FinishBookScreen> {
     List<int> completedIndexes = [];
     for (int i = 0; i < allBooks.length; i++) {
       final userBook = allBooks[i]['userBook'] as UserBookModel;
-      if ((userBook.lastPosition ?? 0.0) >= 0.999) {
+      if ((userBook.lastPosition ?? 0.0) >= 0.995) {
         completedIndexes.add(i);
       }
     }

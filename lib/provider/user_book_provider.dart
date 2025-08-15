@@ -15,6 +15,11 @@ class UserBookProvider with ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
+  BookModel? longestReadBook;
+  Duration? longestReadDuration;
+  BookModel? shortestReadBook;
+  Duration? shortestReadDuration;
+
   // 서재에 책 추가하기
   Future<bool> addBook(BuildContext context, {required String bookId}) async {
     final user = Provider.of<UserProvider>(context, listen: false).user;
@@ -82,5 +87,46 @@ class UserBookProvider with ChangeNotifier {
     notifyListeners();
 
     return books;
+  }
+
+  // 가장 오래 읽은 책 & 짧게 읽은 책 계산하기
+  Future<void> calculateBookStats(BuildContext context) async {
+    final user = Provider.of<UserProvider>(context, listen: false).user;
+
+    final booksSnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user?.userId)
+        .collection('reading_books')
+        .get();
+
+    if (booksSnapshot.docs.isEmpty) {
+      return;
+    }
+
+    longestReadBook = null;
+    longestReadDuration = Duration.zero;
+    shortestReadBook = null;
+    shortestReadDuration = Duration(days: 9999);
+
+    for (var doc in booksSnapshot.docs) {
+      final bookData = doc.data() as Map<String, dynamic>;
+
+      final startDate = (bookData['start_date'] as Timestamp).toDate();
+      final endDate = (bookData['end_date'] as Timestamp).toDate();
+
+      final duration = endDate.difference(startDate);
+
+      if (duration > longestReadDuration!) {
+        longestReadDuration = duration;
+        longestReadBook = BookModel.fromDocument(doc); // Book 모델로 변환
+      }
+
+      if (duration < shortestReadDuration!) {
+        shortestReadDuration = duration;
+        shortestReadBook = BookModel.fromDocument(doc);
+      }
+    }
+
+    notifyListeners();
   }
 }
