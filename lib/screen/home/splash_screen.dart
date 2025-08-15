@@ -33,7 +33,7 @@ class _SplashScreenState extends State<SplashScreen> {
     super.initState();
     if (!_hasUploaded) {
       _hasUploaded = true;
-      uploadDemianQuestionsToField();
+      uploadAllBooksQuestions();
     }
     checkLoginStatus();
   }

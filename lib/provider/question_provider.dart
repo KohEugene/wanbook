@@ -5,27 +5,33 @@ import 'package:flutter/material.dart';
 
 class QuestionProvider with ChangeNotifier {
   Future<List<String>> fetchQuestionsByLevel(String bookTitle, int level) async {
-    final docSnapshot = await FirebaseFirestore.instance
+    final doc = await FirebaseFirestore.instance
         .collection('questions')
         .doc(bookTitle)
         .get();
 
-    final data = docSnapshot.data();
-    final items = data?['items'];
+    final data = doc.data();
+    if (data == null) return [];
 
-    final filteredQuestions = <String>[];
+    final items = data['items'];
+    if (items is! Map) return [];
+
+    final List<String> result = [];
 
     items.forEach((key, value) {
-      final itemLevel = value['level'];
-      final questionText = value['questionText'];
+      if (value is Map) {
+        final itemLevel = value['level'];
+        final questionText = value['questionText']?.toString();
+        final int? asInt =
+            (itemLevel is int) ? itemLevel : int.tryParse(itemLevel?.toString() ?? '');
 
-      if ((itemLevel is int && itemLevel == level) ||
-          (itemLevel is String && int.tryParse(itemLevel) == level)) {
-        filteredQuestions.add(questionText);
+        if (asInt == level && questionText != null) {
+          result.add(questionText);
+        }
       }
     });
 
-    return filteredQuestions;
+    return result;
   }
 }
 
