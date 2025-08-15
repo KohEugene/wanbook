@@ -73,6 +73,9 @@ class BadgeProvider with ChangeNotifier {
   /// 월간 기록 단계 (5권, 10권 ...)
   static const List<int> monthlySteps = [5, 10, 15, 20, 25, 30];
 
+  /// ✅ 완독 판정 임계값(요청: 0.995)
+  static const double completionThreshold = 0.995;
+
   // 제목 정규화 (태그 손쉽게 찾기 위함)
   String _normalizeTitle(String input) {
     var s = input.trim();
@@ -245,25 +248,44 @@ class BadgeProvider with ChangeNotifier {
     // 저장된 업적 병합
     final savedSnap = await achievementsRef.get();
     final Map<String, bool> savedUnlocked = {
-      for (final d in savedSnap.docs) d.id: (d.data()['unlocked'] as bool? ?? true),
+      // ✅ 기본값을 false로 (필드 없으면 잠금으로 간주)
+      for (final d in savedSnap.docs) d.id: (d.data()['unlocked'] as bool? ?? false),
     };
 
     final batch = fs.batch();
     int writes = 0;
+
     for (final b in computed) {
-      if (b.unlocked && !savedUnlocked.containsKey(b.id)) {
-        batch.set(achievementsRef.doc(b.id), {
-          'id': b.id,
-          'title': b.title,
-          'asset': b.asset,
-          'tag': b.tag,
-          'threshold': b.threshold,
-          'unlocked': true,
-          'unlockedAt': FieldValue.serverTimestamp(),
-        }, SetOptions(merge: true));
-        writes++;
+      final alreadyHasDoc = savedUnlocked.containsKey(b.id);
+      final prevUnlocked  = savedUnlocked[b.id] ?? false;
+
+      if (b.unlocked) {
+        if (!alreadyHasDoc) {
+          // ✅ 새로 획득 → 문서 생성
+          batch.set(achievementsRef.doc(b.id), {
+            'id': b.id,
+            'title': b.title,
+            'asset': b.asset,
+            'tag': b.tag,
+            'threshold': b.threshold,
+            'unlocked': true,
+            'unlockedAt': FieldValue.serverTimestamp(),
+          }, SetOptions(merge: true));
+          writes++;
+        } else if (!prevUnlocked) {
+          // ✅ 기존에 있었지만 잠겨있던 배지가 이번에 열림 → 업데이트
+          batch.set(achievementsRef.doc(b.id), {
+            'unlocked': true,
+            'unlockedAt': FieldValue.serverTimestamp(),
+          }, SetOptions(merge: true));
+          writes++;
+        }
+        // 이미 true인 경우는 변경 없음
+      } else {
+        // 잠긴 상태는 DB에 동기화하지 않아도 무방 (필요시 'unlocked': false를 쓰면 됨)
       }
     }
+
     if (writes > 0) await batch.commit();
 
     return computed
@@ -286,15 +308,24 @@ class BadgeProvider with ChangeNotifier {
 
     for (final d in snap.docs) {
       final data = d.data();
-      if (data['update_date'] == null) continue;
-      final ts = data['update_date'] as Timestamp;
-      final dt = ts.toDate();
 
+      // ✅ 완독된 항목만 집계: is_completed == true 또는 last_position >= 0.995
+      final lastPos = (data['last_position'] as num?)?.toDouble() ?? 0.0;
+      final isCompleted = (data['is_completed'] as bool?) ?? false;
+      if (!(isCompleted || lastPos >= completionThreshold)) continue;
+
+      // ✅ 가능하면 end_date(완독 시점), 없으면 update_date 사용
+      Timestamp? ts = data['end_date'] as Timestamp?;
+      ts ??= data['update_date'] as Timestamp?;
+      if (ts == null) continue;
+
+      final dt = ts.toDate();
       if (year != null && dt.year != year) continue;
+
       counter[dt.month] = (counter[dt.month] ?? 0) + 1;
     }
 
-    // 각 월 달성 단계 계산
+    // 각 월 달성 단계 계산(가장 높은 단계로 알아서 업데이트됨)
     final List<MonthlyRecordItem> result = [];
     for (var m = 1; m <= 12; m++) {
       final c = counter[m] ?? 0;
@@ -410,5 +441,4 @@ class BadgeProvider with ChangeNotifier {
       }).toList();
     }
   }
-
 }

@@ -8,17 +8,20 @@ class UserModel {
   final String name;
   final String phonenumber;
   final String nickname;
-  final String profileImageUrl;
+
+  final String profileImageBase64;
+
   final DateTime joinedAt;
 
-  UserModel({required this.email,
+  UserModel({
+    required this.email,
     required this.userId,
     required this.userPwd,
     required this.name,
     required this.phonenumber,
     required this.nickname,
-    this.profileImageUrl = '',
-    required this.joinedAt
+    this.profileImageBase64 = '',
+    required this.joinedAt,
   });
 
   UserModel copyWith({
@@ -28,7 +31,7 @@ class UserModel {
     String? name,
     String? phonenumber,
     String? nickname,
-    String? profileImageUrl,
+    String? profileImageBase64,
     DateTime? joinedAt,
   }) {
     return UserModel(
@@ -38,7 +41,7 @@ class UserModel {
       name: name ?? this.name,
       phonenumber: phonenumber ?? this.phonenumber,
       nickname: nickname ?? this.nickname,
-      profileImageUrl: profileImageUrl ?? this.profileImageUrl,
+      profileImageBase64: profileImageBase64 ?? this.profileImageBase64,
       joinedAt: joinedAt ?? this.joinedAt,
     );
   }
@@ -51,8 +54,8 @@ class UserModel {
       name: map['name'] ?? '',
       phonenumber: map['phone_number'] ?? '',
       nickname: map['nickname'] ?? '',
-      profileImageUrl: map['profile_image_url'] ?? '',
-      joinedAt: (map['join_date'] as Timestamp).toDate()
+      profileImageBase64: map['profile_image_base64'] ?? '',
+      joinedAt: (map['join_date'] as Timestamp).toDate(),
     );
   }
 
@@ -63,12 +66,10 @@ class UserModel {
       'name': name,
       'nickname': nickname,
       'phone_number': phonenumber,
-      'profile_image_url': profileImageUrl,
-      'join_date': joinedAt
+      'profile_image_base64': profileImageBase64,
+      'join_date': joinedAt,
     };
   }
 
-  bool isEmpty() {
-    return email.isEmpty || userId.isEmpty || userPwd.isEmpty;
-  }
+  bool isEmpty() => email.isEmpty || userId.isEmpty || userPwd.isEmpty;
 }

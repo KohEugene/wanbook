@@ -50,7 +50,7 @@ class _BookScreenState extends State<BookScreen> with WidgetsBindingObserver{
     final Map<String, String> fileMap = {
       '데미안': 'demian.epub',
       '변신': 'metamorphosis.epub',
-      '인간실격': 'nolongerhuman.epub',
+      '인간 실격': 'nolongerhuman.epub',
       '이방인': 'thestranger.epub',
       '노인과 바다': 'theoldmanandthesea.epub'
     };
