@@ -70,10 +70,10 @@ class BadgeProvider with ChangeNotifier {
   // 업적 배지 단계 (1권: 입문자, 5권: 베테랑, 10권: 정복자)
   static const List<int> thresholds = [1, 5, 10];
 
-  /// 월간 기록 단계 (5권, 10권 ...)
+  // 월간 기록 단계 (5권, 10권 ...)
   static const List<int> monthlySteps = [5, 10, 15, 20, 25, 30];
 
-  /// ✅ 완독 판정 임계값(요청: 0.995)
+  // 완독 판정
   static const double completionThreshold = 0.995;
 
   // 제목 정규화 (태그 손쉽게 찾기 위함)
@@ -248,7 +248,6 @@ class BadgeProvider with ChangeNotifier {
     // 저장된 업적 병합
     final savedSnap = await achievementsRef.get();
     final Map<String, bool> savedUnlocked = {
-      // ✅ 기본값을 false로 (필드 없으면 잠금으로 간주)
       for (final d in savedSnap.docs) d.id: (d.data()['unlocked'] as bool? ?? false),
     };
 
@@ -261,7 +260,6 @@ class BadgeProvider with ChangeNotifier {
 
       if (b.unlocked) {
         if (!alreadyHasDoc) {
-          // ✅ 새로 획득 → 문서 생성
           batch.set(achievementsRef.doc(b.id), {
             'id': b.id,
             'title': b.title,
@@ -273,16 +271,13 @@ class BadgeProvider with ChangeNotifier {
           }, SetOptions(merge: true));
           writes++;
         } else if (!prevUnlocked) {
-          // ✅ 기존에 있었지만 잠겨있던 배지가 이번에 열림 → 업데이트
           batch.set(achievementsRef.doc(b.id), {
             'unlocked': true,
             'unlockedAt': FieldValue.serverTimestamp(),
           }, SetOptions(merge: true));
           writes++;
         }
-        // 이미 true인 경우는 변경 없음
       } else {
-        // 잠긴 상태는 DB에 동기화하지 않아도 무방 (필요시 'unlocked': false를 쓰면 됨)
       }
     }
 
@@ -309,12 +304,10 @@ class BadgeProvider with ChangeNotifier {
     for (final d in snap.docs) {
       final data = d.data();
 
-      // ✅ 완독된 항목만 집계: is_completed == true 또는 last_position >= 0.995
       final lastPos = (data['last_position'] as num?)?.toDouble() ?? 0.0;
       final isCompleted = (data['is_completed'] as bool?) ?? false;
       if (!(isCompleted || lastPos >= completionThreshold)) continue;
 
-      // ✅ 가능하면 end_date(완독 시점), 없으면 update_date 사용
       Timestamp? ts = data['end_date'] as Timestamp?;
       ts ??= data['update_date'] as Timestamp?;
       if (ts == null) continue;

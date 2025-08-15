@@ -22,22 +22,19 @@ class SearchResultScreen extends StatefulWidget {
 class _SearchResultScreenState extends State<SearchResultScreen> {
   late TextEditingController _searchController;
 
-  /// 검색 Future (로딩/완료/에러 제어)
   late Future<void> _searchFuture;
 
   @override
   void initState() {
     super.initState();
     _searchController = TextEditingController(text: widget.searchKeyword);
-    _runSearch(widget.searchKeyword); // 첫 진입 시 검색
+    _runSearch(widget.searchKeyword);
   }
 
-  /// 검색 실행(같은 화면에서 재사용)
   void _runSearch(String keyword) {
     final viewModel = context.read<SearchProvider>();
     viewModel.clearResults();
 
-    // 검색 Future: timeout + catchError 로 무한 로딩/에러 팝업 방지
     setState(() {
       _searchFuture = viewModel
           .searchBooks(keyword)
@@ -45,7 +42,6 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
           .catchError((_) {});
     });
 
-    // 최근 검색어 저장 (비동기)
     Future.microtask(() async {
       final userId = context.read<UserProvider>().user?.userId ?? '';
       final recent = context.read<RecentSearchProvider>();
@@ -72,14 +68,12 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
           child: FutureBuilder<void>(
             future: _searchFuture,
             builder: (context, snapshot) {
-              // 1) 로딩
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(
                   child: CircularProgressIndicator(color: Color(0xff0077FF)),
                 );
               }
 
-              // 2) 완료(또는 에러) → 결과 유무에 따라 분기
               final book = searchProvider.searchResult;
 
               return SingleChildScrollView(
@@ -92,7 +86,7 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
                       _buildSearchBar(),
                       if (book == null) ...[
                         const SizedBox(height: 140),
-                        _noResultBox(), // ← 에러여도/0건이어도 이 UI 노출
+                        _noResultBox(),
                       ] else ...[
                         const SizedBox(height: 24),
                         _buildBookCover(book.imagePath),
@@ -113,7 +107,6 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
     );
   }
 
-  // ====== 공통 UI ======
   Widget _noResultBox() => Container(
         width: double.infinity,
         color: Colors.white,
@@ -194,7 +187,7 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
                     final keyword = _searchController.text.trim();
                     if (keyword.isNotEmpty) {
                       FocusScope.of(context).unfocus();
-                      _runSearch(keyword); // ← 같은 화면에서 재검색
+                      _runSearch(keyword); 
                     }
                   },
                 ),
