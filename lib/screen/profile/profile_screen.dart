@@ -32,10 +32,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   DateTime? joinDate;
   int howManyBook = 0;
 
-  final Map<String, Map<String, String>> bookInfoMap = {
-    '아몬드': {'author': '손원평', 'image': 'assets/images/b_almond.png'},
-    '눈먼 자들의 도시': {'author': '사라마구', 'image': 'assets/images/b_eye.png'},
-  };
+  BookModel? longestReadBook;
+  BookModel? shortestReadBook;
+  Duration? longestReadDuration;
+  Duration? shortestReadDuration;
 
   // 뱃지에서 보여줄 아이템들
   Future<List<BadgeItem>> _recentBadgesFuture =
@@ -58,20 +58,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
 
+    Future.microtask(() async {
+      final viewModel = Provider.of<UserBookProvider>(context, listen: false);
+      final readingCard = await viewModel.calculateBookStats(context);
+      setState(() {
+        shortestReadBook = readingCard?.shortestReadBook;
+        longestReadBook = readingCard?.longestReadBook;
+        shortestReadDuration = readingCard?.shortestReadDuration;
+        longestReadDuration = readingCard?.longestReadDuration;
+      });
+    });
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final viewModel = Provider.of<UserBookProvider>(context, listen: false);
+      final booksData = await viewModel.fetchReadingBooks(context);
       setState(() {
         nickname = userProvider.user?.nickname ?? '사용자';
         userId =
             userProvider.user?.userId ?? userProvider.userId ?? '사용자 아이디';
         joinDate = userProvider.user?.joinedAt;
+        howManyBook = booksData.length;
       });
 
       // 최근 획득 배지 3개
       final uid = userProvider.user?.userId ?? userProvider.userId ?? '';
       if (uid.isNotEmpty) {
         final badgeProvider =
-            Provider.of<BadgeProvider>(context, listen: false);
+        Provider.of<BadgeProvider>(context, listen: false);
 
         // 연속 3개월
         Future<List<MonthlyRecordItem>> buildMonthly3() async {
@@ -91,22 +105,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
           }
 
           final thisYear =
-              await badgeProvider.getMonthlyRecords(uid, year: curY);
+          await badgeProvider.getMonthlyRecords(uid, year: curY);
           List<MonthlyRecordItem> prevYearList = thisYear;
           List<MonthlyRecordItem> nextYearList = thisYear;
 
           if (prevY != curY) {
             prevYearList =
-                await badgeProvider.getMonthlyRecords(uid, year: prevY);
+            await badgeProvider.getMonthlyRecords(uid, year: prevY);
           }
           if (nextY != curY) {
             nextYearList =
-                await badgeProvider.getMonthlyRecords(uid, year: nextY);
+            await badgeProvider.getMonthlyRecords(uid, year: nextY);
           }
 
           MonthlyRecordItem pick(List<MonthlyRecordItem> list, int month) {
             return list.firstWhere(
-              (e) => e.month == month,
+                  (e) => e.month == month,
               orElse: () => MonthlyRecordItem(
                   month: month,
                   count: 0,
@@ -124,7 +138,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         }
 
         final badgesF =
-            badgeProvider.getRecentUnlockedBadgesSafe(uid, limit: 3);
+        badgeProvider.getRecentUnlockedBadgesSafe(uid, limit: 3);
         final monthlyF = buildMonthly3();
 
         setState(() {
@@ -138,15 +152,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         });
       }
     });
-
-    Future.microtask(() async {
-      final viewModel =
-          Provider.of<UserBookProvider>(context, listen: false);
-      final booksData = await viewModel.fetchReadingBooks(context);
-      setState(() {
-        howManyBook = booksData.length;
-      });
-    });
   }
 
   String formatElapsedTime(DateTime joinedAt) {
@@ -154,7 +159,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final difference = now.difference(joinedAt);
     final elapsedDays = difference.inDays + 1;
     return '$elapsedDays일째';
-    }
+  }
 
   String formatDuration(Duration duration) {
     if (duration.inDays > 0) return '${duration.inDays}일';
@@ -172,29 +177,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
         body: SafeArea(
           child: SingleChildScrollView(
               child: Padding(
-            // 양쪽 여백 넣기 (좌우, 상하 기준)
-            padding:
-                EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.05),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 16),
-                userInfoSection(),
-                const SizedBox(height: 16),
-                readingStatus(),
-                const SizedBox(height: 16),
-                chatWithChackmeong(),
-                const SizedBox(height: 16),
-                readingCard(),
-                const SizedBox(height: 16),
-                monthlyRecord(),
-                const SizedBox(height: 16),
-                achieveBadge(),
-                const SizedBox(height: 16),
-              ],
-            ),
-          )),
-        ));
+                // 양쪽 여백 넣기 (좌우, 상하 기준)
+                padding:
+                    EdgeInsets.symmetric(horizontal: SizeConfig.screenWidth * 0.05),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 16),
+                    userInfoSection(),
+                    const SizedBox(height: 16),
+                    readingStatus(),
+                    const SizedBox(height: 16),
+                    chatWithChackmeong(),
+                    const SizedBox(height: 16),
+                    readingCard(),
+                    const SizedBox(height: 16),
+                    monthlyRecord(),
+                    const SizedBox(height: 16),
+                    achieveBadge(),
+                    const SizedBox(height: 16),
+                  ],
+              ),
+            )
+          ),
+        )
+    );
   }
 
   // 사용자 정보 섹션
@@ -422,10 +429,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget readingCard() {
-    final userBookProvider = Provider.of<UserBookProvider>(context);
-    BookModel? longestReadBook = userBookProvider.longestReadBook;
-    BookModel? shortestReadBook = userBookProvider.shortestReadBook;
-
     if (longestReadBook == null || shortestReadBook == null) {
       return const SizedBox.shrink();
     }
@@ -434,7 +437,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Container(
-          width: SizeConfig.screenWidth * 0.45,
+          width: SizeConfig.screenWidth * 0.435,
           height: 270,
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -450,17 +453,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       fontSize: 16)),
               const SizedBox(height: 8),
               Container(
-                width: 100,
                 height: 140,
+                width: 100,
                 decoration: BoxDecoration(
-                  color: const Color(0xffD9D9D9),
                   borderRadius: BorderRadius.circular(8),
-                  image: shortestReadBook?.imagePath != null
-                      ? DecorationImage(
-                          image: AssetImage(shortestReadBook!.imagePath!),
-                          fit: BoxFit.cover,
-                        )
-                      : null,
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: shortestReadBook?.imagePath != null
+                      ? Image.network(
+                    shortestReadBook!.imagePath!,
+                    fit: BoxFit.cover,
+                  )
+                      : Container(color: Color(0xffD9D9D9)),
                 ),
               ),
               const SizedBox(height: 8),
@@ -482,7 +487,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
               ),
-              Text(formatDuration(userBookProvider.shortestReadDuration!),
+              Text(formatDuration(shortestReadDuration!),
                   style: const TextStyle(
                       color: Color(0xff777777),
                       fontWeight: FontWeight.w400,
@@ -490,9 +495,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ],
           ),
         ),
-        const SizedBox(width: 16),
+        const SizedBox(width: 8),
         Container(
-          width: SizeConfig.screenWidth * 0.45,
+          width: SizeConfig.screenWidth * 0.435,
           height: 270,
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -508,17 +513,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       fontSize: 16)),
               const SizedBox(height: 8),
               Container(
-                width: 100,
                 height: 140,
+                width: 100,
                 decoration: BoxDecoration(
-                  color: const Color(0xffD9D9D9),
                   borderRadius: BorderRadius.circular(8),
-                  image: longestReadBook?.imagePath != null
-                      ? DecorationImage(
-                          image: AssetImage(longestReadBook!.imagePath!),
-                          fit: BoxFit.cover,
-                        )
-                      : null,
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: longestReadBook?.imagePath != null
+                      ? Image.network(
+                    longestReadBook!.imagePath!,
+                    fit: BoxFit.cover,
+                  )
+                      : Container(color: Color(0xffD9D9D9)),
                 ),
               ),
               const SizedBox(height: 8),
@@ -540,7 +547,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
               ),
-              Text(formatDuration(userBookProvider.longestReadDuration!),
+              Text(formatDuration(longestReadDuration!),
                   style: const TextStyle(
                       color: Color(0xff777777),
                       fontWeight: FontWeight.w400,

@@ -41,7 +41,7 @@ class _ReadingBookScreenState extends State<ReadingBookScreen> {
     List<int> readingIndexes = [];
     for (int i = 0; i < allBooks.length; i++) {
       final userBook = allBooks[i]['userBook'] as UserBookModel;
-      if ((userBook.lastPosition ?? 0.0) < 0.999) {
+      if ((userBook.lastPosition ?? 0.0) < 0.995) {
         readingIndexes.add(i);
       }
     }

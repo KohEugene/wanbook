@@ -8,9 +8,7 @@ class UserModel {
   final String name;
   final String phonenumber;
   final String nickname;
-
   final String profileImageBase64;
-
   final DateTime joinedAt;
 
   UserModel({

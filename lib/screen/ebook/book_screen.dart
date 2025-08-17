@@ -208,7 +208,7 @@ class _BookScreenState extends State<BookScreen> with WidgetsBindingObserver{
         });
   }
 
-  // 책 완독했는 지 판단 
+  // 책 완독했는지 판단
   Future<void> checkAndMarkCompletion() async {
     final docRef = FirebaseFirestore.instance
         .collection('users')
@@ -216,7 +216,7 @@ class _BookScreenState extends State<BookScreen> with WidgetsBindingObserver{
         .collection('reading_books')
         .doc(widget.title);
 
-    if (progress >= 0.999) {
+    if (progress >= 0.995) {
       await docRef.update({
         'is_completed': true,
         'end_date': FieldValue.serverTimestamp(),

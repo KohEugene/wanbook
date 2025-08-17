@@ -93,7 +93,7 @@ class _BadgeScreenState extends State<BadgeScreen> {
         width: SizeConfig.screenWidth * 0.9,
         alignment: Alignment.center,
         padding: const EdgeInsets.symmetric(vertical: 32),
-        child: const CircularProgressIndicator(),
+        child: const CircularProgressIndicator(color: Color(0xff0077FF)),
       );
 
   Widget _errorBox(String message) => Container(
