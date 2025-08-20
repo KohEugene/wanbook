@@ -32,6 +32,11 @@ class _AllBookScreenState extends State<AllBookScreen> {
     Future.microtask(() async {
       final viewModel = Provider.of<UserBookProvider>(context, listen: false);
       final booksData = await viewModel.fetchReadingBooks(context);
+      booksData.sort((a, b) {
+        final aUpdatedAt = a['userBook'].updatedAt;
+        final bUpdatedAt = b['userBook'].updatedAt;
+        return bUpdatedAt.compareTo(aUpdatedAt);
+      });
       setState(() {
         allBooks = booksData;
       });
@@ -93,6 +98,11 @@ class _AllBookScreenState extends State<AllBookScreen> {
                 // 돌아왔을 때 책 다시 불러오기
                 final viewModel = Provider.of<UserBookProvider>(context, listen: false);
                 final booksData = await viewModel.fetchReadingBooks(context);
+                booksData.sort((a, b) {
+                  final aUpdatedAt = a['userBook'].updatedAt;
+                  final bUpdatedAt = b['userBook'].updatedAt;
+                  return bUpdatedAt.compareTo(aUpdatedAt);
+                });
                 setState(() {
                   allBooks = booksData;
                 });

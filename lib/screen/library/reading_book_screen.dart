@@ -28,6 +28,11 @@ class _ReadingBookScreenState extends State<ReadingBookScreen> {
     Future.microtask(() async {
       final viewModel = Provider.of<UserBookProvider>(context, listen: false);
       final booksData = await viewModel.fetchReadingBooks(context);
+      booksData.sort((a, b) {
+        final aUpdatedAt = a['userBook'].updatedAt;
+        final bUpdatedAt = b['userBook'].updatedAt;
+        return bUpdatedAt.compareTo(aUpdatedAt);
+      });
       setState(() {
         allBooks = booksData;
       });
