@@ -29,8 +29,20 @@ class _PopUpState extends State<PopUp> {
   @override
   void initState() {
     super.initState();
-    final user = Provider.of<UserProvider>(context, listen: false).user;
+    final userProv = Provider.of<UserProvider>(context, listen: false);
+    final user = userProv.user;
+
     _nicknameController.text = user?.nickname ?? '';
+
+    final b64 = user?.profileImageBase64;
+    if (b64 != null && b64.isNotEmpty) {
+      try {
+        final sanitized = b64.contains(',') ? b64.split(',').last : b64;
+        _previewBytes = base64Decode(sanitized);
+      } catch (_) {
+        _previewBytes = null;
+      }
+    }
   }
 
   @override
