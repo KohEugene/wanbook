@@ -33,7 +33,7 @@ class UserBookModel {
       t = [data['tag'] as String];
     }
     return UserBookModel(
-      bookId: data['book_id'] ?? '',
+      bookId: data['book_id'] ?? doc.id,
       lastPosition: (data['last_position'] as num?)?.toDouble(),
       isCompleted: data['is_completed'] ?? false,
       maxScroll: (data['max_scroll'] as num?)?.toDouble(),

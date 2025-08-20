@@ -119,9 +119,12 @@ class UserBookProvider with ChangeNotifier {
 
       final startDate = userBook.startedAt;
       final endDate = userBook.completedAt;
-      final duration = endDate?.difference(startDate);
 
-      if (duration! > longestReadDuration) {
+      if (endDate == null) continue;
+
+      final duration = endDate.difference(startDate);
+
+      if (duration > longestReadDuration) {
         longestReadDuration = duration;
         longestUserBook = userBook;
       }
