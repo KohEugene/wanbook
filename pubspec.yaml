@@ -41,6 +41,8 @@ dependencies:
 
   permission_handler: ^11.3.1
 
+  lottie: ^3.3.0
+
 flutter_icons:
   android: true
   ios: true
@@ -61,6 +63,7 @@ flutter:
      - assets/images/records/
      - assets/epub/
      - assets/book.json
+     - assets/confetti.json
 
   fonts:
     - family: Pretendard

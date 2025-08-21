@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import 'package:wanbook/provider/user_book_provider.dart';
 import 'package:wanbook/provider/recentsearch_provider.dart';
 import 'package:wanbook/provider/user_provider.dart';
+import 'package:wanbook/shared/achievement_screen.dart';
+import '../../provider/badge_provider.dart';
 import '../../provider/search_provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../shared/menu_bottom.dart';
@@ -23,6 +25,7 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
   late TextEditingController _searchController;
 
   late Future<void> _searchFuture;
+
 
   @override
   void initState() {
@@ -261,57 +264,63 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
       height: 50,
       child: OutlinedButton(
         onPressed: () async {
+          final userProvider = Provider.of<UserProvider>(context, listen: false);
           final success = await context.read<UserBookProvider>().addBook(context, bookId: bookId);
+          if (success) {
+            final badgeProvider = Provider.of<BadgeProvider>(context, listen: false);
+            await badgeProvider.checkAndShowAchievements(userProvider.userId!, context);
+          }
+          Future.delayed(const Duration(seconds: 3), () {
+            showDialog(
+              context: context,
+              builder: (context) {
+                final title = success ? '추가 완료' : '이미 추가됨';
+                final content = success
+                    ? '해당 도서가 내 서재에 추가되었어요.'
+                    : '이미 서재에 도서가 있어요.';
 
-          showDialog(
-            context: context,
-            builder: (context) {
-              final title = success ? '추가 완료' : '이미 추가됨';
-              final content = success
-                  ? '해당 도서가 내 서재에 추가되었어요.'
-                  : '이미 서재에 도서가 있어요.';
-
-              return AlertDialog(
-                backgroundColor: const Color(0xffF8F8F8),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                title: Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xff0077FF),
+                return AlertDialog(
+                  backgroundColor: const Color(0xffF8F8F8),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                ),
-                content: Text(
-                  content,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
-                    color: Color(0xff777777),
+                  title: Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xff0077FF),
+                    ),
                   ),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: TextButton.styleFrom(foregroundColor: const Color(0xff777777)),
-                    child: const Text('머무르기'),
+                  content: Text(
+                    content,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w400,
+                      color: Color(0xff777777),
+                    ),
                   ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => const MenuBottom(initialIndex: 2)),
-                      );
-                    },
-                    style: TextButton.styleFrom(foregroundColor: const Color(0xff0077FF)),
-                    child: const Text('서재로 이동'),
-                  ),
-                ],
-              );
-            },
-          );
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: TextButton.styleFrom(foregroundColor: const Color(0xff777777)),
+                      child: const Text('머무르기'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => const MenuBottom(initialIndex: 2)),
+                        );
+                      },
+                      style: TextButton.styleFrom(foregroundColor: const Color(0xff0077FF)),
+                      child: const Text('서재로 이동'),
+                    ),
+                  ],
+                );
+              },
+            );
+          });
         },
         style: OutlinedButton.styleFrom(
           foregroundColor: const Color(0xff0077FF),

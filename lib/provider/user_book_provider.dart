@@ -9,6 +9,7 @@ import 'package:wanbook/provider/user_provider.dart';
 
 import '../model/book_model.dart';
 import '../model/user_book_model.dart';
+import 'badge_provider.dart';
 
 class UserBookProvider with ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

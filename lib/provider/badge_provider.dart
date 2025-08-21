@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:wanbook/shared/achievement_screen.dart';
 
 import '../model/user_book_model.dart';
 
@@ -286,6 +287,67 @@ class BadgeProvider with ChangeNotifier {
     return computed
         .map((b) => b.copyWith(unlocked: b.unlocked || (savedUnlocked[b.id] ?? false)))
         .toList();
+  }
+
+  // 새로운 업적 확인 + 업적 획득 시 화면 띄우기
+  Future<void> checkAndShowAchievements(String userId, BuildContext context) async {
+    final fs = FirebaseFirestore.instance;
+    final userRef = fs.collection('users').doc(userId);
+    final achievementsRef = userRef.collection('achievements');
+
+    final prevSnap = await achievementsRef.get();
+    final savedUnlocked = <String, bool>{};
+    for (var doc in prevSnap.docs) {
+      savedUnlocked[doc.id] = doc['unlocked'] ?? false;
+    }
+
+    final computed = await getUserAchievements(userId);
+
+    final batch = fs.batch();
+    int writes = 0;
+
+    for (final b in computed) {
+      final alreadyHasDoc = savedUnlocked.containsKey(b.id);
+      final prevUnlocked = savedUnlocked[b.id] ?? false;
+
+      if (b.unlocked) {
+        if (!alreadyHasDoc) {
+          batch.set(achievementsRef.doc(b.id), {
+            'id': b.id,
+            'title': b.title,
+            'asset': b.asset,
+            'tag': b.tag,
+            'threshold': b.threshold,
+            'unlocked': true,
+            'unlockedAt': FieldValue.serverTimestamp(),
+          }, SetOptions(merge: true));
+          writes++;
+        } else if (!prevUnlocked) {
+          batch.set(achievementsRef.doc(b.id), {
+            'unlocked': true,
+            'unlockedAt': FieldValue.serverTimestamp(),
+          }, SetOptions(merge: true));
+          writes++;
+        }
+      }
+    }
+
+    if (writes > 0) await batch.commit();
+
+    final newUnlocked = computed.where((b) => b.unlocked).map((b) => b.id).toSet();
+    final justUnlocked = newUnlocked.difference(savedUnlocked.keys.where((k) => savedUnlocked[k] == true).toSet());
+
+    if (justUnlocked.isNotEmpty) {
+      final newBadges =
+      computed.where((b) => justUnlocked.contains(b.id)).toList();
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => AchievementScreen(badges: newBadges),
+        ),
+      );
+    }
   }
 
   // 월간 기록: update_date 기준 월별로 count (일단 올해만 되도록 함)
