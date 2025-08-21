@@ -30,13 +30,10 @@ class _AchievementScreenState extends State<AchievementScreen>
 
     // 좌우로 점점 작게 흔들고 멈추기
     _swingAnim = TweenSequence<double>([
-      // 1차 크게 흔들기
       TweenSequenceItem(tween: Tween(begin: 0.0, end: 0.35), weight: 1),
       TweenSequenceItem(tween: Tween(begin: 0.35, end: -0.35), weight: 2),
-      // 2차 중간 크기
       TweenSequenceItem(tween: Tween(begin: -0.35, end: 0.25), weight: 2),
       TweenSequenceItem(tween: Tween(begin: 0.25, end: -0.15), weight: 2),
-      // 3차 작게
       TweenSequenceItem(tween: Tween(begin: -0.15, end: 0.08), weight: 2),
       TweenSequenceItem(tween: Tween(begin: 0.08, end: 0.0), weight: 1),
     ]).animate(CurvedAnimation(
