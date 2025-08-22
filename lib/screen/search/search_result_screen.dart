@@ -270,9 +270,10 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
             final badgeProvider = Provider.of<BadgeProvider>(context, listen: false);
             await badgeProvider.checkAndShowAchievements(userProvider.userId!, context);
           }
-          Future.delayed(const Duration(seconds: 3), () {
+          Future.delayed(const Duration(seconds: 4), () {
             showDialog(
               context: context,
+              barrierDismissible: false,
               builder: (context) {
                 final title = success ? '추가 완료' : '이미 추가됨';
                 final content = success

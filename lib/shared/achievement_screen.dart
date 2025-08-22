@@ -30,12 +30,11 @@ class _AchievementScreenState extends State<AchievementScreen>
 
     // 좌우로 점점 작게 흔들고 멈추기
     _swingAnim = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 0.0, end: 0.35), weight: 1),
-      TweenSequenceItem(tween: Tween(begin: 0.35, end: -0.35), weight: 2),
-      TweenSequenceItem(tween: Tween(begin: -0.35, end: 0.25), weight: 2),
-      TweenSequenceItem(tween: Tween(begin: 0.25, end: -0.15), weight: 2),
-      TweenSequenceItem(tween: Tween(begin: -0.15, end: 0.08), weight: 2),
-      TweenSequenceItem(tween: Tween(begin: 0.08, end: 0.0), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: 0.6), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: 0.6, end: -0.6), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: -0.6, end: 0.4), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: 0.4, end: -0.2), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: -0.2, end: 0.0), weight: 1),
     ]).animate(CurvedAnimation(
       parent: _swingController,
       curve: Curves.easeOut,
@@ -53,64 +52,61 @@ class _AchievementScreenState extends State<AchievementScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black.withOpacity(0.9),
       body: SafeArea(
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Lottie.asset(
-                'assets/confetti.json',
-                repeat: false,
-                width: 250,
-                height: 250,
-              ),
-              const SizedBox(height: 20),
-
-              Column(
-                children: widget.badges.map((b) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    child: Column(
-                      children: [
-                        AnimatedBuilder(
+               Stack(
+                  alignment: Alignment.center,
+                  children: [
+                  Lottie.asset(
+                    'assets/confetti.json',
+                    repeat: false,
+                    width: 250,
+                    height: 250,
+                  ),
+                  Column(
+                    children: widget.badges.map((b) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        child: AnimatedBuilder(
                           animation: _swingAnim,
                           builder: (context, child) {
-                            return Transform.rotate(
-                              angle: _swingAnim.value * math.pi,
+                            return Transform(
+                              transform: Matrix4.rotationY(_swingAnim.value * math.pi),
+                              alignment: Alignment.center,
                               child: child,
                             );
                           },
                           child: SvgPicture.asset(
                             b.asset,
-                            width: 120,
-                            height: 120,
+                            width: 120, height: 120,
                           ),
                         ),
-                        const SizedBox(height: 12),
-                        Text(
-                          b.title,
-                          style: const TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        Text(
-                          "조건: ${b.threshold}권 이상",
-                          style: const TextStyle(
-                            fontSize: 16,
-                            color: Colors.white70,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList(),
+                      );
+                    }).toList(),
+                  ),
+                ]
               ),
-
+              const SizedBox(height: 20),
+              Text(
+                widget.badges.first.title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 20,
+                  color: Color(0xff0077FF),
+                ),
+              ),
+              Text(
+                "${widget.badges.first.threshold}권 달성",
+                style: const TextStyle(
+                  fontWeight: FontWeight.w400,
+                  fontSize: 16,
+                  color: Colors.black,
+                ),
+              ),
               const SizedBox(height: 40),
-
               OutlinedButton(
                 style: OutlinedButton.styleFrom(
                   foregroundColor: const Color(0xff0077FF),
