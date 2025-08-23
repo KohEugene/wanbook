@@ -99,18 +99,26 @@ class _ChatScreenState extends State<ChatScreen> {
   // 터미널에 flutter pub get > flutter pub add http 입력
   // api key넣고 실행하기 (github에서 보안 문제로 apikey있으면 push가 안됨..)
   Future<void> _getGPTResponse(String prompt) async {
-    const apiKey = '';  // 여기 추가
+    const apiKey = ''; 
     const endpoint = 'https://api.openai.com/v1/chat/completions';
 
-     final headers = {
+    final headers = {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $apiKey',
     };
 
+    final systemForBook = """
+    당신은 독서 도우미 AI입니다.
+    지금 사용자가 대화하는 도서 제목은 "${widget.title}" 입니다.
+    - 사용자가 메시지에 책 제목을 적지 않아도 기본적으로 "${widget.title}"을 기준으로 이해하고 답하세요.
+    - 만약 사용자가 명확히 다른 책을 지칭하면 그 책으로 전환하되, 그렇지 않으면 계속 "${widget.title}" 기준으로 답하세요.
+    - 가능한 한 책의 핵심 주제/인물/챕터 구조/핵심 문장/메시지/배경지식 중심으로 간결하게 대답하세요.
+    """;
+
     final body = json.encode({
-      "model": "gpt-3.5-turbo",
+      "model": "gpt-3.5-turbo", 
       "messages": [
-        {"role": "system", "content": "당신은 독서 도우미 AI입니다."},
+        {"role": "system", "content": systemForBook},
         {"role": "user", "content": prompt},
       ],
       "temperature": 0.7,
@@ -118,7 +126,6 @@ class _ChatScreenState extends State<ChatScreen> {
 
     try {
       final response = await http.post(Uri.parse(endpoint), headers: headers, body: body);
-
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         final reply = data['choices'][0]['message']['content'].trim();

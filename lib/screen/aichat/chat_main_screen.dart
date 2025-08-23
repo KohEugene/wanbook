@@ -37,7 +37,6 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
 
   Future<void> _loadChatClickAndFetchQuestions() async {
     final user = Provider.of<UserProvider>(context, listen: false).user;
-
     final docRef = FirebaseFirestore.instance
         .collection('users')
         .doc(user?.userId)
@@ -49,13 +48,14 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
     if (snapshot.exists) {
       final data = snapshot.data()!;
       chatClick = (data['chat_click'] ?? 0) as int;
-
-      // 페이지 진입 시 chat_click 증가
       await docRef.update({'chat_click': chatClick + 1});
       chatClick += 1;
     } else {
       chatClick = 1;
-      await docRef.set({'chat_click': chatClick}, SetOptions(merge: true));
+      await docRef.set({
+        'book_id': widget.title,
+        'chat_click': chatClick
+      }, SetOptions(merge: true));
     }
 
     final level = chatClick < 3 ? 1 : (chatClick < 6 ? 2 : 3);
@@ -72,26 +72,21 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
     if (message.trim().isEmpty) return;
 
     final user = Provider.of<UserProvider>(context, listen: false).user;
-
-    final querySnapshot = await FirebaseFirestore.instance
+    final docRef = FirebaseFirestore.instance
         .collection('users')
         .doc(user?.userId)
         .collection('reading_books')
-        .where('book_id', isEqualTo: widget.title)
-        .limit(1)
-        .get();
+        .doc(widget.title); 
 
-    if (querySnapshot.docs.isNotEmpty) {
-      final docRef = querySnapshot.docs.first.reference;
-      final current = querySnapshot.docs.first.data()['chat_click'] ?? 0;
-      await docRef.update({'chat_click': (current as int) + 1});
+    final snap = await docRef.get();
+    if (snap.exists) {
+      final current = (snap.data()?['chat_click'] ?? 0) as int;
+      await docRef.update({'chat_click': current + 1});
     } else {
-      final newDoc = FirebaseFirestore.instance
-          .collection('users')
-          .doc(user?.userId)
-          .collection('reading_books')
-          .doc();
-      await newDoc.set({'book_id': widget.title, 'chat_click': 1});
+      await docRef.set({
+        'book_id': widget.title, 
+        'chat_click': 1
+      });
     }
 
     Navigator.push(
