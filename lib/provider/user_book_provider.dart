@@ -9,7 +9,6 @@ import 'package:wanbook/provider/user_provider.dart';
 
 import '../model/book_model.dart';
 import '../model/user_book_model.dart';
-import 'badge_provider.dart';
 
 class UserBookProvider with ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -40,15 +39,41 @@ class UserBookProvider with ChangeNotifier {
       return false;
     } else {
       final newBook = UserBookModel(
-          bookId: bookId, lastPosition: 0, isCompleted: false,
-          startedAt: now, updatedAt: now, completedAt: null,
-          chatClick: 0,
+        bookId: bookId,
+        lastPosition: 0,
+        isCompleted: false,
+        startedAt: now,
+        updatedAt: now,
+        completedAt: null,
+        chatClick: 0,
       );
 
       await docRef.set(newBook.toMap(), SetOptions(merge: true));
     }
     notifyListeners();
     return true;
+  }
+
+  // 🔹 목적(단일) & 사전지식(여러개) 저장 (같은 문서)
+  Future<void> saveReadingPurposeAndPreknowledge(
+    BuildContext context, {
+    required String bookId,
+    required String purpose,             
+    required List<String> preknowledge,    
+  }) async {
+    final user = Provider.of<UserProvider>(context, listen: false).user;
+
+    final docRef = _firestore
+        .collection('users')
+        .doc(user?.userId)
+        .collection('reading_books')
+        .doc(bookId);
+
+    await docRef.set({
+      'purpose': purpose,           
+      'preknowledge': preknowledge,      
+      'update_date': DateTime.now(),
+    }, SetOptions(merge: true));
   }
 
   // 유저의 독서 목록 불러오기
@@ -74,7 +99,7 @@ class UserBookProvider with ChangeNotifier {
       final userBook = UserBookModel.fromDocument(logDoc);
 
       final book = bookList.firstWhere(
-            (b) => b.title == userBook.bookId,
+        (b) => b.title == userBook.bookId,
       );
 
       if (book.title.isNotEmpty) {
@@ -91,7 +116,7 @@ class UserBookProvider with ChangeNotifier {
     return books;
   }
 
-  // 가장 오래 읽은 책 & 짧게 읽은 책 계산하기
+  // 가장 오래 읽은 책 & 짧게 읽은 책 계산하기 (원본 그대로)
   Future<ReadingCardModel?> calculateBookStats(BuildContext context) async {
     final user = Provider.of<UserProvider>(context, listen: false).user;
 
@@ -141,17 +166,15 @@ class UserBookProvider with ChangeNotifier {
 
     if (longestUserBook != null) {
       longestReadBook = bookList.firstWhere(
-            (b) => b.title == longestUserBook!.bookId,
+        (b) => b.title == longestUserBook!.bookId,
       );
     }
 
     if (shortestUserBook != null) {
       shortestReadBook = bookList.firstWhere(
-            (b) => b.title == shortestUserBook!.bookId,
+        (b) => b.title == shortestUserBook!.bookId,
       );
     }
-
-    //notifyListeners();
 
     return ReadingCardModel(
       longestReadBook: longestReadBook,

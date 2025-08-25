@@ -1,4 +1,3 @@
-
 // '전체 도서' 탭 화면
 
 import 'package:flutter/cupertino.dart';
@@ -74,15 +73,33 @@ class _AllBookScreenState extends State<AllBookScreen> {
                     .doc(book.title)
                     .get();
 
-                final latestProgress = (snapshot.data()?['last_position'] as num?)?.toDouble() ?? 0.0;
+                final data = snapshot.data();
+                final latestProgress = (data?['last_position'] as num?)?.toDouble() ?? 0.0;
+
+                // 목적, 사전지식 필드 존재 여부 체크
+                final hasPurposeField = data?.containsKey('purpose') ?? false;
+                final hasPreknowledgeField = data?.containsKey('preknowledge') ?? false;
 
                 if (latestProgress == 0.0) {
-                  await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ReadingPurposeScreen(title: book.title),
-                    ),
-                  );
+                  // last_position == 0 이지만 목적, 사전지식 필드가 존재하면 바로 BookScreen
+                  if (hasPurposeField && hasPreknowledgeField) {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => BookScreen(
+                          title: book.title,
+                          initialProgress: latestProgress, // 0.0 이어도 그대로 전달
+                        ),
+                      ),
+                    );
+                  } else {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ReadingPurposeScreen(title: book.title),
+                      ),
+                    );
+                  }
                 } else {
                   await Navigator.push(
                     context,

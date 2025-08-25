@@ -1,5 +1,4 @@
-// 목적 선택 화면
-
+// 독서 목적 (단일 선택)
 import 'package:flutter/material.dart';
 import 'package:wanbook/screen/question/preknowledge_screen.dart';
 
@@ -12,7 +11,7 @@ class ReadingPurposeScreen extends StatefulWidget {
 }
 
 class _ReadingPurposeScreenState extends State<ReadingPurposeScreen> {
-  String selectedPurpose = '';
+  String selectedPurpose = ''; 
 
   final List<String> purposes = [
     '지식 습득',
@@ -49,7 +48,7 @@ class _ReadingPurposeScreenState extends State<ReadingPurposeScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(height: 16),
-              buildProgressBar(currentStep: 0), // 진행도 표시 
+              buildProgressBar(currentStep: 0),
               const SizedBox(height: 32),
               buildHeaderText(),
               const SizedBox(height: 76),
@@ -64,15 +63,14 @@ class _ReadingPurposeScreenState extends State<ReadingPurposeScreen> {
     );
   }
 
-  // 위에 질문 목록
   Widget buildHeaderText() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.center, // 텍스트 가운데 정렬
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
           '주요 독서 목적은 무엇인가요?',
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Colors.black),
-          textAlign: TextAlign.center, // 줄 바꿈 시에도 중앙 정렬
+          textAlign: TextAlign.center,
         ),
         const SizedBox(height: 6),
         Text(
@@ -84,9 +82,7 @@ class _ReadingPurposeScreenState extends State<ReadingPurposeScreen> {
     );
   }
 
-  // 독서 목적 물어보는 목록
   Widget buildPurposeChips() {
-    // 왼쪽, 오른쪽 나눠서 저장
     List<String> leftColumn = [];
     List<String> rightColumn = [];
 
@@ -98,100 +94,66 @@ class _ReadingPurposeScreenState extends State<ReadingPurposeScreen> {
       }
     }
 
+    Widget buildChip(String label) {
+      final bool isSelected = label == selectedPurpose;
+
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 24),
+        child: GestureDetector(
+          onTap: () {
+            setState(() {
+              selectedPurpose = label; 
+            });
+          },
+          child: Container(
+            height: 38,
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+              color: isSelected ? Color(0xffCCE4FF) : Color(0xffE4E4E4),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(24),
+                topRight: Radius.circular(24),
+                bottomLeft: Radius.circular(24),
+                bottomRight: Radius.circular(2),
+              ),
+            ),
+            alignment: Alignment.centerLeft,
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 14,
+                color: isSelected ? Color(0xff0077FF) : Color(0xff777777),
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
     return Center(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 왼쪽 Column
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: leftColumn.map((purpose) {
-              final bool isSelected = purpose == selectedPurpose;
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 24),
-                child: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      selectedPurpose = purpose;
-                    });
-                  },
-                  child: Container(
-                    height: 38,
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: isSelected ? Color(0xffCCE4FF) : Color(0xffE4E4E4),
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(24),
-                        topRight: Radius.circular(24),
-                        bottomLeft: Radius.circular(24),
-                        bottomRight: Radius.circular(2),
-                      ),
-                    ),
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      purpose,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: isSelected ? Color(0xff0077FF) : Color(0xff777777),
-                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            }).toList(),
+            children: leftColumn.map(buildChip).toList(),
           ),
-          const SizedBox(width: 40), // 열 사이 간격
-          // 오른쪽 Column
+          const SizedBox(width: 40),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: rightColumn.map((purpose) {
-              final bool isSelected = purpose == selectedPurpose;
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 24),
-                child: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      selectedPurpose = purpose;
-                    });
-                  },
-                  child: Container(
-                    height: 38,
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: isSelected ? Color(0xffCCE4FF) : Color(0xffE4E4E4),
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(24),
-                        topRight: Radius.circular(24),
-                        bottomLeft: Radius.circular(24),
-                        bottomRight: Radius.circular(2),
-                      ),
-                    ),
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      purpose,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: isSelected ? Color(0xff0077FF) : Color(0xff777777),
-                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            }).toList(),
+            children: rightColumn.map(buildChip).toList(),
           ),
         ],
       ),
     );
   }
 
-  // 하단 버튼 두개
   Widget buildBottomButtons() {
     return Row(
       children: [
-        // 건너뛰기 버튼
+        // 건너뛰기
         Expanded(
           child: SizedBox(
             height: 50,
@@ -199,86 +161,90 @@ class _ReadingPurposeScreenState extends State<ReadingPurposeScreen> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => PreKnowledgeScreen(title: widget.title)),
+                  MaterialPageRoute(
+                    builder: (context) => PreKnowledgeScreen(
+                      title: widget.title,
+                      selectedPurpose: selectedPurpose, 
+                    ),
+                  ),
                 );
               },
               style: OutlinedButton.styleFrom(
-                backgroundColor: Color(0xffE4E4E4),
-                foregroundColor: Color(0xff777777),
+                backgroundColor: const Color(0xffE4E4E4),
+                foregroundColor: const Color(0xff777777),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(32),
                 ),
-                side: BorderSide(color: Colors.transparent),
+                side: const BorderSide(color: Colors.transparent),
                 shadowColor: Colors.transparent,
                 elevation: 0,
               ),
-              child: Text('건너뛰기', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400)),
+              child: const Text('건너뛰기', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400)),
             ),
           ),
         ),
         const SizedBox(width: 16),
 
-        // 다음 버튼
+        // 다음
         Expanded(
           child: SizedBox(
             height: 50,
             child: OutlinedButton(
-              // 아무것도 선택x시 다음버튼 못 되게
               onPressed: () {
                 if (selectedPurpose.isEmpty) {
                   showDialog(
                     context: context,
-                    builder: (context) {
-                      return AlertDialog(
-                        backgroundColor: Color(0xffF8F8F8),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
+                    builder: (context) => AlertDialog(
+                      backgroundColor: const Color(0xffF8F8F8),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      title: const Text(
+                        '알림',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xff0077FF),
                         ),
-                        title: Text(
-                          '알림',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xff0077FF),
+                      ),
+                      content: const Text(
+                        '독서 목적을 하나 선택해 주세요.',
+                        style: TextStyle(fontSize: 16, color: Color(0xff777777)),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: TextButton.styleFrom(
+                            foregroundColor: const Color(0xff0077FF),
                           ),
+                          child: const Text('확인'),
                         ),
-                        content: Text(
-                          '하나의 독서 목적을 선택해 주세요.',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Color(0xff777777),
-                          ),
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            style: TextButton.styleFrom(
-                              foregroundColor: Color(0xff0077FF),
-                            ),
-                            child: Text('확인'),
-                          ),
-                        ],
-                      );
-                    },
+                      ],
+                    ),
                   );
-                } else {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => PreKnowledgeScreen(title: widget.title)),
-                  );
+                  return;
                 }
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PreKnowledgeScreen(
+                      title: widget.title,
+                      selectedPurpose: selectedPurpose, 
+                    ),
+                  ),
+                );
               },
               style: OutlinedButton.styleFrom(
-                backgroundColor: Color(0xffCCE4FF),
-                foregroundColor: Color(0xff0077FF),
+                backgroundColor: const Color(0xffCCE4FF),
+                foregroundColor: const Color(0xff0077FF),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(32),
                 ),
-                side: BorderSide(color: Colors.transparent),
+                side: const BorderSide(color: Colors.transparent),
                 elevation: 0,
                 shadowColor: Colors.transparent,
               ),
-              child: Text('다음', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+              child: const Text('다음', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
             ),
           ),
         ),
@@ -286,21 +252,20 @@ class _ReadingPurposeScreenState extends State<ReadingPurposeScreen> {
     );
   }
 
-  // 진행도 바
   Widget buildProgressBar({required int currentStep, int totalSteps = 4}) {
     double progress = currentStep / totalSteps;
 
     return TweenAnimationBuilder<double>(
       tween: Tween<double>(begin: 0, end: progress),
-      duration: Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 300),
       builder: (context, value, _) {
         return ClipRRect(
           borderRadius: BorderRadius.circular(4),
           child: LinearProgressIndicator(
             value: value,
             minHeight: 4,
-            backgroundColor: Color(0xffE4E4E4),
-            valueColor: AlwaysStoppedAnimation<Color>(Color(0xff0077FF)),
+            backgroundColor: const Color(0xffE4E4E4),
+            valueColor: const AlwaysStoppedAnimation<Color>(Color(0xff0077FF)),
           ),
         );
       },

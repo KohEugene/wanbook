@@ -94,10 +94,6 @@ class _ChatScreenState extends State<ChatScreen> {
     _getGPTResponse(input.trim());
   }
 
-  // GPT 3.5 API
-  // pubspec.yaml 에 http 추가햇음
-  // 터미널에 flutter pub get > flutter pub add http 입력
-  // api key넣고 실행하기 (github에서 보안 문제로 apikey있으면 push가 안됨..)
   Future<void> _getGPTResponse(String prompt) async {
     const apiKey = ''; 
     const endpoint = 'https://api.openai.com/v1/chat/completions';
