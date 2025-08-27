@@ -1,3 +1,4 @@
+// lib/screen/ebook/book_screen.dart
 import 'package:flutter/material.dart';
 import 'package:html/parser.dart';
 import 'package:epubx/epubx.dart';
@@ -15,6 +16,8 @@ import 'package:wanbook/screen/ebook/book_menu.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../shared/reading_heartbeat.dart';
+
 class BookScreen extends StatefulWidget {
   final String title;
   final double initialProgress;
@@ -25,13 +28,13 @@ class BookScreen extends StatefulWidget {
   State<BookScreen> createState() => _BookScreenState();
 }
 
-class _BookScreenState extends State<BookScreen> with WidgetsBindingObserver{
+class _BookScreenState extends State<BookScreen> with WidgetsBindingObserver {
   final ScrollController _scrollController = ScrollController();
 
   late String userId;
   late String nickname;
   double lastSavedProgress = 0.0;
-  
+
   List<EpubChapter> chapters = [];
   bool isLoading = true;
   bool _justJumped = false;
@@ -44,7 +47,9 @@ class _BookScreenState extends State<BookScreen> with WidgetsBindingObserver{
 
   bool showUI = true;
   bool showHint = false;
-  Timer? _inactivityTimer;
+
+  // 하트비트 서비스
+  ReadingHeartbeat? _heartbeatSvc;
 
   String get epubFileName {
     final Map<String, String> fileMap = {
@@ -55,18 +60,32 @@ class _BookScreenState extends State<BookScreen> with WidgetsBindingObserver{
       '노인과 바다': 'theoldmanandthesea.epub'
     };
     return fileMap[widget.title] ?? 'default.epub';
-  }  
+  }
 
   @override
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
       setState(() {
         nickname = userProvider.user?.nickname ?? '사용자';
         userId = userProvider.user?.userId ?? 'guest';
       });
+
+      // 하트비트 서비스 구성/시작
+      _heartbeatSvc = ReadingHeartbeat(
+        firestore: FirebaseFirestore.instance,
+        userId: userId,
+        bookId: widget.title,
+        getProgress: () => progress,
+        isUIVisible: () => showUI,
+        onHintShouldShow: () {
+          if (!mounted) return;
+          setState(() => showHint = true);
+        },
+      );
+      await _heartbeatSvc!.start();
     });
 
     loadEpub();
@@ -92,14 +111,20 @@ class _BookScreenState extends State<BookScreen> with WidgetsBindingObserver{
         lastSavedProgress = progress;
         saveProgress(progress);
       }
+
+      // 진행률 변화 이벤트를 하트비트 서비스에 전달
+      _heartbeatSvc?.onUserProgressChanged(progress);
     });
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
-    cancelInactivityTimer();
     WidgetsBinding.instance.removeObserver(this);
+
+    // 서비스 정리(통계 저장 포함)
+    unawaited(_heartbeatSvc?.stop());
+
     super.dispose();
   }
 
@@ -115,9 +140,9 @@ class _BookScreenState extends State<BookScreen> with WidgetsBindingObserver{
           .collection('reading_books')
           .doc(widget.title)
           .update({
-            'last_position': rounded,
-            'update_date': FieldValue.serverTimestamp(),
-          });
+        'last_position': rounded,
+        'update_date': FieldValue.serverTimestamp(),
+      });
       print("Firestore에 진행률 저장됨: $rounded");
     } catch (e) {
       print("Firestore 저장 실패: $e");
@@ -159,7 +184,6 @@ class _BookScreenState extends State<BookScreen> with WidgetsBindingObserver{
       });
 
       await scrollToInitialPosition();
-
     } catch (e) {
       print("EPUB 또는 Firestore 로드 실패: $e");
       setState(() {
@@ -174,7 +198,7 @@ class _BookScreenState extends State<BookScreen> with WidgetsBindingObserver{
     int stableCount = 0;
 
     for (int i = 0; i < 30; i++) {
-      await Future.delayed(Duration(milliseconds: 100));
+      await Future.delayed(const Duration(milliseconds: 100));
 
       if (!_scrollController.hasClients) continue;
 
@@ -203,9 +227,9 @@ class _BookScreenState extends State<BookScreen> with WidgetsBindingObserver{
         .collection('reading_books')
         .doc(widget.title)
         .update({
-          'max_scroll': max,
-          'update_date': FieldValue.serverTimestamp(),
-        });
+      'max_scroll': max,
+      'update_date': FieldValue.serverTimestamp(),
+    });
   }
 
   // 책 완독했는지 판단
@@ -237,27 +261,6 @@ class _BookScreenState extends State<BookScreen> with WidgetsBindingObserver{
       showUI = !showUI;
       showHint = false;
     });
-
-    if (!showUI) {
-      startInactivityTimer();
-    } else {
-      cancelInactivityTimer();
-    }
-  }
-
-  // UI 숨겨질 시 힌트 책멍 타이머
-  void startInactivityTimer() {
-    _inactivityTimer?.cancel();
-    _inactivityTimer = Timer(Duration(seconds: 7), () {
-      setState(() {
-        showHint = true;
-      });
-    });
-  }
-
-  void cancelInactivityTimer() {
-    _inactivityTimer?.cancel();
-    _inactivityTimer = null;
   }
 
   @override
@@ -267,9 +270,6 @@ class _BookScreenState extends State<BookScreen> with WidgetsBindingObserver{
       setState(() {
         showHint = false; // 힌트 숨기기
       });
-      if (!showUI) {
-        startInactivityTimer(); // 다시 타이머 시작
-      }
     }
   }
 
@@ -279,35 +279,38 @@ class _BookScreenState extends State<BookScreen> with WidgetsBindingObserver{
       backgroundColor: isDarkMode ? Colors.black : Colors.white,
       body: SafeArea(
         child: Stack(
+          clipBehavior: Clip
+              .none,
           children: [
             Positioned.fill(
-              child: isLoading
-                  ? const Center(child: CircularProgressIndicator(
-                      color: Color(0xff0077FF),)
-                  )
-                  : ListView.builder(
-                      controller: _scrollController,
-                      padding: const EdgeInsets.all(16),
-                      itemCount: chapters.length,
-                      itemBuilder: (context, index) {
-                        final chapter = chapters[index];
-                        final text = parse(chapter.HtmlContent ?? '').body?.text ?? '';
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 32),
-                          child: SelectableText(
-                            text,
-                            style: TextStyle(
-                              fontSize: fontSize,
-                              height: lineHeight,
-                              color: isDarkMode ? Colors.white : Colors.black,
+                child: isLoading
+                    ? const Center(
+                        child: CircularProgressIndicator(
+                        color: Color(0xff0077FF),
+                      ))
+                    : ListView.builder(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.all(16),
+                        itemCount: chapters.length,
+                        itemBuilder: (context, index) {
+                          final chapter = chapters[index];
+                          final text =
+                              parse(chapter.HtmlContent ?? '').body?.text ?? '';
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 32),
+                            child: SelectableText(
+                              text,
+                              style: TextStyle(
+                                fontSize: fontSize,
+                                height: lineHeight,
+                                color:
+                                    isDarkMode ? Colors.white : Colors.black,
+                              ),
+                              textAlign: textAlign,
                             ),
-                            textAlign: textAlign,
-                          ),
-                  );
-                },
-              )
-            ),
-
+                          );
+                        },
+                      )),
             // UI 전체 토글용 투명 레이어
             Positioned.fill(
               child: GestureDetector(
@@ -316,8 +319,6 @@ class _BookScreenState extends State<BookScreen> with WidgetsBindingObserver{
                 child: const SizedBox.expand(),
               ),
             ),
-
-            // appbar
             if (showUI)
               Positioned(
                 top: 0,
@@ -325,8 +326,6 @@ class _BookScreenState extends State<BookScreen> with WidgetsBindingObserver{
                 right: 0,
                 child: buildAppBar(context),
               ),
-
-            // progress bar
             if (showUI)
               Positioned(
                 left: 0,
@@ -334,17 +333,17 @@ class _BookScreenState extends State<BookScreen> with WidgetsBindingObserver{
                 bottom: 0,
                 child: buildProgressBar(context),
               ),
-
-            // icon
             if (showUI)
               Positioned(
                 right: 24,
                 bottom: 144,
                 child: buildFloatingChaekmeongIcon(),
               ),
-
-            // 힌트용 책멍이 애니메이션
-            if (showHint) buildHintChaekmeongIcon(context, widget.title),
+            // 힌트용 책멍이 애니메이션 + 말풍선 (버튼 제거, 텍스트만)
+            if (showHint) ...[
+              buildHintChaekmeongIcon(context, widget.title),
+              _buildHintSpeechBubble(context),
+            ],
           ],
         ),
       ),
@@ -367,23 +366,27 @@ class _BookScreenState extends State<BookScreen> with WidgetsBindingObserver{
           ),
           centerTitle: true,
           leading: IconButton(
-            icon: Icon(Icons.chevron_left_rounded, color: isDarkMode ? Colors.white : Colors.black),
+            icon: Icon(Icons.chevron_left_rounded,
+                color: isDarkMode ? Colors.white : Colors.black),
             onPressed: () async {
               await checkAndMarkCompletion();
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (_) => MenuBottom(initialIndex: 2)),
+                MaterialPageRoute(
+                    builder: (_) => MenuBottom(initialIndex: 2)),
               );
             },
           ),
           actions: [
             IconButton(
-              icon: Icon(Icons.menu, color: isDarkMode ? Colors.white : Colors.black),
+              icon: Icon(Icons.menu,
+                  color: isDarkMode ? Colors.white : Colors.black),
               onPressed: () {
                 showModalBottomSheet(
                   context: context,
                   shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                    borderRadius:
+                        BorderRadius.vertical(top: Radius.circular(24)),
                   ),
                   isScrollControlled: true,
                   builder: (_) => ReaderSettingsBottomSheet(
@@ -421,7 +424,6 @@ class _BookScreenState extends State<BookScreen> with WidgetsBindingObserver{
     );
   }
 
-
   // 진행도바
   Widget buildProgressBar(BuildContext context) {
     if (chapters.isEmpty) return const SizedBox.shrink();
@@ -456,7 +458,7 @@ class _BookScreenState extends State<BookScreen> with WidgetsBindingObserver{
           Text(
             '${(progress * 100).round()}%',
             style: TextStyle(
-              color: isDarkMode ? Colors.white : Color(0xff777777),
+              color: isDarkMode ? Colors.white : const Color(0xff777777),
               fontSize: 12,
             ),
           ),
@@ -465,7 +467,7 @@ class _BookScreenState extends State<BookScreen> with WidgetsBindingObserver{
     );
   }
 
-  // 책멍 챗봇 아이콘콘
+  // 책멍 챗봇 아이콘
   Widget buildFloatingChaekmeongIcon() {
     return GestureDetector(
       onTap: () {
@@ -482,7 +484,7 @@ class _BookScreenState extends State<BookScreen> with WidgetsBindingObserver{
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           border: Border.all(color: const Color(0xff777777)),
-          color: isDarkMode ? Color(0xffE4E4E4) : Colors.white,
+          color: isDarkMode ? const Color(0xffE4E4E4) : Colors.white,
         ),
         child: Padding(
           padding: const EdgeInsets.all(8),
@@ -513,9 +515,6 @@ class _BookScreenState extends State<BookScreen> with WidgetsBindingObserver{
             setState(() {
               showHint = false;
             });
-            if (!showUI) {
-              startInactivityTimer();
-            }
           });
         },
         child: PngFrameAnimation(
@@ -528,4 +527,92 @@ class _BookScreenState extends State<BookScreen> with WidgetsBindingObserver{
       ),
     );
   }
+
+  // 말풍선 UI
+  Widget _buildHintSpeechBubble(BuildContext context) {
+    final bubbleWidth = 240.0;
+    final bubblePadding = const EdgeInsets.all(12.0);
+    return Positioned(
+      right: 30, 
+      bottom: 230,
+      child: Material(
+        color: Colors.transparent,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Container(
+              width: bubbleWidth,
+              padding: bubblePadding,
+              decoration: BoxDecoration(
+                color: isDarkMode
+                    ? const Color(0xE61F1F1F) // 약간 투명한 다크 배경
+                    : Colors.white.withOpacity(0.95), // 라이트 모드도 살짝 투명
+                borderRadius: BorderRadius.circular(14),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.10),
+                    blurRadius: 18,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+                border: Border.all(
+                  color: isDarkMode
+                      ? const Color(0xFF3A3A3A)
+                      : const Color(0xFFE6E6E6),
+                ),
+              ),
+              child: DefaultTextStyle(
+                style: TextStyle(
+                  color: isDarkMode ? Colors.white : const Color(0xFF222222),
+                  fontSize: 14,
+                  height: 1.45,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min, // 내용만큼만
+                  children: [
+                    // 제목/아이콘
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.tips_and_updates, size: 18),
+                        const SizedBox(width: 6),
+                        Text(
+                          "책멍이 힌트",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: isDarkMode
+                                ? Colors.white
+                                : const Color(0xff0077FF),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    // 상황별 메시지 (텍스트만)
+                    Text(
+                      _heartbeatSvc?.hintMessageFor(progress) ??
+                          _hintMessageForContext(),
+                      maxLines: 4,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _hintMessageForContext() {
+    if (progress < 0.05) return "시작이 반!\n이 책에 대해 미리 알아볼까요?";
+    if (progress < 0.3) return "이 부분 핵심만 추려볼까요?\n요약/키워드 추천!";
+    if (progress < 0.7) return "이제 중반부예요!\n인물/개념 관계 정리해드릴까요?";
+    if (progress < 0.95) return "마무리 단계!\n놓친 포인트를 점검해볼까요?";
+    return "완독 코앞!\n핵심만 빠르게 리마인드해드릴게요.";
+  }
 }
+
+void unawaited(Future<void>? f) {}

@@ -54,7 +54,7 @@ class UserBookProvider with ChangeNotifier {
     return true;
   }
 
-  // 🔹 목적(단일) & 사전지식(여러개) 저장 (같은 문서)
+  // 목적(단일) & 사전지식(여러개) 저장 (같은 문서)
   Future<void> saveReadingPurposeAndPreknowledge(
     BuildContext context, {
     required String bookId,
