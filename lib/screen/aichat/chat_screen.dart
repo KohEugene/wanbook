@@ -8,13 +8,19 @@ import '../../provider/chat_provider.dart';
 import '../../model/chatmessage_model.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../shared/openai_shared.dart'; 
 
 class ChatScreen extends StatefulWidget {
   final String message;
   final String title;
   final bool isFromHistory;
 
-  const ChatScreen({super.key, required this.message, required this.title, this.isFromHistory = false,});
+  const ChatScreen({
+    super.key,
+    required this.message,
+    required this.title,
+    this.isFromHistory = false,
+  });
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -29,14 +35,11 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadChatHistory();
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadChatHistory());
   }
 
-  void _loadChatHistory() async {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final userId = userProvider.user?.userId ?? '';
+  Future<void> _loadChatHistory() async {
+    final userId = Provider.of<UserProvider>(context, listen: false).user?.userId ?? '';
 
     final snapshot = await FirebaseFirestore.instance
         .collection('users')
@@ -49,9 +52,9 @@ class _ChatScreenState extends State<ChatScreen> {
 
     setState(() {
       _messages.addAll(snapshot.docs.map((doc) => {
-        'sender': doc['senderId'] == 'bot' ? 'bot' : 'user',
-        'text': doc['text'] ?? '',
-      }));
+            'sender': doc['senderId'] == 'bot' ? 'bot' : 'user',
+            'text': (doc['text'] ?? '').toString(),
+          }));
     });
 
     if (!_hasSentInitialQuestion && !widget.isFromHistory) {
@@ -95,74 +98,40 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _getGPTResponse(String prompt) async {
-    const apiKey = ''; 
-    const endpoint = 'https://api.openai.com/v1/chat/completions';
-
-    final headers = {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $apiKey',
-    };
-
-    final systemForBook = """
-    당신은 독서 도우미 AI입니다.
-    지금 사용자가 대화하는 도서 제목은 "${widget.title}" 입니다.
-    - 사용자가 메시지에 책 제목을 적지 않아도 기본적으로 "${widget.title}"을 기준으로 이해하고 답하세요.
-    - 만약 사용자가 명확히 다른 책을 지칭하면 그 책으로 전환하되, 그렇지 않으면 계속 "${widget.title}" 기준으로 답하세요.
-    - 가능한 한 책의 핵심 주제/인물/챕터 구조/핵심 문장/메시지/배경지식 중심으로 간결하게 대답하세요.
-    """;
-
-    final body = json.encode({
-      "model": "gpt-3.5-turbo", 
-      "messages": [
-        {"role": "system", "content": systemForBook},
-        {"role": "user", "content": prompt},
-      ],
-      "temperature": 0.7,
-    });
-
     try {
-      final response = await http.post(Uri.parse(endpoint), headers: headers, body: body);
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final reply = data['choices'][0]['message']['content'].trim();
+      final reply = await OpenAIShared.chatWithBook(
+        bookTitle: widget.title,
+        userPrompt: prompt,
+      );
 
-        final userId = Provider.of<UserProvider>(context, listen: false).user?.userId ?? '';
-        final chatProvider = Provider.of<ChatProvider>(context, listen: false);
+      final userId = Provider.of<UserProvider>(context, listen: false).user?.userId ?? '';
+      final chatProvider = Provider.of<ChatProvider>(context, listen: false);
 
-        final botMessage = ChatMessageModel(
-          senderId: 'bot',
-          text: reply,
-          timestamp: DateTime.now(),
-          bookTitle: widget.title,
-        );
+      final botMessage = ChatMessageModel(
+        senderId: 'bot',
+        text: reply,
+        timestamp: DateTime.now(),
+        bookTitle: widget.title,
+      );
 
-        setState(() {
-          _isBotTyping = false;
-          _messages.add({'sender': 'bot', 'text': reply});
-        });
+      setState(() {
+        _isBotTyping = false;
+        _messages.add({'sender': 'bot', 'text': reply});
+      });
 
-        await chatProvider.sendMessage(userId, widget.title, botMessage);
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(userId)
-            .collection('chats')
-            .doc(widget.title)
-            .set({
-              'lastMessage': botMessage.text,
-              'timestamp': botMessage.timestamp,
-            }, SetOptions(merge: true));
-      } else {
-        _showError("오류가 발생했어요. 다시 시도해 주세요.");
-      }
+      await chatProvider.sendMessage(userId, widget.title, botMessage);
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .collection('chats')
+          .doc(widget.title)
+          .set({
+            'lastMessage': botMessage.text,
+            'timestamp': botMessage.timestamp,
+          }, SetOptions(merge: true));
     } catch (e) {
-      _showError("인터넷 연결을 확인해 주세요.");
+      _showError('오류가 발생했어요. 다시 시도해 주세요.');
     }
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
   }
 
   void _showError(String message) {
