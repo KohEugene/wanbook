@@ -1,5 +1,8 @@
 // 챗봇 목록
 
+import 'dart:convert'; // 추가: book.json 파싱용
+import 'package:flutter/services.dart' show rootBundle; // 추가: 에셋 로드용
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wanbook/model/chatmessage_model.dart';
@@ -22,14 +25,8 @@ class _ChatlistScreenState extends State<ChatlistScreen> {
 
   Map<String, ChatMessageModel> lastMessages = {};
 
-  final Map<String, String> bookImageMap = {
-    '데미안': 'assets/images/b_damian.png',
-    '이기적 유전자': 'assets/images/b_gene.png',
-    '이방인': 'assets/images/b_stranger.png',
-    '노인과 바다': 'assets/images/b_sea.png',
-    '아몬드': 'assets/images/b_almond.png',
-    '인간실격': 'assets/images/b_human.png',
-  };
+  // 추가: book.json에서 불러온 "제목 → imagePath(URL 또는 에셋 경로)" 매핑
+  final Map<String, String> _coverByTitle = {};
 
   @override
   void initState() {
@@ -37,10 +34,39 @@ class _ChatlistScreenState extends State<ChatlistScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       userId = Provider.of<UserProvider>(context, listen: false).user?.userId ?? '';
       chatProvider = Provider.of<ChatProvider>(context, listen: false);
+
+      // 추가: book.json 로드해서 제목→커버 매핑 준비 (imagePath 사용)
+      await _loadCoversFromBookJson();
+
       await fetchLastMessages();
     });
   }
   
+  // 추가: book.json에서 "title"과 "imagePath" 매핑 생성
+  Future<void> _loadCoversFromBookJson() async {
+    try {
+      final jsonStr = await rootBundle.loadString('assets/book.json');
+      final List<dynamic> list = json.decode(jsonStr);
+
+      for (final item in list) {
+        if (item is Map<String, dynamic>) {
+          final title = (item['title'] ?? '').toString().trim();
+          if (title.isEmpty) continue;
+
+          // 🔑 표지 키는 imagePath로 고정
+          final cover = item['imagePath']?.toString();
+
+          if (cover != null && cover.isNotEmpty) {
+            _coverByTitle[title] = cover;
+          }
+        }
+      }
+      setState(() {}); // 매핑 갱신
+    } catch (e) {
+      debugPrint('book.json 로드 실패: $e');
+    }
+  }
+
   Future<void> fetchLastMessages() async {
     final firestore = FirebaseFirestore.instance;
     userId = Provider.of<UserProvider>(context, listen: false).user?.userId ?? '';
@@ -74,6 +100,17 @@ class _ChatlistScreenState extends State<ChatlistScreen> {
     });
   }
 
+  // 추가: 문자열이 http면 NetworkImage, 그 외엔 에셋 경로로 간주 (없으면 기본 커버)
+  ImageProvider _coverProvider(String? pathOrUrl) {
+    if (pathOrUrl == null || pathOrUrl.isEmpty) {
+      return const AssetImage('assets/images/default_cover.png');
+    }
+    if (pathOrUrl.startsWith('http')) {
+      return NetworkImage(pathOrUrl);
+    }
+    return AssetImage(pathOrUrl);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -96,7 +133,9 @@ class _ChatlistScreenState extends State<ChatlistScreen> {
                   itemBuilder: (context, index) {
                     final bookTitle = lastMessages.keys.elementAt(index);
                     final message = lastMessages[bookTitle]!;
-                    return chatRecord(bookTitle, message.text, message.timestamp);
+                    // 추가: 제목(title)로 imagePath 찾기
+                    final cover = _coverByTitle[bookTitle];
+                    return chatRecord(bookTitle, message.text, message.timestamp, cover);
                   },
                 ),
         ),
@@ -105,9 +144,7 @@ class _ChatlistScreenState extends State<ChatlistScreen> {
   }
 
   // 책 당 채팅 목록
-  Widget chatRecord(String bookTitle, String chat, DateTime time) {
-    final imagePath = bookImageMap[bookTitle] ?? 'assets/images/default_cover.png';
-
+  Widget chatRecord(String bookTitle, String chat, DateTime time, String? cover) {
     return InkWell(
       onTap: () {
         Navigator.push(
@@ -129,7 +166,7 @@ class _ChatlistScreenState extends State<ChatlistScreen> {
                 color: const Color(0xffD9D9D9),
                 borderRadius: BorderRadius.circular(15),
                 image: DecorationImage(
-                  image: AssetImage(imagePath),
+                  image: _coverProvider(cover), // 추가: title 매칭된 imagePath 적용
                   fit: BoxFit.cover,
                 ),
               ),
