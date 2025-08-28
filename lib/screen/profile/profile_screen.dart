@@ -76,7 +76,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       setState(() {
         nickname = userProvider.user?.nickname ?? '사용자';
         userId =
-            userProvider.user?.userId ?? userProvider.userId ?? '사용자 아이디';
+            userProvider.user?.userId ?? '사용자 아이디';
         joinDate = userProvider.user?.joinedAt;
         howManyBook = booksData.length;
       });

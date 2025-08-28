@@ -154,7 +154,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 buildAttendanceSection(userId, nickname, attendanceProvider),
                 const SizedBox(height: 24),
                 TextButton(
-                  onPressed: () => FlutterLocalNotification.showNotification(),
+                  onPressed: () => FlutterLocalNotification.sendRandomNotification(userId),
                   child: const Text("알림 보내기"),
                 ),
               ],
