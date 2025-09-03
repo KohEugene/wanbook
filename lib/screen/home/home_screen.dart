@@ -89,12 +89,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         });
       }
     });
-
-    FlutterLocalNotification.init();
-    Future.delayed(
-      const Duration(seconds: 3),
-      () => FlutterLocalNotification.requestNotificationPermission(),
-    );
   }
 
   @override
@@ -153,10 +147,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 const SizedBox(height: 24),
                 buildAttendanceSection(userId, nickname, attendanceProvider),
                 const SizedBox(height: 24),
-                TextButton(
-                  onPressed: () => FlutterLocalNotification.sendRandomNotification(userId),
-                  child: const Text("알림 보내기"),
-                ),
               ],
             ),
           ),

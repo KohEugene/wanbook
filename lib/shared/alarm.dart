@@ -173,8 +173,11 @@ class FlutterLocalNotification {
       final books = querySnapshot.docs.map((doc) {
         final data = doc.data();
         return {
+          'bookId': doc.id,
           'purpose': data['purpose'] as String?,
-          'progress': data['last_position'] as double?, // 진행률 (0.0 ~ 1.0)
+          'progress': data['last_position'] as double?,
+          'lastReadDate': (data['update_date'] as Timestamp?)?.toDate(),
+          'lastNotifiedDate': (data['notify_date'] as Timestamp?)?.toDate(),
         };
       }).toList();
       return books;
@@ -184,36 +187,63 @@ class FlutterLocalNotification {
     }
   }
 
-  // 랜덤 메시지 고르기
-  static Future<void> sendRandomNotification(String userId) async {
+  // 알림 보낸 날짜 업데이트
+  static Future<void> updateLastNotifiedDate(String userId, String bookId) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .collection('reading_books')
+          .doc(bookId)
+          .set({
+        'notify_date': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+    } catch (e) {
+      print('Error updating lastNotifiedDate: $e');
+    }
+  }
+
+  // 알림 메시지 고르기
+  static Future<void> scheduleNotifications(String userId) async {
     final userBooks = await fetchUserPurposes(userId);
+    final now = DateTime.now();
 
     if (userBooks.isNotEmpty) {
-      final random = Random();
-      final randomBook = userBooks[random.nextInt(userBooks.length)];
+      for (var book in userBooks) {
+        final lastReadDate = book['lastReadDate'] as DateTime?;
+        final lastNotifiedDate = book['lastNotifiedDate'] as DateTime?;
 
-      final purpose = randomBook['purpose'] as String? ?? 'default';
-      final progress = randomBook['progress'] as double? ?? 0.0;
+        final bool hasNotifiedRecently =
+            lastNotifiedDate != null && now.difference(lastNotifiedDate).inMinutes < 1;
 
-      // 진행률에 따라 메시지 구간(low/mid/high)을 결정
-      String progressKey;
-      if (progress < 0.3) {
-        progressKey = 'low';
-      } else if (progress < 0.7) {
-        progressKey = 'mid';
-      } else {
-        progressKey = 'high';
+        if (lastReadDate != null &&
+            now.difference(lastReadDate).inMinutes >= 1 &&
+            !hasNotifiedRecently) {
+
+          final bookId = book['bookId'] as String;
+          final purpose = book['purpose'] as String? ?? 'default';
+          final progress = book['progress'] as double? ?? 0.0;
+
+          String progressKey;
+          if (progress < 0.3) {
+            progressKey = 'low';
+          } else if (progress < 0.7) {
+            progressKey = 'mid';
+          } else {
+            progressKey = 'high';
+          }
+
+          final message = notificationMessages[purpose]?[progressKey] ??
+              notificationMessages['default']!['general']!;
+
+          await FlutterLocalNotification.showNotification(
+            title: message['title'] as String,
+            body: message['body'] as String,
+          );
+
+          await updateLastNotifiedDate(userId, bookId);
+        }
       }
-
-      // 결정된 목적과 진행률 구간에 맞는 메시지 선택
-      final message = notificationMessages[purpose]?[progressKey] ??
-          notificationMessages[purpose]?['low'] ?? // 해당 진행률 메시지가 없으면 'low' 메시지 사용
-          notificationMessages['default']!['general']!;
-
-      await showNotification(
-        title: message['title']!,
-        body: message['body']!,
-      );
     } else {
       final message = notificationMessages['default']!['general']!;
       await showNotification(

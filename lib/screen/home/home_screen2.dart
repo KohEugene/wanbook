@@ -91,12 +91,6 @@ class _HomeScreenState2 extends State<HomeScreen2>
         }
       }
     });
-
-    FlutterLocalNotification.init();
-    Future.delayed(
-      const Duration(seconds: 3),
-      () => FlutterLocalNotification.requestNotificationPermission(),
-    );
   }
 
   Future<void> _loadRecommendedBooks() async {
@@ -182,10 +176,6 @@ class _HomeScreenState2 extends State<HomeScreen2>
                 const SizedBox(height: 24),
                 buildAttendanceSection(userId, nickname, attendanceProvider),
                 const SizedBox(height: 24),
-                TextButton(
-                  onPressed: () => FlutterLocalNotification.sendRandomNotification(userId),
-                  child: const Text("알림 보내기"),
-                ),
               ],
             ),
           ),

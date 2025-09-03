@@ -111,6 +111,32 @@ class _ChatlistScreenState extends State<ChatlistScreen> {
     return AssetImage(pathOrUrl);
   }
 
+  String formatTime(DateTime time) {
+    final hour = time.hour.toString();
+    final minute = time.minute.toString().padLeft(2, '0');
+    return '$hour:$minute';
+  }
+
+  String formatDate(DateTime date) {
+    final month = date.month.toString();
+    final day = date.day.toString();
+    return '$month월 $day일';
+  }
+
+  String formatChatTime(DateTime chatTime) {
+    final now = DateTime.now();
+
+    final isSameDay = chatTime.year == now.year &&
+        chatTime.month == now.month &&
+        chatTime.day == now.day;
+
+    if (isSameDay) {
+      return formatTime(chatTime);
+    } else {
+      return formatDate(chatTime);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -127,7 +153,7 @@ class _ChatlistScreenState extends State<ChatlistScreen> {
           padding: EdgeInsets.symmetric(
               horizontal: SizeConfig.screenWidth * 0.05, vertical: 16),
           child: lastMessages.isEmpty
-              ? const Center(child: Text("채팅 기록이 없습니다."))
+              ? const Center(child: CircularProgressIndicator(color: Color(0xff0077FF)),)
               : ListView.builder(
                   itemCount: lastMessages.length,
                   itemBuilder: (context, index) {
@@ -202,7 +228,7 @@ class _ChatlistScreenState extends State<ChatlistScreen> {
             ),
             const SizedBox(width: 8),
             Text(
-              '${time.hour}:${time.minute.toString().padLeft(2, '0')}',
+              formatChatTime(time),
               style: const TextStyle(
                 color: Color(0xffADADAD),
                 fontWeight: FontWeight.w400,

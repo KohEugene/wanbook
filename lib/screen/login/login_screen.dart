@@ -13,6 +13,7 @@ import 'package:wanbook/screen/login/join_screen.dart';
 import 'package:wanbook/shared/size_config.dart';
 
 import '../../provider/user_provider.dart';
+import '../../shared/alarm.dart';
 import '../../shared/menu_bottom.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -244,6 +245,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 await storage.delete(key: 'keepLogin');
               }
 
+              await FlutterLocalNotification.scheduleNotifications(userId);
               Navigator.push(context, MaterialPageRoute(
                 builder: (context) {
                   return MenuBottom();

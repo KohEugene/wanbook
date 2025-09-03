@@ -12,6 +12,7 @@ import 'package:wanbook/provider/recentsearch_provider.dart';
 import 'package:wanbook/provider/chat_provider.dart';
 import 'package:wanbook/provider/question_provider.dart';
 import 'package:wanbook/screen/home/splash_screen.dart';
+import 'package:wanbook/shared/alarm.dart';
 import 'package:wanbook/shared/size_config.dart';
 
 
@@ -20,6 +21,8 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  await FlutterLocalNotification.init();
+  FlutterLocalNotification.requestNotificationPermission();
   runApp(
       MultiProvider(
         providers: [
