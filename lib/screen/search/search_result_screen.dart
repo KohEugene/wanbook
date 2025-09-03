@@ -270,7 +270,7 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
             final badgeProvider = Provider.of<BadgeProvider>(context, listen: false);
             await badgeProvider.checkAndShowAchievements(userProvider.userId!, context);
           }
-          Future.delayed(const Duration(seconds: 4), () {
+          Future.delayed(const Duration(seconds: 3), () {
             showDialog(
               context: context,
               barrierDismissible: false,
