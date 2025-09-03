@@ -151,7 +151,6 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
   Widget buildHintChips() {
     return Wrap(
       spacing: 14,
-      runSpacing: 4,
       children: hintQuestions.map((hint) {
         return GestureDetector(
           onTap: () => _incrementChatClickAndNavigate(hint),
