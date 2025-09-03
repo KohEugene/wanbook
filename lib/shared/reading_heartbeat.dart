@@ -25,7 +25,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 //
 // BookScreen 쪽에서는
 //  • 진행률, UI 보이는지 여부만 알려주면 되고,
-//  • 힌트를 띄워야 하는 타이밍이면 onHintShouldShow()를 불러 줍니다.
+//  • 힌트를 띄워야 하는 타이밍이면 onHintShouldShow()를 부르기
 // ────────────────────────────────────────────────────────────────────────
 
 // 힌트 기준값들
