@@ -18,7 +18,6 @@ Future<void> uploadAllBooksQuestions() async {
     'Q7':  {'questionText': '아브락사스의 의미', 'level': 3},
     'Q8':  {'questionText': '등장인물들이 전달하고자 하는 메세지', 'level': 3},
     'Q9':  {'questionText': '책의 주제를 알려주는 대사 한 줄', 'level': 3},
-    'Q10': {'questionText': '“표식”, “소명”의 맥락적 의미', 'level': 3},
   };
 
   // ──────────────── 노인과 바다 ────────────────
@@ -32,7 +31,6 @@ Future<void> uploadAllBooksQuestions() async {
     'Q7':  {'questionText': '“패배했으나 패배하지 않았다”는 의미', 'level': 3},
     'Q8':  {'questionText': '바다, 손의 상처, 사자 꿈의 의미 비교', 'level': 3},
     'Q9':  {'questionText': '책의 주제를 알려주는 대사 한 줄', 'level': 3},
-    'Q10': {'questionText': '“운명”, “자존심”의 맥락적 의미', 'level': 3},
   };
 
   // ───────────────── 변신(카프카) ─────────────────
@@ -46,7 +44,6 @@ Future<void> uploadAllBooksQuestions() async {
     'Q7':  {'questionText': '여동생 그레테의 역할 변화의 의미', 'level': 3},
     'Q8':  {'questionText': '책의 주제를 알려주는 대사 한 줄', 'level': 3},
     'Q9':  {'questionText': '문, 음식, 방/문턱의 의미', 'level': 3},
-    'Q10': {'questionText': '“짐”, “혐오”의 맥락적 의미', 'level': 3},
   };
 
   // ───────────────── 이방인(카뮈) ─────────────────
@@ -60,7 +57,6 @@ Future<void> uploadAllBooksQuestions() async {
     'Q7':  {'questionText': '뫼르소와 종교(신부)의 대립에 대해 설명', 'level': 3},
     'Q8':  {'questionText': '마리와의 관계가 드러내는 뫼르소의 세계관', 'level': 3},
     'Q9':  {'questionText': '책의 주제를 알려주는 대사 한 줄', 'level': 3},
-    'Q10': {'questionText': '“무의미”, “행복”의 맥락적 의미', 'level': 3},
   };
 
   // ──────────────── 인간 실격(다자이 오사무) ────────────────
@@ -74,7 +70,6 @@ Future<void> uploadAllBooksQuestions() async {
     'Q7':  {'questionText': '사진/수기 형식과 신뢰성 문제의 연관', 'level': 3},
     'Q8':  {'questionText': '책의 주제를 알려주는 대사 한 줄', 'level': 3},
     'Q9':  {'questionText': '“실격”, “타인”의 의미 변주', 'level': 3},
-    'Q10': {'questionText': '“구원”, “자학”의 맥락적 의미', 'level': 3},
   };
 
   final books = <String, Map<String, Map<String, dynamic>>>{
