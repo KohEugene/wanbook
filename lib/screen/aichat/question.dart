@@ -10,7 +10,7 @@ Future<void> uploadAllBooksQuestions() async {
   // ───────────────── 데미안 ─────────────────
   final demian = <String, Map<String, dynamic>>{
     'Q1':  {'questionText': '이 책의 주제', 'level': 1},
-    'Q2':  {'questionText': '헤르만 헤세에 대해', 'level': 1},
+    'Q2':  {'questionText': '작가에 대해', 'level': 1},
     'Q3':  {'questionText': '줄거리 한 단락 요약', 'level': 1},
     'Q4':  {'questionText': '주인공 싱클레어의 내적 변화 과정', 'level': 2},
     'Q5':  {'questionText': '데미안이 싱클레어에게 주는 영향', 'level': 2},
@@ -23,7 +23,7 @@ Future<void> uploadAllBooksQuestions() async {
   // ──────────────── 노인과 바다 ────────────────
   final oldManSea = <String, Map<String, dynamic>>{
     'Q1':  {'questionText': '이 책의 주제', 'level': 1},
-    'Q2':  {'questionText': '헤밍웨이에 대해', 'level': 1},
+    'Q2':  {'questionText': '작가에 대해', 'level': 1},
     'Q3':  {'questionText': '줄거리 한 단락 요약', 'level': 1},
     'Q4':  {'questionText': '산티아고와 마놀린의 관계', 'level': 2},
     'Q5':  {'questionText': '바다와 거대한 청새치가 상징하는 것', 'level': 2},
@@ -36,7 +36,7 @@ Future<void> uploadAllBooksQuestions() async {
   // ───────────────── 변신(카프카) ─────────────────
   final metamorphosis = <String, Map<String, dynamic>>{
     'Q1':  {'questionText': '이 책의 주제', 'level': 1},
-    'Q2':  {'questionText': '프란츠 카프카에 대해', 'level': 1},
+    'Q2':  {'questionText': '작가에 대해', 'level': 1},
     'Q3':  {'questionText': '줄거리 한 단락 요약', 'level': 1},
     'Q4':  {'questionText': '그레고르가 벌레로 변한 설정의 의미', 'level': 2},
     'Q5':  {'questionText': '가족들의 태도 변화가 의미하는 것', 'level': 2},
@@ -49,7 +49,7 @@ Future<void> uploadAllBooksQuestions() async {
   // ───────────────── 이방인(카뮈) ─────────────────
   final stranger = <String, Map<String, dynamic>>{
     'Q1':  {'questionText': '이 책의 주제', 'level': 1},
-    'Q2':  {'questionText': '알베르 카뮈에 대해', 'level': 1},
+    'Q2':  {'questionText': '작가에 대해', 'level': 1},
     'Q3':  {'questionText': '줄거리 한 단락 요약', 'level': 1},
     'Q4':  {'questionText': '뫼르소의 성격과 태도와 사회 규범의 관계', 'level': 2},
     'Q5':  {'questionText': '장례식/태양/바다가 의미하는 것', 'level': 2},
@@ -62,7 +62,7 @@ Future<void> uploadAllBooksQuestions() async {
   // ──────────────── 인간 실격(다자이 오사무) ────────────────
   final noLongerHuman = <String, Map<String, dynamic>>{
     'Q1':  {'questionText': '이 책의 주제', 'level': 1},
-    'Q2':  {'questionText': '다자이 오사무에 대해', 'level': 1},
+    'Q2':  {'questionText': '작가에 대해', 'level': 1},
     'Q3':  {'questionText': '줄거리 한 단락 요약', 'level': 1},
     'Q4':  {'questionText': '요조가 “가면(익살)”을 쓰는 이유', 'level': 2},
     'Q5':  {'questionText': '여성들과의 관계가 요조의 자기인식에 미친 영향', 'level': 2},
