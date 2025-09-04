@@ -69,16 +69,28 @@ class _ChatScreenState extends State<ChatScreen> {
     final userId = Provider.of<UserProvider>(context, listen: false).user?.userId ?? '';
     final chatProvider = Provider.of<ChatProvider>(context, listen: false);
 
+    final outcome = OpenAIShared.classifyPrompt(
+      input.trim(),
+      widget.title,
+      const [], 
+      true,
+    );
+
     final userMessage = ChatMessageModel(
       senderId: userId,
       text: input.trim(),
       timestamp: DateTime.now(),
       bookTitle: widget.title,
+      category: outcome.category,
+      isBlocked: outcome.isBlocked,
+      relatedToBook: outcome.relatedToBook,
+      guardReason: outcome.guardReason,
+      otherBookHint: outcome.otherBookHint,
     );
 
     setState(() {
       _messages.add({'sender': 'user', 'text': input.trim()});
-      _isBotTyping = true;
+      _isBotTyping = !outcome.isBlocked;
     });
 
     _controller.clear();
@@ -94,18 +106,51 @@ class _ChatScreenState extends State<ChatScreen> {
           'timestamp': userMessage.timestamp,
         }, SetOptions(merge: true));
 
+    if (outcome.isBlocked) {
+      final botNotice = ChatMessageModel(
+        senderId: 'bot',
+        text: outcome.blockMsg,
+        timestamp: DateTime.now(),
+        bookTitle: widget.title,
+      );
+
+      setState(() {
+        _isBotTyping = false;
+        _messages.add({'sender': 'bot', 'text': outcome.blockMsg});
+      });
+
+      await chatProvider.sendMessage(userId, widget.title, botNotice);
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .collection('chats')
+          .doc(widget.title)
+          .set({
+            'lastMessage': botNotice.text,
+            'timestamp': botNotice.timestamp,
+          }, SetOptions(merge: true));
+
+      return;
+    }
     _getGPTResponse(input.trim());
   }
 
   Future<void> _getGPTResponse(String prompt) async {
     try {
-      final reply = await OpenAIShared.chatWithBook(
+      final result = await OpenAIShared.chatWithBook(
         bookTitle: widget.title,
         userPrompt: prompt,
       );
 
+      final reply = result.reply;
+
       final userId = Provider.of<UserProvider>(context, listen: false).user?.userId ?? '';
       final chatProvider = Provider.of<ChatProvider>(context, listen: false);
+
+      setState(() {
+        _isBotTyping = false;
+        _messages.add({'sender': 'bot', 'text': reply});
+      });
 
       final botMessage = ChatMessageModel(
         senderId: 'bot',
@@ -113,11 +158,6 @@ class _ChatScreenState extends State<ChatScreen> {
         timestamp: DateTime.now(),
         bookTitle: widget.title,
       );
-
-      setState(() {
-        _isBotTyping = false;
-        _messages.add({'sender': 'bot', 'text': reply});
-      });
 
       await chatProvider.sendMessage(userId, widget.title, botMessage);
       await FirebaseFirestore.instance

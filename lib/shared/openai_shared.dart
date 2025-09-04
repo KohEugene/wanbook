@@ -2,6 +2,28 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+class GuardOutcome {
+  final String blockMsg;
+  final String category;
+  final bool relatedToBook;
+  final String guardReason;
+  final String otherBookHint;
+  const GuardOutcome({
+    this.blockMsg = '',
+    this.category = 'on_topic',
+    this.relatedToBook = true,
+    this.guardReason = '',
+    this.otherBookHint = '',
+  });
+  bool get isBlocked => blockMsg.isNotEmpty;
+}
+
+class ChatResult {
+  final String reply;
+  final GuardOutcome meta;
+  const ChatResult({required this.reply, required this.meta});
+}
+
 class OpenAIShared {
   static const String _apiKey = '';
   static const String _endpoint = 'https://api.openai.com/v1/chat/completions';
@@ -29,27 +51,98 @@ class OpenAIShared {
     throw Exception('OpenAI error: HTTP ${res.statusCode} ${res.reasonPhrase} | ${res.body}');
   }
 
+  static GuardOutcome classifyPrompt(
+    String prompt,
+    String bookTitle,
+    List<String> bookKeywords,
+    bool allowRecommendations,
+  ) {
+    final p = prompt.trim();
+    final lower = p.toLowerCase();
+    final current = bookTitle.toLowerCase();
+
+    // 칭찬/격려
+    if (_looksLikePraiseOrEncouragement(lower)) {
+      return const GuardOutcome(
+        category: 'praise',
+        relatedToBook: false,
+        guardReason: 'praise_or_encouragement',
+      );
+    }
+
+    // 무조건 허용: 현재 책 직접 언급 or 지시어
+    if (lower.contains(current) || _mentionsCurrentBookByDeixis(lower)) {
+      if (_mentionsComparisonOrRelation(lower)) return const GuardOutcome(category: 'compare');
+      if (allowRecommendations && _looksLikeRelatedRecommendation(lower)) {
+        return const GuardOutcome(category: 'recommendation');
+      }
+      if (_isMetaAboutCurrentBook(lower)) return const GuardOutcome(category: 'meta');
+      return const GuardOutcome(category: 'on_topic');
+    }
+
+    // 우선 허용
+    if (_isMetaAboutCurrentBook(lower)) return const GuardOutcome(category: 'meta');
+    if (_mentionsBookKeywords(lower, bookKeywords)) return const GuardOutcome(category: 'on_topic');
+    if (_mentionsComparisonOrRelation(lower)) return const GuardOutcome(category: 'compare');
+    if (_looksLikeCurrentVsOtherComparison(p, bookTitle)) return const GuardOutcome(category: 'compare');
+
+    // ‘책’ 맥락 없는 일반 "추천"은 무시
+    if (allowRecommendations && _looksLikeRelatedRecommendation(lower)) {
+      return const GuardOutcome(category: 'recommendation');
+    }
+
+    // 느슨한 다른 책 감지 (따옴표 없이도 "X에 대해 알려줘/요약" 등)
+    final looseOther = _extractOtherTitleHintLoose(p, current);
+    if (looseOther.isNotEmpty) {
+      return GuardOutcome(
+        blockMsg: '현재 "$bookTitle"에 대한 대화를 하고 있어요! 해당 책과 관련된 내용만 질문해주세요!',
+        category: 'guard_block',
+        relatedToBook: false,
+        guardReason: 'other_book_only_loose',
+        otherBookHint: looseOther,
+      );
+    }
+
+    // "…라는 책" / 따옴표 제목 등 명시적 다른 책
+    if (_mentionsExplicitOtherTitleButNotCurrentContext(p, current)) {
+      final hint = _extractOtherTitleHint(p);
+      return GuardOutcome(
+        blockMsg: '현재 "$bookTitle"에 대한 대화를 하고 있어요! 해당 책과 관련된 내용만 질문해주세요!',
+        category: 'guard_block',
+        relatedToBook: false,
+        guardReason: 'other_book_only',
+        otherBookHint: hint,
+      );
+    }
+
+    // 맥락 없음
+    return const GuardOutcome(
+      category: 'off_topic',
+      relatedToBook: false,
+      guardReason: 'no_context',
+    );
+  }
+
   // 책멍이와 대화
-  static Future<String> chatWithBook({
+  static Future<ChatResult> chatWithBook({
     required String bookTitle,
     required String userPrompt,
     List<String> bookKeywords = const [],
     bool allowRecommendations = true,
     double temperature = 0.7,
   }) async {
-    // 가드: "현재 책 맥락인지" 폭넓게 허용, 정말 "다른 책만"이면 차단
-    final blockMsg = _guardPrompt(userPrompt, bookTitle, bookKeywords, allowRecommendations);
-    if (blockMsg.isNotEmpty) return blockMsg;
+    final outcome = classifyPrompt(userPrompt, bookTitle, bookKeywords, allowRecommendations);
+    if (outcome.isBlocked) {
+      return ChatResult(reply: outcome.blockMsg, meta: outcome);
+    }
 
-    // 추천 의도 감지 시, 시스템에 강한 힌트 추가
-    final forceRecHint = (allowRecommendations && _looksLikeRelatedRecommendation(userPrompt.toLowerCase()))
+    // 추천/비교 힌트
+    final forceRecHint = (allowRecommendations && outcome.category == 'recommendation')
         ? '\n[중요] 사용자가 "$bookTitle"을 기준으로 비슷한/연관 도서를 요청했습니다. 반드시 2~3권 추천을 제공하고, 이유를 한 줄로 설명하세요.'
         : '';
-
-    // 비교/차이/공통 의도 힌트
-    final forceCompareHint = _looksLikeCurrentVsOtherComparison(
-      userPrompt, bookTitle
-    ) ? '\n[중요] 사용자가 "$bookTitle"과 다른 작품의 비교/차이/공통점을 요청했습니다. "$bookTitle"을 중심으로 2~3개 핵심 포인트만 간결히 제시하세요.' : '';
+    final forceCompareHint = (outcome.category == 'compare')
+        ? '\n[중요] 사용자가 "$bookTitle"과 다른 작품의 비교/차이/공통점을 요청했습니다. "$bookTitle"을 중심으로 2~3개 핵심 포인트만 간결히 제시하세요.'
+        : '';
 
     // 시스템 프롬프트
     final system = '''
@@ -93,38 +186,12 @@ class OpenAIShared {
     ], temperature: temperature);
 
     final reply = (data['choices']?[0]?['message']?['content'] as String?)?.trim() ?? '';
-    return reply.isEmpty ? '답변을 생성하지 못했습니다.' : reply;
+    final safeReply = reply.isEmpty ? '답변을 생성하지 못했습니다.' : reply;
+
+    return ChatResult(reply: safeReply, meta: outcome);
   }
 
-  // 가드
-  static String _guardPrompt(
-    String prompt,
-    String bookTitle,
-    List<String> bookKeywords,
-    bool allowRecommendations,
-  ) {
-    final p = prompt.trim();
-    final lower = p.toLowerCase();
-    final current = bookTitle.toLowerCase();
-
-    // 무조건 허용: 현재 책 직접 언급 or 지시어
-    if (lower.contains(current) || _mentionsCurrentBookByDeixis(lower)) return '';
-
-    // 우선 허용: 메타/내부 키워드/짧은 개념질문/연관·비교/추천
-    if (_isMetaAboutCurrentBook(lower)) return '';
-    if (_mentionsBookKeywords(lower, bookKeywords)) return '';
-    if (_looksLikeShortConceptQuery(p)) return '';
-    if (_mentionsComparisonOrRelation(lower)) return '';
-    if (_looksLikeCurrentVsOtherComparison(p, bookTitle)) return ''; // ← 추가
-    if (allowRecommendations && _looksLikeRelatedRecommendation(lower)) return '';
-
-    // "다른 책만" 주제로 보일 때만 차단
-    if (_mentionsExplicitOtherTitleButNotCurrentContext(p, current)) {
-      return '현재 "$bookTitle"에 대한 대화를 하고 있어요! 해당 책과 관련된 내용만 질문해주세요!';
-    }
-    return '';
-  }
-
+  // 서브루틴
   static bool _isMetaAboutCurrentBook(String lower) {
     const meta = [
       '작가','저자','author','지은이','출간','출판','번역','판본','isbn','장르','배경',
@@ -150,20 +217,25 @@ class OpenAIShared {
     return false;
   }
 
+  static bool _hasBookContext(String lower) {
+    const ctx = ['책', '도서', '작품', '소설', '이 책', '이 작품', '같은 작가', '저자', '작가'];
+    return ctx.any((k) => lower.contains(k));
+  }
+
   static bool _looksLikeRelatedRecommendation(String lower) {
-    // 다양한 표현을 포괄 (공백·조사 변형 대응)
+    if (!_hasBookContext(lower)) return false;
+
     const rec = [
-      '비슷한 책', '비슷한 작품', '유사한 책', '유사한 작품',
-      '같은 작가', '다른 작품', '읽을 만한', '더 읽을', '후속 읽기', '확장 독서',
-      '추천', '추천해', '추천해줘', '추천 좀', '추천 부탁', '리커멘드', 'recommend',
-      '비슷한 주제', '유사한 주제', '비슷한 분위기', '비슷한 메시지', '비슷한 느낌'
+      '비슷한 책','비슷한 작품','유사한 책','유사한 작품',
+      '같은 작가','다른 작품','읽을 만한','더 읽을','후속 읽기','확장 독서',
+      '추천','추천해','추천해줘','추천 좀','추천 부탁','리커멘드','recommend',
+      '비슷한 주제','유사한 주제','비슷한 분위기','비슷한 메시지','비슷한 느낌'
     ];
     if (lower.contains('이 책과') && (lower.contains('비슷') || lower.contains('유사'))) return true;
     return rec.any((k) => lower.contains(k));
   }
 
   static bool _mentionsComparisonOrRelation(String lower) {
-    // 비교/연관/차이/공통 등 폭넓게 인식
     const rel = [
       '비교','대비','대조','차이','차이점','다른 점','차별점',
       '공통','공통점','유사','유사점','비슷','비슷한 점','닮','닮은점',
@@ -174,37 +246,23 @@ class OpenAIShared {
   }
 
   static bool _mentionsCurrentBookByDeixis(String lower) {
-    // 지시어 확장
-    const deictic = ['이 책', '이 작품', '해당 책', '본서', '현 작품', '현재 책', '이 소설'];
+    const deictic = ['이 책','이 작품','해당 책','본서','현 작품','현재 책','이 소설'];
     return deictic.any((k) => lower.contains(k));
   }
 
-  // 현재 책 vs 다른 책 비교 의도 감지
   static bool _looksLikeCurrentVsOtherComparison(String prompt, String bookTitle) {
     final lower = prompt.toLowerCase();
     final current = bookTitle.toLowerCase();
-
-    // 현재 책 제목이 함께 나오고 비교 키워드가 있으면 비교 의도
     if (lower.contains(current) && _mentionsComparisonOrRelation(lower)) return true;
-
-    // '이 책과 "다른책"' + 비교 키워드
     final hasDeixis = _mentionsCurrentBookByDeixis(lower);
     final hasCompare = _mentionsComparisonOrRelation(lower);
-    final otherTitleQuoted = RegExp(
-      r'["“”][^"“”]+["“”]\s*(책|소설|시리즈)?',
-      caseSensitive: false
-    ).hasMatch(prompt);
+    final otherTitleQuoted = RegExp(r'["“”][^"“”]+["“”]\s*(책|소설|시리즈)?', caseSensitive: false).hasMatch(prompt);
     if (hasDeixis && hasCompare && otherTitleQuoted) return true;
-
-    // '이 책과/와/랑/하고 X 비교/차이/비슷'
-    if (hasDeixis && hasCompare && RegExp(r'(과|와|랑|하고)\s*[^ ]+', caseSensitive: false).hasMatch(lower)) {
-      return true;
-    }
+    if (hasDeixis && hasCompare && RegExp(r'(과|와|랑|하고)\s*[^ ]+', caseSensitive: false).hasMatch(lower)) return true;
     return false;
   }
 
   static bool _mentionsExplicitOtherTitleButNotCurrentContext(String prompt, String currentTitleLower) {
-    // 현재 책 언급/지시어/비교·추천 맥락이 있으면 차단하지 않음
     final lower = prompt.toLowerCase();
     if (lower.contains(currentTitleLower)) return false;
     if (_mentionsCurrentBookByDeixis(lower)) return false;
@@ -212,28 +270,63 @@ class OpenAIShared {
     if (_looksLikeRelatedRecommendation(lower)) return false;
     if (_looksLikeCurrentVsOtherComparison(prompt, currentTitleLower)) return false;
 
-    // "…라는 책", 따옴표 제목 등만 다른 책으로 판단
     final patterns = [
       RegExp(r'["“”](.+?)["“”]\s*(라는|이란)?\s*책', caseSensitive: false),
       RegExp(r'["“”](.+?)["“”]\s*(소설|시리즈)', caseSensitive: false),
       RegExp(r'(.+?)\s*(책|소설|시리즈)\s*(어때|어떤|요약|내용|결말|해석|의미)', caseSensitive: false),
     ];
-
     for (final p in patterns) {
       final m = p.firstMatch(prompt);
       if (m != null) {
         final candidates = [
           for (var i = 1; i <= m.groupCount; i++) (m.group(i) ?? '').trim().toLowerCase()
         ]..removeWhere((e) => e.isEmpty);
-
         if (candidates.isEmpty) continue;
         final mentioned = candidates.reduce((a, b) => a.length >= b.length ? a : b);
-        if (mentioned.isNotEmpty && !currentTitleLower.contains(mentioned)) {
-          return true; // 현재 책 맥락 없이 "다른 책만" 질문 → 차단
-        }
+        if (mentioned.isNotEmpty && !currentTitleLower.contains(mentioned)) return true;
       }
     }
     return false;
+  }
+
+  static String _extractOtherTitleHint(String text) {
+    final m = RegExp(r'["“”]([^"“”]+)["“”]').firstMatch(text);
+    if (m != null) return m.group(1)?.trim() ?? '';
+    final m2 = RegExp(r'(.+?)\s*(라는|이란)?\s*책').firstMatch(text);
+    if (m2 != null) return m2.group(1)?.trim() ?? '';
+    return '';
+  }
+
+  // 느슨한 “다른 책” 제목 추정 (따옴표 없음)
+  static String _extractOtherTitleHintLoose(String text, String currentLower) {
+    final lower = text.toLowerCase();
+
+    const stopwords = [
+      '주제','등장인물','결말','상징','배경','작가','저자','인용','문장','구절','챕터','장','목차',
+      '해석','요약','메시지','세계관','영화화','리메이크','비교','차이','공통점'
+    ];
+
+    final m = RegExp(
+      r'([\uAC00-\uD7A3A-Za-z0-9\s]{2,20})\s*(에 대해|에대한|에 관해|에관해)\s*(알려줘|설명|요약|정리|무엇|뭐야|가 뭐야)',
+      caseSensitive: false,
+    ).firstMatch(text);
+
+    if (m != null) {
+      final cand = (m.group(1) ?? '').trim();
+      if (cand.isEmpty) return '';
+      final candLower = cand.toLowerCase();
+      if (currentLower.contains(candLower)) return '';
+      if (stopwords.any((s) => candLower.contains(s))) return '';
+      if (cand.replaceAll(' ', '').length < 2) return '';
+      return cand;
+    }
+
+    return '';
+  }
+
+  static bool _looksLikePraiseOrEncouragement(String lower) {
+    const ks = ['고마워','감사','좋아요','잘했','대단','멋지','최고','굿','똑똑','유용','helpful','thanks','thank you','appreciate'];
+    return ks.any(lower.contains);
   }
 
   // 사전지식 요약
@@ -251,12 +344,10 @@ class OpenAIShared {
 - "$bookTitle"을 중심으로, "$topic"과 관련된 배경지식/핵심정보를 알려주세요.
 - 한국어로 친절하게 답하세요.
 ''';
-
     final data = await _postChat([
       {'role': 'system', 'content': system},
       {'role': 'user', 'content': "이 책과 관련된 '$topic' 정보를 알려줘."},
     ], temperature: temperature);
-
     final reply = (data['choices']?[0]?['message']?['content'] as String?)?.trim() ?? '';
     return reply.isEmpty ? '해당 주제에 대한 정보를 준비하지 못했습니다.' : reply;
   }
