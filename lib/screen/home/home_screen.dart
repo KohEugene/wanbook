@@ -1,8 +1,11 @@
-// 홈 1 (진행도서 o)
+// 홈
+import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:wanbook/shared/menu_bottom.dart';
 import 'package:wanbook/screen/ebook/book_screen.dart';
@@ -15,6 +18,9 @@ import '../../shared/size_config.dart';
 import '../../model/book_model.dart';
 import '../../model/user_book_model.dart';
 import '../../provider/user_book_provider.dart';
+
+import '../../shared/book_basic.dart';
+import '../search/search_result_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -41,13 +47,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   String? currentMessage;
   String nickname = '사용자';
 
-  BookModel? selectedBook;
+  BookModel? selectedBook;  
   UserBookModel? selectedUserBook;
 
   late AnimationController _scaleController;
   late Animation<double> _scaleAnimation;
 
-  double completedRatio = 0.0;
+  double completedRatio = 0.0;  
+
+  bool _showRecommended = false; 
+  List<BookModel> _recommended = [];
 
   @override
   void initState() {
@@ -70,25 +79,76 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       final userId = userProvider.user?.userId;
       nickname = userProvider.user?.nickname ?? '사용자';
 
-      if (userId != null) {
-        await attendanceProvider.markAttendance(userId);
-        await attendanceProvider.fetchThisWeekAttendance(userId);
+      if (userId == null) return;
 
-        final books = await userBookProvider.fetchReadingBooks(context);
-        final total = books.length;
-        final completed = books.where((b) => b['userBook'].isCompleted).length;
-        final completedRatio = total > 0 ? completed / total : 0.0;
+      await attendanceProvider.markAttendance(userId);
+      await attendanceProvider.fetchThisWeekAttendance(userId);
 
-        final selected = books.isNotEmpty ? books[Random().nextInt(books.length)] : null;
+      final pairs = await userBookProvider.fetchReadingBooks(context);
+      final inProgress = pairs
+          .where((m) => (m['userBook'] as UserBookModel).isCompleted == false)
+          .toList();
 
+      final allSnap = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .collection('reading_books')
+          .get();
+
+      final total = allSnap.docs.length;
+      final completed = allSnap.docs.where((d) {
+        final data = d.data();
+        return (data['is_completed'] == true);
+      }).length;
+
+      final computedCompletedRatio = total > 0 ? completed / total : 0.0;
+
+      if (!mounted) return;
+
+      if (inProgress.isEmpty) {
+        // 진행중 도서가 하나도 없으면 인기도서
+        await _loadRecommendedBooks();
         setState(() {
-          selectedBook = selected?['book'];
-          selectedUserBook = selected?['userBook'];
-          this.completedRatio = completedRatio;
+          _showRecommended = true;
+          completedRatio = computedCompletedRatio;
+          currentMessage = getRandomMessage();
+        });
+      } else {
+        // 미완독 리스트에서 랜덤 1권 노출
+        final selected = inProgress[Random().nextInt(inProgress.length)];
+        setState(() {
+          selectedBook = selected['book'] as BookModel?;
+          selectedUserBook = selected['userBook'] as UserBookModel?;
+          _showRecommended = false;
+          completedRatio = computedCompletedRatio;
           currentMessage = getRandomMessage();
         });
       }
     });
+  }
+
+  Future<void> _loadRecommendedBooks() async {
+    try {
+      final jsonStr = await rootBundle.loadString('assets/book.json');
+      final dynamic parsed = json.decode(jsonStr);
+
+      final List<dynamic> rawList = parsed is List
+          ? parsed
+          : (parsed is Map && parsed['books'] is List ? parsed['books'] : []);
+
+      final list = rawList
+          .map((e) => BookModel.fromJson(e as Map<String, dynamic>))
+          .where((b) => (b.imagePath ?? '').trim().isNotEmpty)
+          .toList()
+        ..shuffle();
+
+      setState(() {
+        _recommended = list.take(12).toList();
+      });
+    } catch (e) {
+      debugPrint('loadRecommendedBooks error: $e');
+      setState(() => _recommended = []);
+    }
   }
 
   @override
@@ -102,10 +162,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void updateMessage() {
     if (_isClicked || !mounted) return;
 
-    setState(() {
-      _isClicked = true;
-    });
-
+    setState(() => _isClicked = true);
     _scaleController.stop();
     _scaleController.forward(from: 0.0);
 
@@ -130,6 +187,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final userId = userProvider.user?.userId ?? '';
     final nickname = userProvider.user?.nickname ?? '사용자';
     final attendanceProvider = Provider.of<AttendanceProvider>(context);
+
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -143,7 +201,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 const SizedBox(height: 16),
                 buildChaekmeongImage(completedRatio),
                 const SizedBox(height: 24),
-                buildReadingSection(context),
+                if (!_showRecommended)
+                  buildReadingSection(context)
+                else
+                  buildRecommendedSection(),
                 const SizedBox(height: 24),
                 buildAttendanceSection(userId, nickname, attendanceProvider),
                 const SizedBox(height: 24),
@@ -207,14 +268,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
+  // 진행 중 도서 섹션
   Widget buildReadingSection(BuildContext context) {
     if (selectedBook == null || selectedUserBook == null) return const SizedBox.shrink();
 
-    String title = selectedBook!.title;
-    String author = selectedBook!.author.split(',').first;
-    String? coverImage = selectedBook!.imagePath;
-    double percentValue = selectedUserBook!.lastPosition ?? 0.0;
-    String percentText = "${(percentValue * 100).round()}%";
+    final title = selectedBook!.title;
+    final author = selectedBook!.author.split(',').first;
+    final coverImage = selectedBook!.imagePath;
+    final percentValue = selectedUserBook!.lastPosition ?? 0.0;
+    final percentText = "${(percentValue * 100).round()}%";
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -224,8 +286,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           children: [
             const Text('아직 완독할 도서가 남았어요!', style: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600)),
             TextButton(
-              onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => BookScreen(title: selectedBook!.title,
-                          initialProgress: selectedUserBook?.lastPosition ?? 0.0,))),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => BookScreen(
+                    title: selectedBook!.title,
+                    initialProgress: selectedUserBook?.lastPosition ?? 0.0,
+                  ),
+                ),
+              ),
               child: Row(
                 children: const [
                   Text('독서하기', style: TextStyle(color: Color(0xff777777), fontSize: 14)),
@@ -257,10 +326,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 8),
-                    Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                      maxLines: 1, overflow: TextOverflow.ellipsis,),
-                    Text(author, style: const TextStyle(color: Color(0xff777777), fontSize: 14),
-                      maxLines: 1, overflow: TextOverflow.ellipsis,),
+                    Text(
+                      title,
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      author,
+                      style: const TextStyle(color: Color(0xff777777), fontSize: 14),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                     const SizedBox(height: 16),
                     Text(
                       selectedBook!.description ?? '책 설명이 없습니다.',
@@ -280,7 +357,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             ),
                             child: FractionallySizedBox(
                               alignment: Alignment.centerLeft,
-                              widthFactor: percentValue,
+                              widthFactor: percentValue.clamp(0.0, 1.0),
                               child: Container(
                                 decoration: BoxDecoration(
                                   color: const Color(0xff0077FF),
@@ -304,6 +381,48 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
+  // 인기도서 추천 섹션
+  Widget buildRecommendedSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        const SizedBox(height: 4),
+        const Text('이런 책은 어떠신가요?\n책멍이의 추천 도서 목록',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 190,
+          child: _recommended.isEmpty
+              ? const Center(
+                  child: Text('추천 도서를 준비 중이에요.',
+                      style: TextStyle(color: Color(0xff777777))),
+                )
+              : ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: _recommended.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 8),
+                  itemBuilder: (context, index) {
+                    final b = _recommended[index];
+                    return BookBasic(
+                      book: b,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                SearchResultScreen(searchKeyword: b.title),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+        ),
+      ],
+    );
+  }
+
   Widget buildAttendanceSection(String userId, String nickname, AttendanceProvider provider) {
     final status = provider.attendanceStatus;
     final days = ['일', '월', '화', '수', '목', '금', '토'];
@@ -319,7 +438,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               onPressed: () {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (_) => MenuBottom(initialIndex: 3)),
+                  MaterialPageRoute(builder: (_) => const MenuBottom(initialIndex: 3)),
                 );
               },
               child: Row(

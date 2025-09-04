@@ -249,7 +249,12 @@ class _PopUpState extends State<PopUp> {
                         ? const SizedBox(
                             width: 20,
                             height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Color(0xff0077FF),
+                              ),
+                            ),
                           )
                         : const Icon(
                             Icons.photo_camera_rounded,
@@ -337,7 +342,12 @@ class _PopUpState extends State<PopUp> {
                             ? const SizedBox(
                                 width: 18,
                                 height: 18,
-                                child: CircularProgressIndicator(strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Color(0xff0077FF),
+                                  ),
+                                ),
                               )
                             : const Text(
                                 '변경',

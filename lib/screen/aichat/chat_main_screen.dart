@@ -180,6 +180,7 @@ class _ChatMainScreenState extends State<ChatMainScreen> {
         Expanded(
           child: TextField(
             controller: _controller,
+            cursorColor: const Color(0xff0077FF),
             decoration: InputDecoration(
               hintText: '책에 대해 궁금한 점을 물어보세요',
               hintStyle: const TextStyle(color: Color(0xff777777), fontSize: 14),
