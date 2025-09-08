@@ -1,6 +1,7 @@
 
 // '독서 중' 탭 화면
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -8,8 +9,11 @@ import 'package:provider/provider.dart';
 import '../../model/book_model.dart';
 import '../../model/user_book_model.dart';
 import '../../provider/user_book_provider.dart';
+import '../../provider/user_provider.dart';
 import '../../shared/book_progress.dart';
 import '../../shared/size_config.dart';
+import '../ebook/book_screen.dart';
+import '../question/purpose_screen.dart';
 
 class ReadingBookScreen extends StatefulWidget {
   const ReadingBookScreen({super.key});
@@ -66,7 +70,60 @@ class _ReadingBookScreenState extends State<ReadingBookScreen> {
             int originalIndex = readingIndexes[index];
             final book = allBooks[originalIndex]['book'] as BookModel;
             final readingBook = allBooks[originalIndex]['userBook'] as UserBookModel;
-            return BookProgress(book: book, readingBook: readingBook);
+            return BookProgress(
+                book: book,
+                readingBook: readingBook,
+                onTap: () async {
+                  final userProvider = Provider.of<UserProvider>(context, listen: false);
+                  final userId = userProvider.user?.userId;
+
+                  final snapshot = await FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(userId)
+                      .collection('reading_books')
+                      .doc(book.title)
+                      .get();
+
+                  final data = snapshot.data();
+                  final latestProgress = (data?['last_position'] as num?)?.toDouble() ?? 0.0;
+
+                  // 목적, 사전지식 필드 존재 여부 체크
+                  final hasPurposeField = data?.containsKey('purpose') ?? false;
+                  final hasPreknowledgeField = data?.containsKey('preknowledge') ?? false;
+
+                  if (latestProgress == 0.0) {
+                    // last_position == 0 이지만 목적, 사전지식 필드가 존재하면 바로 BookScreen
+                    if (hasPurposeField && hasPreknowledgeField) {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => BookScreen(
+                            title: book.title,
+                            initialProgress: latestProgress, // 0.0 이어도 그대로 전달
+                          ),
+                        ),
+                      );
+                    } else {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ReadingPurposeScreen(title: book.title),
+                        ),
+                      );
+                    }
+                  } else {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => BookScreen(
+                          title: book.title,
+                          initialProgress: latestProgress,
+                        ),
+                      ),
+                    );
+                  }
+                }
+            );
           },
         ),
       ),

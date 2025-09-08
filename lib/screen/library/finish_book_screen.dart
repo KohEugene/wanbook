@@ -1,6 +1,7 @@
 
 // '완독 도서' 탭 화면
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -9,7 +10,9 @@ import 'package:wanbook/shared/book_progress.dart';
 import '../../model/book_model.dart';
 import '../../model/user_book_model.dart';
 import '../../provider/user_book_provider.dart';
+import '../../provider/user_provider.dart';
 import '../../shared/size_config.dart';
+import '../ebook/book_screen.dart';
 
 class FinishBookScreen extends StatefulWidget {
   const FinishBookScreen({super.key});
@@ -66,7 +69,33 @@ class _FinishBookScreenState extends State<FinishBookScreen> {
             int originalIndex = completedIndexes[index];
             final book = allBooks[originalIndex]['book'] as BookModel;
             final readingBook = allBooks[originalIndex]['userBook'] as UserBookModel;
-            return BookProgress(book: book, readingBook: readingBook);
+            return BookProgress(
+                book: book,
+                readingBook: readingBook,
+                onTap: () async {
+                  final userProvider = Provider.of<UserProvider>(context, listen: false);
+                  final userId = userProvider.user?.userId;
+
+                  final snapshot = await FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(userId)
+                      .collection('reading_books')
+                      .doc(book.title)
+                      .get();
+
+                  final data = snapshot.data();
+                  final latestProgress = (data?['last_position'] as num?)?.toDouble() ?? 0.0;
+
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => BookScreen(
+                      title: book.title,
+                      initialProgress: latestProgress,),
+                    ),
+                  );
+                }
+            );
           },
         ),
       ),
