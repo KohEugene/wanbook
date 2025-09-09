@@ -1,8 +1,8 @@
-// 분석 그래프
+// 분석 그래프 위젯들 모음
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
-/// 시간대 막대 차트 (수평 스크롤)
+// 독서 시간대 (막대 그래프)
 class HourBars extends StatelessWidget {
   const HourBars({
     super.key,
@@ -12,16 +12,17 @@ class HourBars extends StatelessWidget {
     this.gap = 8,
   });
 
-  final List<double> values;
-  final double barMax;
-  final double barWidth;
-  final double gap;
+  final List<double> values; 
+  final double barMax;     
+  final double barWidth;   
+  final double gap;         
 
   @override
   Widget build(BuildContext context) {
     final maxV = values.isEmpty
         ? 1.0
         : values.reduce((a, b) => a > b ? a : b).clamp(1, double.infinity);
+
     final contentWidth = values.length * (barWidth + gap);
 
     return SingleChildScrollView(
@@ -40,7 +41,7 @@ class HourBars extends StatelessWidget {
                       width: barWidth,
                       height: (values[i] / maxV) * barMax,
                       decoration: BoxDecoration(
-                        color: const Color(0xff0077FF), // 막대 = 진한 파랑
+                        color: const Color(0xff0077FF),
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
@@ -78,7 +79,7 @@ class HourBars extends StatelessWidget {
   }
 }
 
-/// 진행률(0~100) 정체 곡선 (수평 스크롤)
+// 진핼률 정체 구간 (꺾은선 그래프)
 class DwellLineChart extends StatelessWidget {
   const DwellLineChart({
     super.key,
@@ -86,19 +87,19 @@ class DwellLineChart extends StatelessWidget {
     this.height = 160,
     this.step = 6,
     this.showXAxisLabels = true,
-    this.labelInterval = 10, // ⬅️ 세로선/라벨 간격을 동일하게 사용
-    this.labelBuilder,
+    this.labelInterval = 10, 
+    this.labelBuilder,    
     this.axisLabelStyle =
         const TextStyle(fontSize: 11, color: Color(0xff777777)),
   });
 
-  final List<int> dwell;
-  final double height;
-  final double step;
-  final bool showXAxisLabels;
-  final int labelInterval;
-  final String Function(int value)? labelBuilder;
-  final TextStyle axisLabelStyle;
+  final List<int> dwell;            
+  final double height;         
+  final double step;                 
+  final bool showXAxisLabels;        
+  final int labelInterval;            
+  final String Function(int value)? labelBuilder; 
+  final TextStyle axisLabelStyle;     
 
   @override
   Widget build(BuildContext context) {
@@ -114,7 +115,6 @@ class DwellLineChart extends StatelessWidget {
         height: height + 28,
         child: Stack(
           children: [
-            // 선, 채우기, 세로 가이드선을 그림
             CustomPaint(
               size: Size(width, height + 28),
               painter: _LinePainterDense(
@@ -122,10 +122,9 @@ class DwellLineChart extends StatelessWidget {
                 maxY: maxY.toDouble(),
                 step: step,
                 leftPadding: left,
-                tickInterval: labelInterval, // ⬅️ 가이드선 간격을 라벨 간격과 통일
+                tickInterval: labelInterval,
               ),
             ),
-            // x축 라벨을 같은 좌표에 맞춰서 중앙 정렬로 그림
             if (showXAxisLabels)
               Positioned(
                 left: 0,
@@ -148,6 +147,7 @@ class DwellLineChart extends StatelessWidget {
   }
 }
 
+// 꺾은선 그래프 가이드라인+선 그리기 (경로 계산)
 class _LinePainterDense extends CustomPainter {
   _LinePainterDense({
     required this.dwell,
@@ -169,16 +169,14 @@ class _LinePainterDense extends CustomPainter {
     final bottom = 32.0;
     final h = size.height - top - bottom;
 
-    // 세로 가이드선 (0부터 100까지 tickInterval 간격)
     final guide = Paint()..color = const Color(0x11000000);
     for (int v = 0; v <= 100; v += tickInterval) {
       final x = leftPadding + step * v;
       canvas.drawLine(Offset(x, top), Offset(x, top + h), guide);
     }
 
-    // 꺾은선 경로
     final p = Path();
-    double lastY = top + h; // fallback
+    double lastY = top + h; 
     for (int i = 0; i < dwell.length; i++) {
       final x = leftPadding + i * step;
       final norm = dwell[i] / maxY;
@@ -191,7 +189,6 @@ class _LinePainterDense extends CustomPainter {
       if (i == dwell.length - 1) lastY = y;
     }
 
-    // ⬅️ 데이터가 100 미만 인덱스에서 끝나면, 마지막 y값으로 x=100까지 이어줌
     final endX = leftPadding + step * 100;
     final lastDataIndex = dwell.isEmpty ? 0 : dwell.length - 1;
     final lastDataX = leftPadding + step * lastDataIndex;
@@ -208,7 +205,6 @@ class _LinePainterDense extends CustomPainter {
       ..color = const Color(0xffCCE4FF)
       ..style = PaintingStyle.fill;
 
-    // ⬅️ 채우기도 그래프 끝(endX)까지 닫아줌
     final fillPath = Path.from(p)
       ..lineTo(endX, top + h)
       ..lineTo(leftPadding, top + h)
@@ -227,7 +223,7 @@ class _LinePainterDense extends CustomPainter {
       old.tickInterval != tickInterval;
 }
 
-/// x축 숫자를 세로 가이드선과 정확히 맞춰 그려주는 페인터
+// 꺾은선 그래프 x축 라벨 가이드라인에 맞춰 정렬
 class _XAxisLabelsPainter extends CustomPainter {
   _XAxisLabelsPainter({
     required this.leftPadding,
@@ -255,9 +251,8 @@ class _XAxisLabelsPainter extends CustomPainter {
         textAlign: TextAlign.center,
       )..layout();
 
-      // 중앙 정렬: 라벨의 가운데가 가이드선(x)에 오도록 배치
       final dx = x - tp.width / 2;
-      final dy = size.height / 2 - tp.height / 2; // 수직 가운데(높이 28 내)
+      final dy = size.height / 2 - tp.height / 2; 
       tp.paint(canvas, Offset(dx, dy));
     }
   }
@@ -271,13 +266,12 @@ class _XAxisLabelsPainter extends CustomPainter {
       old.labelBuilder != labelBuilder;
 }
 
-/// 레이더 차트 (오각형)
-/// 레이더 차트 (오각형)
+// 오각형 레이더
 class HabitRadarChart extends StatelessWidget {
   const HabitRadarChart({
     super.key,
-    required this.scores, // 0~100, 길이 5
-    this.labelPush = 8,   // 라벨을 꼭짓점에서 바깥으로 밀어낼 거리(px). 0이면 꼭짓점에 딱 붙음
+    required this.scores, 
+    this.labelPush = 8,  
   });
 
   final List<double> scores;
@@ -294,13 +288,11 @@ class HabitRadarChart extends StatelessWidget {
           final center = Offset(c.maxWidth / 2, c.maxHeight / 2 + 6);
           final radius = math.min(c.maxWidth, c.maxHeight) * 0.32;
 
-          // 꼭짓점 좌표
           final vertices = List<Offset>.generate(5, (i) {
             final th = -math.pi / 2 + 2 * math.pi * i / 5;
             return center + Offset(math.cos(th), math.sin(th)) * radius;
           });
 
-          // 밀어낼 좌표 (옵션)
           final placed = vertices.map((v) {
             if (labelPush == 0) return v;
             final dir = (v - center);
@@ -315,7 +307,6 @@ class HabitRadarChart extends StatelessWidget {
                 size: Size.infinite,
                 painter: _RadarPainter(scores: scores),
               ),
-              // ⬇️ 꼭짓점(placed[i])의 정중앙에 라벨 박스를 배치
               for (int i = 0; i < 5; i++)
                 CustomSingleChildLayout(
                   delegate: _VertexPositionDelegate(target: placed[i]),
@@ -331,14 +322,13 @@ class HabitRadarChart extends StatelessWidget {
   }
 }
 
-/// 자식 위젯을 target의 정중앙에 놓아주는 delegate
+// 라벨 상자 꼭짓점 위치 계산 후 위치시키기
 class _VertexPositionDelegate extends SingleChildLayoutDelegate {
   _VertexPositionDelegate({required this.target});
   final Offset target;
 
   @override
   Offset getPositionForChild(Size size, Size childSize) {
-    // child의 중심이 target에 오도록
     return Offset(target.dx - childSize.width / 2, target.dy - childSize.height / 2);
   }
 
@@ -347,7 +337,7 @@ class _VertexPositionDelegate extends SingleChildLayoutDelegate {
       oldDelegate.target != target;
 }
 
-/// 기존 회색 칩 스타일을 컴포넌트로 분리
+// 회색 라벨 칩
 class _LabelChip extends StatelessWidget {
   const _LabelChip({required this.text});
   final String text;
@@ -368,7 +358,7 @@ class _LabelChip extends StatelessWidget {
   }
 }
 
-
+// 오각형 레이더 그리기 (좌표 계산)
 class _RadarPainter extends CustomPainter {
   _RadarPainter({required this.scores});
   final List<double> scores;
@@ -381,6 +371,7 @@ class _RadarPainter extends CustomPainter {
     final c = Offset(size.width / 2, size.height / 2 + 6);
     final radius = size.shortestSide * 0.32;
 
+    // 스타일
     final grid = Paint()
       ..color = const Color(0x22000000)
       ..style = PaintingStyle.stroke;
@@ -388,14 +379,13 @@ class _RadarPainter extends CustomPainter {
       ..color = const Color(0x33000000)
       ..style = PaintingStyle.stroke;
     final fill = Paint()
-      ..color = const Color(0xffCCE4FF) // 레이더 내부 채우기 = 연한 파랑
+      ..color = const Color(0xffCCE4FF) 
       ..style = PaintingStyle.fill;
     final line = Paint()
-      ..color = const Color(0xff0077FF) // 레이더 외곽선 = 진한 파랑
+      ..color = const Color(0xff0077FF)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
 
-    // 오각형 그리드
     for (final r in [radius * 0.34, radius * 0.67, radius]) {
       final path = Path();
       for (int i = 0; i < n; i++) {
@@ -411,13 +401,11 @@ class _RadarPainter extends CustomPainter {
       canvas.drawPath(path, grid);
     }
 
-    // 축
     for (int i = 0; i < n; i++) {
       final th = -math.pi / 2 + 2 * math.pi * i / n;
       canvas.drawLine(c, c + Offset(math.cos(th), math.sin(th)) * radius, axis);
     }
 
-    // 스코어 폴리곤
     final p = Path();
     for (int i = 0; i < n; i++) {
       final th = -math.pi / 2 + 2 * math.pi * i / n;

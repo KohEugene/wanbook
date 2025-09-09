@@ -1,4 +1,4 @@
-// 사용자 독서 패턴 분석
+// 사용자 독서 패턴 분석 화면
 import 'dart:math' as math;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -14,8 +14,8 @@ import 'package:wanbook/screen/profile/analyze_chart.dart';
 class AnalyzeScreen extends StatefulWidget {
   const AnalyzeScreen({
     super.key,
-    this.initialBookId, // null이면 '전체'
-    this.rangeDays = 30,
+    this.initialBookId, // null이면 전체(모든 책)
+    this.rangeDays = 30, // 통계 범위(최근 n일)
   });
 
   final String? initialBookId;
@@ -27,20 +27,17 @@ class AnalyzeScreen extends StatefulWidget {
 
 class _AnalyzeScreenState extends State<AnalyzeScreen> {
   bool _loading = true;
-
   final Map<String, String> _books = {};
-  String? _selectedBookId; // null = 전체
+  String? _selectedBookId;
+  int _totalSecs = 0;         // 총 읽은 시간(초)
+  int _activeDays = 0;        // 읽은 날 수
+  int _sessionCount = 0;      // 세션 수(책을 펼친 횟수)
+  int _streak = 0;            // 오늘부터 연속 읽은 일수
 
-  int _totalSecs = 0;
-  int _activeDays = 0;
-  int _sessionCount = 0;
-  int _streak = 0;
-  List<int> _hours = List<int>.filled(24, 0);    // 시간대별 분
-  List<int> _dwell = List<int>.filled(100, 0);   // 버킷별 체류(초)
-
+  List<int> _hours = List<int>.filled(24, 0);   // 시간대별 읽은 분
+  List<int> _dwell = List<int>.filled(100, 0);  // 진행률 0~99% 정체한 초
   Map<String, int> _clickByRoute = {};
   Map<String, int> _clickByEntry = {};
-
   List<_BookAvgRow> _bookAverages = [];
 
   Future<String>? _coachFuture;
@@ -68,6 +65,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
     }
   }
 
+  // 책 목록 가져오기
   Future<void> _loadBooksFromLibrary() async {
     _books.clear();
     final list =
@@ -78,7 +76,6 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
       final userBook = m['userBook'] as UserBookModel;
       _books[userBook.bookId] = book.title;
     }
-
     if (_books.isEmpty) {
       final uid = _uid();
       final snap = await FirebaseFirestore.instance
@@ -92,6 +89,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
     }
   }
 
+  // reading_metrics 합산
   Future<void> _loadMetricsFor(String? bookId) async {
     _totalSecs = 0;
     _activeDays = 0;
@@ -106,7 +104,6 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
     final now = DateTime.now();
     final start = DateTime(now.year, now.month, now.day)
         .subtract(Duration(days: widget.rangeDays - 1));
-
     final dailyMap = <DateTime, int>{};
     final targetIds = bookId != null ? [bookId] : _books.keys.toList();
 
@@ -136,39 +133,40 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
         final sess = await d.reference.collection('sessions').get();
         final daySum = sess.docs.fold<int>(
           0,
-          (a, s) =>
-              a + ((s.data()['total_active_seconds'] ?? 0) as num).toInt(),
+          (a, s) => a + ((s.data()['total_active_seconds'] ?? 0) as num).toInt(),
         );
-        _sessionCount += sess.docs.length;
+        _sessionCount += sess.docs.length; 
 
         final y = int.parse(d.id.substring(0, 4));
         final m = int.parse(d.id.substring(5, 7));
         final dd = int.parse(d.id.substring(8, 10));
         final dayKey = DateTime(y, m, dd);
 
+        // 활동 일자
         _totalSecs += daySum;
         if (daySum > 0) _activeDays++;
         dailyMap[dayKey] = (dailyMap[dayKey] ?? 0) + daySum;
 
+        // 시간대 분포
         final arrHours =
             List<int>.from(d.data()['hour_histogram'] ?? List.filled(24, 0));
         for (int h = 0; h < 24; h++) {
           _hours[h] += (h < arrHours.length ? arrHours[h] : 0);
         }
 
+        // 진행률 0~99% 정체
         final arrDwell = List<num>.from(
             d.data()['dwell_seconds_by_bucket'] ?? List.filled(100, 0));
         for (int i = 0; i < 100; i++) {
           _dwell[i] += (i < arrDwell.length ? arrDwell[i].round() : 0);
         }
       }
-
       await _loadChatbotClicksForBook(uid, bId, start);
     }
-
     _streak = _calcStreak(dailyMap, start, DateTime.now());
   }
 
+  // chatbot_clicks 횟수
   Future<void> _loadChatbotClicksForBook(
       String uid, String bookId, DateTime start) async {
     try {
@@ -193,6 +191,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
     }
   }
 
+  // 연속 읽은 일수 계산
   int _calcStreak(Map<DateTime, int> daily, DateTime start, DateTime now) {
     int streak = 0;
     DateTime cur = DateTime(now.year, now.month, now.day);
@@ -209,6 +208,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
     return streak;
   }
 
+  // 책별 평균
   Future<void> _loadBookAverages() async {
     _bookAverages = [];
     final uid = _uid();
@@ -246,8 +246,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
         final sess = await d.reference.collection('sessions').get();
         final daySum = sess.docs.fold<int>(
           0,
-          (a, s) =>
-              a + ((s.data()['total_active_seconds'] ?? 0) as num).toInt(),
+          (a, s) => a + ((s.data()['total_active_seconds'] ?? 0) as num).toInt(),
         );
         totalSecs += daySum;
         if (daySum > 0) activeDays++;
@@ -266,7 +265,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
     _bookAverages.sort((a, b) => b.avgSecs.compareTo(a.avgSecs));
   }
 
-  // 레이더(꾸준함, 집중 유지, 속도 안정, 재독 성향, 리듬 다양성)
+  // 오각형 레이더 계산
   List<double> _buildHabitScores() {
     final days = widget.rangeDays.clamp(1, 365);
     final consist = (_activeDays / days) * 100.0;
@@ -318,6 +317,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
     return '${s}s';
   }
 
+  // 1. 책 선택 드롭다운
   Widget _bookDropdown() {
     return DropdownButtonFormField<String?>(
       value: _selectedBookId,
@@ -344,6 +344,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
     );
   }
 
+  // 책멍이 코멘트 프롬포트
   void _refreshCoachNote() {
     final title = _selectedBookId == null
         ? '전체(모든 책)'
@@ -377,14 +378,14 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
       allowRecommendations: false,
       temperature: 0.2,
     ).then((r) => r.reply);
-    setState(() {});
+    setState(() {}); // FutureBuilder 갱신
   }
+
 
   @override
   Widget build(BuildContext context) {
     final avgPerActiveDay =
         _activeDays == 0 ? 0 : (_totalSecs ~/ _activeDays);
-
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -402,22 +403,19 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
               children: [
                 _card('책 선택', _bookDropdown()),
                 const SizedBox(height: 12),
-
                 _bookAvgCard(),
                 const SizedBox(height: 16),
-
                 _card(
                   '최근 ${widget.rangeDays}일 요약',
                   _metricStrip([
                     ('총 읽은 시간', _formatHms(_totalSecs)),
                     ('하루 평균 읽은 시간', _formatHms(avgPerActiveDay)),
-                    ('책을 펼친 횟수', '$_sessionCount'),
+                    ('책을 펼친 횟수', '$_sessionCount'), 
                     ('독서한 날', '$_activeDays일'),
                     ('연속 독서 일수', '$_streak일'),
                   ]),
                 ),
                 const SizedBox(height: 16),
-
                 _card(
                   '시간대별 독서 시간 (분)',
                   HourBars(
@@ -428,20 +426,17 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-
                 _card(
                   '진행률 0~100% 정체 분석',
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // 그래프
                       DwellLineChart(
                         dwell: _dwell,
                         height: 160,
                         step: 6,
                       ),
                       const SizedBox(height: 16),
-                      // Top3
                       const Text(
                         '정체 상위 구간(Top 3)',
                         style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
@@ -452,7 +447,6 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-
                 _card(
                   '나의 독서 습관 레이더',
                   Column(
@@ -460,21 +454,18 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
                     children: [
                       HabitRadarChart(scores: _buildHabitScores()),
                       const SizedBox(height: 8),
-                      // ⬇️ 레이더 밑 작은 설명
                       _radarLegend(),
                     ],
                   ),
                 ),
                 const SizedBox(height: 16),
-
                 _card('책멍이 코멘트', _coachNote()),
               ],
             ),
     );
   }
 
-  // ────────────────────── 보조 UI: 메서드로 정리 (build 하나만 유지) ──────────────────────
-
+  // 회색 상자
   Widget _card(String title, Widget child) {
     return Container(
       padding: const EdgeInsets.all(14),
@@ -494,38 +485,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
     );
   }
 
-  Widget _metricStrip(List<(String, String)> items) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        for (final (label, value) in items) ...[
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            child: Row(
-              children: [
-                Text(
-                  label,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  value,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Color(0xff777777),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-
+  // 2. 선택한 책 요약
   Widget _bookAvgCard() {
     if (_selectedBookId == null) {
       return _card('책별 하루 평균 분석 요약',
@@ -573,6 +533,40 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
     );
   }
 
+  // 3. 최근 30일 요약
+  Widget _metricStrip(List<(String, String)> items) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (final (label, value) in items) ...[
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Row(
+              children: [
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Color(0xff777777),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  // 3. 진행률 정체 구간 (TOP3)
   Widget _topBuckets() {
     final pairs = [
       for (int i = 0; i < 100; i++) {'b': i, 's': _dwell[i]}
@@ -613,49 +607,27 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
     );
   }
 
-  // ⬇️ 레이더 밑에 붙일 작은 설명(라벨=굵게 14pt, 설명=10pt 회색, 세로 배열)
+  // 4. 오각형 레이더
   Widget _radarLegend() {
-    final scores = _buildHabitScores()
-        .map((e) => e.toStringAsFixed(0))
-        .toList();
+    final scores = _buildHabitScores().map((e) => e.toStringAsFixed(0)).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _LegendLine(
-          label: '꾸준',
-          value: scores[0],
-          desc: '얼마나 꾸준히 읽었는지',
-        ),
+        _LegendLine(label: '꾸준', value: scores[0], desc: '얼마나 꾸준히 읽었는지'),
         const SizedBox(height: 6),
-        _LegendLine(
-          label: '집중',
-          value: scores[1],
-          desc: '읽는 동안 집중을 잘 유지했는지',
-        ),
+        _LegendLine(label: '집중', value: scores[1], desc: '읽는 동안 집중을 잘 유지했는지'),
         const SizedBox(height: 6),
-        _LegendLine(
-          label: '안정',
-          value: scores[2],
-          desc: '읽는 속도가 균일한지',
-        ),
+        _LegendLine(label: '안정', value: scores[2], desc: '읽는 속도가 균일한지'),
         const SizedBox(height: 6),
-        _LegendLine(
-          label: '재독',
-          value: scores[3],
-          desc: '같은 부분을 반복해서 읽는 성향이 있는지',
-        ),
+        _LegendLine(label: '재독', value: scores[3], desc: '같은 부분을 반복해서 읽는 성향이 있는지'),
         const SizedBox(height: 6),
-        _LegendLine(
-          label: '리듬',
-          value: scores[4],
-          desc: '읽는 시간이 얼마나 고르게 분포했는지',
-        ),
+        _LegendLine(label: '리듬', value: scores[4], desc: '읽는 시간이 얼마나 고르게 분포했는지'),
       ],
     );
   }
 
-
+  // 6. 책멍이 코멘트
   Widget _coachNote() {
     if (_coachFuture == null) {
       return const Text('분석을 준비하고 있습니다…',
@@ -691,7 +663,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
   }
 }
 
-// 작은 전용 위젯: 레이더 범례 한 줄
+// 오각형 레이더 설명용
 class _LegendLine extends StatelessWidget {
   const _LegendLine({
     super.key,
@@ -700,9 +672,9 @@ class _LegendLine extends StatelessWidget {
     required this.desc,
   });
 
-  final String label;
-  final String value;
-  final String desc;
+  final String label; 
+  final String value; 
+  final String desc;  
 
   @override
   Widget build(BuildContext context) {
@@ -732,7 +704,6 @@ class _LegendLine extends StatelessWidget {
     );
   }
 }
-
 
 // 데이터 모델
 class _BookAvgRow {

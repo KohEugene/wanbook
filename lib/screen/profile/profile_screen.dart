@@ -562,7 +562,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-    Widget analyzeWithChackmeong() {
+  Widget analyzeWithChackmeong() {
     return Container(
       width: SizeConfig.screenWidth * 0.9,
       height: 166,
