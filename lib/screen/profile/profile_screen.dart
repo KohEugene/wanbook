@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:wanbook/screen/aichat/chatlist_screen.dart';
 import 'package:wanbook/screen/login/login_screen.dart';
 import 'package:wanbook/screen/profile/badge_screen.dart';
+import 'package:wanbook/screen/profile/analyze_screen.dart';
 import 'package:wanbook/shared/pop_up.dart';
 import '../../model/book_model.dart';
 import '../../provider/badge_provider.dart';
@@ -191,6 +192,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     chatWithChackmeong(),
                     const SizedBox(height: 16),
                     readingCard(),
+                    const SizedBox(height: 16),
+                    analyzeWithChackmeong(),
                     const SizedBox(height: 16),
                     monthlyRecord(),
                     const SizedBox(height: 16),
@@ -556,6 +559,78 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
       ],
+    );
+  }
+
+    Widget analyzeWithChackmeong() {
+    return Container(
+      width: SizeConfig.screenWidth * 0.9,
+      height: 166,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+          color: const Color(0xffF8F8F8),
+          borderRadius: BorderRadius.circular(16)),
+      child: Stack(
+        children: [
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: SvgPicture.asset(
+              'assets/images/analyze_Chaekmeong.svg',
+              width: 150,
+              height: 120,
+              fit: BoxFit.contain,
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                '독서 패턴 분석',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                ),
+              ),
+              Row(
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) {
+                        return const AnalyzeScreen();
+                      }));
+                    },
+                    style: ButtonStyle(
+                      overlayColor: WidgetStateColor.resolveWith(
+                        (states) => Colors.transparent,
+                      ),
+                    ),
+                    child: const Row(
+                      children: [
+                        Text(
+                          '분석 보기',
+                          style: TextStyle(
+                            color: Color(0xff777777),
+                            fontWeight: FontWeight.w400,
+                            fontSize: 14,
+                          ),
+                        ),
+                        Icon(
+                          Icons.chevron_right_rounded,
+                          color: Color(0xff777777),
+                          size: 14,
+                        )
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
