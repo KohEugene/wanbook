@@ -317,51 +317,6 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
     return '${s}s';
   }
 
-  // 1. 책 선택 드롭다운
-  Widget _bookDropdown() {
-    final options = <(String?, String)>[
-      (null, '전체'),
-      ..._books.entries.map<(String?, String)>((e) => (e.key, e.value)),
-    ];
-
-    return DropdownButtonFormField<String?>(
-      value: _selectedBookId,
-      isExpanded: true,
-      dropdownColor: const Color(0xffCCE4FF),
-      items: [
-        for (final (value, label) in options)
-          DropdownMenuItem<String?>(
-            value: value,
-            child: Text(label),
-          ),
-      ],
-      onChanged: (val) async {
-        setState(() { _selectedBookId = val; _loading = true; });
-        await _loadMetricsFor(val);
-        _refreshCoachNote();
-        if (mounted) setState(() => _loading = false);
-      },
-      decoration: InputDecoration(
-        isDense: true,
-        hintText: '책을 선택하세요',
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Color(0xff0077FF)),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Color(0xff0077FF)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Color(0xff0077FF), width: 2),
-        ),
-      ),
-    );
-  }
-
-
-
   // 책멍이 코멘트 프롬포트
   void _refreshCoachNote() {
     final title = _selectedBookId == null
@@ -430,16 +385,16 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
                 _card(
                   '최근 ${widget.rangeDays}일 요약',
                   _metricStrip([
-                    ('총 읽은 시간', _formatHms(_totalSecs)),
-                    ('하루 평균 읽은 시간', _formatHms(avgPerActiveDay)),
-                    ('책을 펼친 횟수', '$_sessionCount'), 
+                    ('전체 독서 시간', _formatHms(_totalSecs)),
+                    ('하루 평균', _formatHms(avgPerActiveDay)),
+                    ('책 펼친 횟수', '$_sessionCount'), 
                     ('독서한 날', '$_activeDays일'),
-                    ('연속 독서 일수', '$_streak일'),
+                    ('연속 독서', '$_streak일'),
                   ]),
                 ),
                 const SizedBox(height: 16),
                 _card(
-                  '시간대별 독서 시간 (분)',
+                  '시간대별 독서 시간',
                   HourBars(
                     values: _hours.map((m) => m.toDouble()).toList(),
                     barMax: 130,
@@ -449,7 +404,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
                 ),
                 const SizedBox(height: 16),
                 _card(
-                  '진행률 0~100% 정체 분석',
+                  '진행률 0~100% 정체 시간 분석',
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -460,7 +415,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
                       ),
                       const SizedBox(height: 16),
                       const Text(
-                        '정체 상위 구간(Top 3)',
+                        '정체 시간 상위 구간(Top 3)',
                         style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
                       ),
                       const SizedBox(height: 8),
@@ -481,14 +436,35 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                _card('책멍이 코멘트', _coachNote()),
+                _card(
+                  '책멍이 코멘트',
+                  _coachNote(),
+                  titleWidget: Row(
+                    children: [
+                      SvgPicture.asset(
+                        'assets/images/main_Chaekmeong_1.svg',
+                        width: 30,
+                        height: 30,
+                      ),
+                      const SizedBox(width: 6),
+                      const Text(
+                        '책멍이 코멘트',
+                        style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
     );
   }
 
   // 회색 상자
-  Widget _card(String title, Widget child) {
+  Widget _card(
+    String title,
+    Widget child, {
+    Widget? titleWidget,
+  }) {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -498,11 +474,57 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title,
-              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+          titleWidget ??
+              Text(
+                title,
+                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+              ),
           const SizedBox(height: 12),
           child,
         ],
+      ),
+    );
+  }
+
+  // 1. 책 선택 드롭다운
+  Widget _bookDropdown() {
+    final options = <(String?, String)>[
+      (null, '전체'),
+      ..._books.entries.map<(String?, String)>((e) => (e.key, e.value)),
+    ];
+
+    return DropdownButtonFormField<String?>(
+      value: _selectedBookId,
+      isExpanded: true,
+      dropdownColor: const Color(0xffCCE4FF),
+      items: [
+        for (final (value, label) in options)
+          DropdownMenuItem<String?>(
+            value: value,
+            child: Text(label),
+          ),
+      ],
+      onChanged: (val) async {
+        setState(() { _selectedBookId = val; _loading = true; });
+        await _loadMetricsFor(val);
+        _refreshCoachNote();
+        if (mounted) setState(() => _loading = false);
+      },
+      decoration: InputDecoration(
+        isDense: true,
+        hintText: '책을 선택하세요',
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: Color(0xff0077FF)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: Color(0xff0077FF)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: Color(0xff0077FF), width: 2),
+        ),
       ),
     );
   }
@@ -537,7 +559,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
           children: [
             Expanded(
               child: Text(row.title,
-                  style: const TextStyle(fontWeight: FontWeight.w600)),
+                  style: const TextStyle(color: Color(0xff0077FF), fontWeight: FontWeight.w600)),
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -557,38 +579,57 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
 
   // 3. 최근 30일 요약
   Widget _metricStrip(List<(String, String)> items) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        for (final (label, value) in items) ...[
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            child: Row(
-              children: [
-                Text(
-                  label,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 14,
+    return LayoutBuilder(
+      builder: (context, c) {
+        final gap = 12.0;
+        final halfW = (c.maxWidth - gap) / 2; 
+        return Wrap(
+          spacing: gap,
+          runSpacing: gap,
+          children: [
+            for (final (label, value) in items)
+              SizedBox(
+                width: (items.length == 1 || label == '전체 독서 시간')
+                    ? c.maxWidth
+                    : halfW,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0x11000000)),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 6,
+                        height: 6,
+                        decoration: const BoxDecoration( color: Color(0xff0077FF), shape: BoxShape.circle,),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          label,
+                          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        value,
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: Color(0xff0077FF),),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  value,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Color(0xff777777),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ],
+              ),
+          ],
+        );
+      },
     );
   }
 
-  // 3. 진행률 정체 구간 (TOP3)
+  // 4. 진행률 정체 구간 (TOP3)
   Widget _topBuckets() {
     final pairs = [
       for (int i = 0; i < 100; i++) {'b': i, 's': _dwell[i]}
@@ -610,9 +651,9 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('$bucket–${(bucket + 1).clamp(0, 100)}% 구간',
-                style: const TextStyle(fontWeight: FontWeight.w600)),
-            Text(minStr, style: const TextStyle(color: Color(0xff777777))),
+            Text('$bucket~${(bucket + 1).clamp(0, 100)}% 구간',
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+            Text(minStr, style: const TextStyle(fontWeight: FontWeight.w400, fontSize: 12, color: Color(0xff777777))),
           ],
         ),
       );
@@ -629,7 +670,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
     );
   }
 
-  // 4. 오각형 레이더
+  // 5. 오각형 레이더
   Widget _radarLegend() {
     final scores = _buildHabitScores().map((e) => e.toStringAsFixed(0)).toList();
 
@@ -659,7 +700,20 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
       future: _coachFuture,
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.waiting) {
-          return const Text('책멍이가 분석 중이에요!');
+          return Row(
+            children: const [
+              SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation(Color(0xff0077FF)),
+                ),
+              ),
+              SizedBox(width: 8),
+              Text('책멍이가 분석 중이에요!'),
+            ],
+          );
         }
         if (snap.hasError) {
           return Text(
@@ -667,20 +721,102 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
             style: const TextStyle(color: Color(0xff777777), fontSize: 13),
           );
         }
+
         final text = (snap.data ?? '').trim();
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SvgPicture.asset(
-              'assets/images/main_Chaekmeong_1.svg',
-              width: 50,
-              height: 50,
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xff0077FF), width: 1),
+          ),
+          child: IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Container(
+                  width: 4,
+                  decoration: const BoxDecoration(
+                    color: Color(0xff0077FF),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(12),
+                      bottomLeft: Radius.circular(12),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: _buildCoachRich(
+                      text.isEmpty ? '코멘트가 비어 있습니다.' : text,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: 8),
-            Expanded(child: Text(text.isEmpty ? '코멘트가 비어 있습니다.' : text)),
-          ],
+          ),
         );
       },
+    );
+  }
+
+  // 책멍이 코멘트 디자인용
+  Widget _buildCoachRich(String text) {
+    final lines = text.split('\n');
+    final children = <Widget>[];
+
+    for (final raw in lines) {
+      final line = raw.trimRight();
+
+      if (line.trim().isEmpty) {
+        children.add(const SizedBox(height: 6));
+        continue;
+      }
+      final trimmed = line.trim();
+      if (RegExp(r'^<.*?>$').hasMatch(trimmed)) {
+        final title = trimmed.replaceAll(RegExp(r'[<>]'), '');
+        children.add(Padding(
+          padding: const EdgeInsets.only(top: 4, bottom: 6),
+          child: const Text('',),
+        ));
+        children.removeLast();
+        children.add(Padding(
+          padding: const EdgeInsets.only(top: 4, bottom: 6),
+          child: Text(
+            title,
+            style: const TextStyle(fontWeight: FontWeight.w700),
+          ),
+        ));
+        continue;
+      }
+      final m = RegExp(r'^\-\s*(.*)$').firstMatch(trimmed);
+      if (m != null) {
+        final body = m.group(1)!;
+        children.add(Padding(
+          padding: const EdgeInsets.symmetric(vertical: 2),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 6,
+                height: 6,
+                margin: const EdgeInsets.only(top: 6),
+                decoration: const BoxDecoration(
+                  color: Color(0xff0077FF),
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(child: Text(body)),
+            ],
+          ),
+        ));
+        continue;
+      }
+      children.add(Text(line));
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: children,
     );
   }
 }
