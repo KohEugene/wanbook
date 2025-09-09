@@ -52,6 +52,16 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
     super.dispose();
   }
 
+  void onCheckboxChanged(String bookId, bool isChecked) {
+    setState(() {
+      if (isChecked) {
+        selectedBookIds.add(bookId);
+      } else {
+        selectedBookIds.remove(bookId);
+      }
+    });
+  }
+
   Future<void> deleteSelectedBooks() async {
     if (selectedBookIds.isEmpty) {
       return;
@@ -75,7 +85,7 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
         selectedBookIds.clear();
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('선택한 책들이 서재에서 삭제되었습니다.'), backgroundColor: Color(0xff0077FF)),
+        SnackBar(content: Text('선택한 책이 서재에서 삭제되었습니다.'), backgroundColor: Color(0xff0077FF)),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -83,12 +93,6 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
       );
     }
   }
-
-  final List<Widget> _pages = [
-    AllBookScreen(),
-    ReadingBookScreen(),
-    FinishBookScreen()
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -169,9 +173,7 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
                     onPressed: () {
                       setState(() {
                         isEditingMode = !isEditingMode;
-                        if (!isEditingMode) {
-                          selectedBookIds.clear();
-                        }
+                        selectedBookIds.clear();
                       });
                     },
                     style: ButtonStyle(
@@ -191,7 +193,23 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
               Expanded(
                   child: TabBarView(
                       controller: tabController,
-                      children: _pages
+                      children: [
+                        AllBookScreen(
+                          isEditingMode: isEditingMode,
+                          selectedBookIds: selectedBookIds,
+                          onCheckboxChanged: onCheckboxChanged,
+                        ),
+                        ReadingBookScreen(
+                          isEditingMode: isEditingMode,
+                          selectedBookIds: selectedBookIds,
+                          onCheckboxChanged: onCheckboxChanged,
+                        ),
+                        FinishBookScreen(
+                          isEditingMode: isEditingMode,
+                          selectedBookIds: selectedBookIds,
+                          onCheckboxChanged: onCheckboxChanged,
+                        ),
+                      ],
                   )
               )
             ],

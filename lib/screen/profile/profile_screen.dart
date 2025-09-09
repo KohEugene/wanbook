@@ -190,7 +190,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     readingStatus(),
                     const SizedBox(height: 16),
                     chatWithChackmeong(),
-                    const SizedBox(height: 16),
                     readingCard(),
                     const SizedBox(height: 16),
                     analyzeWithChackmeong(),
@@ -442,6 +441,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         Container(
           width: SizeConfig.screenWidth * 0.435,
           height: 270,
+          margin: EdgeInsets.only(top: 16),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
               color: const Color(0xffF8F8F8),
@@ -502,6 +502,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         Container(
           width: SizeConfig.screenWidth * 0.435,
           height: 270,
+          margin: EdgeInsets.only(top: 16),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
               color: const Color(0xffF8F8F8),

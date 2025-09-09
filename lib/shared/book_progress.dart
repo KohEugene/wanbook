@@ -117,10 +117,15 @@ class BookProgress extends StatelessWidget {
             if (isEditingMode)
               Positioned(
                 top: 0,
-                right: 0,
+                left: 0,
                 child: Checkbox(
                   value: isSelected,
                   onChanged: onCheckboxChanged,
+                  activeColor: Color(0xff0077FF),
+                  checkColor: Colors.white,
+                  side: BorderSide(
+                    color: Color(0xff777777)
+                  ),
                 ),
               ),
           ]

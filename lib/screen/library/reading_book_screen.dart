@@ -16,7 +16,16 @@ import '../ebook/book_screen.dart';
 import '../question/purpose_screen.dart';
 
 class ReadingBookScreen extends StatefulWidget {
-  const ReadingBookScreen({super.key});
+  final bool isEditingMode;
+  final List<String> selectedBookIds;
+  final void Function(String bookId, bool isChecked) onCheckboxChanged;
+
+  const ReadingBookScreen({
+    Key? key,
+    required this.isEditingMode,
+    required this.selectedBookIds,
+    required this.onCheckboxChanged,
+  }) : super(key: key);
 
   @override
   State<ReadingBookScreen> createState() => _ReadingBookScreenState();
@@ -73,6 +82,11 @@ class _ReadingBookScreenState extends State<ReadingBookScreen> {
             return BookProgress(
                 book: book,
                 readingBook: readingBook,
+                isEditingMode: widget.isEditingMode,
+                isSelected: widget.selectedBookIds.contains(book.title),
+                onCheckboxChanged: (value) {
+                  widget.onCheckboxChanged(book.title, value ?? false);
+                },
                 onTap: () async {
                   final userProvider = Provider.of<UserProvider>(context, listen: false);
                   final userId = userProvider.user?.userId;

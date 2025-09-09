@@ -15,7 +15,16 @@ import '../../provider/user_book_provider.dart';
 import '../../shared/size_config.dart';
 
 class AllBookScreen extends StatefulWidget {
-  const AllBookScreen({super.key});
+  final bool isEditingMode;
+  final List<String> selectedBookIds;
+  final void Function(String bookId, bool isChecked) onCheckboxChanged;
+
+  const AllBookScreen({
+    Key? key,
+    required this.isEditingMode,
+    required this.selectedBookIds,
+    required this.onCheckboxChanged,
+  }) : super(key: key);
 
   @override
   State<AllBookScreen> createState() => _AllBookScreenState();
@@ -62,6 +71,11 @@ class _AllBookScreenState extends State<AllBookScreen> {
             return BookProgress( 
               book: book,
               readingBook: readingBook,
+              isEditingMode: widget.isEditingMode,
+              isSelected: widget.selectedBookIds.contains(book.title),
+              onCheckboxChanged: (value) {
+                widget.onCheckboxChanged(book.title, value ?? false);
+              },
               onTap: () async {
                 final userProvider = Provider.of<UserProvider>(context, listen: false);
                 final userId = userProvider.user?.userId;

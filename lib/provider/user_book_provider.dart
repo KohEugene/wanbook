@@ -134,21 +134,24 @@ class UserBookProvider with ChangeNotifier {
     final List<dynamic> jsonList = json.decode(jsonString);
     final bookList = jsonList.map((e) => BookModel.fromJson(e)).toList();
 
+    // 완료된 책이 2권 이상일 때만 위젯이 보일 수 있도록
+    final completedBooks = readLogSnapshot.docs
+        .map((doc) => UserBookModel.fromDocument(doc))
+        .where((book) => book.completedAt != null)
+        .toList();
+
+    if (completedBooks.length < 2) {
+      return null;
+    }
+
     UserBookModel? longestUserBook;
     Duration longestReadDuration = Duration.zero;
 
     UserBookModel? shortestUserBook;
     Duration shortestReadDuration = Duration(days: 9999);
 
-    for (var logDoc in readLogSnapshot.docs) {
-      final userBook = UserBookModel.fromDocument(logDoc);
-
-      final startDate = userBook.startedAt;
-      final endDate = userBook.completedAt;
-
-      if (endDate == null) continue;
-
-      final duration = endDate.difference(startDate);
+    for (var userBook in completedBooks) {
+      final duration = userBook.completedAt!.difference(userBook.startedAt);
 
       if (duration > longestReadDuration) {
         longestReadDuration = duration;
