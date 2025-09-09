@@ -319,30 +319,48 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
 
   // 1. 책 선택 드롭다운
   Widget _bookDropdown() {
+    final options = <(String?, String)>[
+      (null, '전체'),
+      ..._books.entries.map<(String?, String)>((e) => (e.key, e.value)),
+    ];
+
     return DropdownButtonFormField<String?>(
       value: _selectedBookId,
       isExpanded: true,
-      items: <DropdownMenuItem<String?>>[
-        const DropdownMenuItem(value: null, child: Text('전체 (모든 책)')),
-        ..._books.entries
-            .map((e) => DropdownMenuItem(value: e.key, child: Text(e.value))),
+      dropdownColor: const Color(0xffCCE4FF),
+      items: [
+        for (final (value, label) in options)
+          DropdownMenuItem<String?>(
+            value: value,
+            child: Text(label),
+          ),
       ],
       onChanged: (val) async {
-        setState(() {
-          _selectedBookId = val;
-          _loading = true;
-        });
+        setState(() { _selectedBookId = val; _loading = true; });
         await _loadMetricsFor(val);
         _refreshCoachNote();
         if (mounted) setState(() => _loading = false);
       },
-      decoration: const InputDecoration(
+      decoration: InputDecoration(
         isDense: true,
-        border: OutlineInputBorder(),
         hintText: '책을 선택하세요',
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: Color(0xff0077FF)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: Color(0xff0077FF)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: Color(0xff0077FF), width: 2),
+        ),
       ),
     );
   }
+
+
 
   // 책멍이 코멘트 프롬포트
   void _refreshCoachNote() {
@@ -397,7 +415,11 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
         ),
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(
+              child: CircularProgressIndicator(
+                valueColor: const AlwaysStoppedAnimation(Color(0xff0077FF)), backgroundColor: const Color(0xffCCE4FF),                 
+              ),
+            )
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [
