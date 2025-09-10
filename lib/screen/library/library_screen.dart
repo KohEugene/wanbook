@@ -1,4 +1,3 @@
-
 // 서재 메인 화면
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -11,7 +10,7 @@ import 'package:wanbook/screen/library/reading_book_screen.dart';
 
 import '../../provider/user_provider.dart';
 import '../../shared/size_config.dart';
-
+import '../../provider/badge_provider.dart';
 
 class LibraryScreen extends StatefulWidget {
   const LibraryScreen({super.key});
@@ -80,6 +79,15 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
 
     try {
       await batch.commit();
+
+      final uid = context.read<UserProvider>().user?.userId;
+      if (uid != null && uid.isNotEmpty && uid != '사용자 아이디') {
+        try {
+          await context.read<BadgeProvider>().updateAchievements(uid);  // 업적삭제
+        } catch (_) {
+        }
+      }
+
       setState(() {
         isEditingMode = false;
         selectedBookIds.clear();

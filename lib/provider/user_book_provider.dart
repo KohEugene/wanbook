@@ -1,3 +1,4 @@
+// ✓ 실시간 UI용 헬퍼 추가: books.json 캐시, getBookByTitle(), readingBooksStream(), addBook에 update_date 저장
 // 서재에 책 추가 & 사용자별 독서 정보 불러오기 함수
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
@@ -20,6 +21,27 @@ class UserBookProvider with ChangeNotifier {
   Duration? longestReadDuration;
   BookModel? shortestReadBook;
   Duration? shortestReadDuration;
+
+  // ✓ books.json 캐시 인덱스
+  Map<String, BookModel>? _bookIndex;
+
+  // ✓ books.json 캐시 로드
+  Future<void> _ensureBookIndexLoaded() async {
+    if (_bookIndex != null) return;
+    final jsonString = await rootBundle.loadString('assets/book.json');
+    final List<dynamic> jsonList = json.decode(jsonString);
+    final list = jsonList.map((e) => BookModel.fromJson(e)).toList();
+    _bookIndex = {
+      for (final b in list) b.title: b,
+    };
+  }
+
+  // ✓ 제목으로 BookModel 빠르게 조회 (StreamBuilder에서 사용)
+  BookModel? getBookByTitle(String title) {
+    final idx = _bookIndex;
+    if (idx == null) return null;
+    return idx[title];
+  }
 
   // 서재에 책 추가하기
   Future<bool> addBook(BuildContext context, {required String bookId}) async {
@@ -48,7 +70,11 @@ class UserBookProvider with ChangeNotifier {
         chatClick: 0,
       );
 
-      await docRef.set(newBook.toMap(), SetOptions(merge: true));
+      await docRef.set({
+        ...newBook.toMap(),
+        // ✓ 정렬 및 실시간 최신 표시를 위한 update_date 필드 보장
+        'update_date': now,
+      }, SetOptions(merge: true));
     }
     notifyListeners();
     return true;
@@ -76,6 +102,19 @@ class UserBookProvider with ChangeNotifier {
     }, SetOptions(merge: true));
   }
 
+  // ✓ Firestore 실시간 스트림 (StreamBuilder에서 사용)
+  Stream<QuerySnapshot<Map<String, dynamic>>> readingBooksStream(
+      BuildContext context) {
+    final user = Provider.of<UserProvider>(context, listen: false).user;
+    final uid = user?.userId ?? '';
+    return _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('reading_books')
+        .orderBy('update_date', descending: true)
+        .snapshots();
+  }
+
   // 유저의 독서 목록 불러오기
   Future<List<Map<String, dynamic>>> fetchReadingBooks(BuildContext context) async {
     final user = Provider.of<UserProvider>(context, listen: false).user;
@@ -88,6 +127,9 @@ class UserBookProvider with ChangeNotifier {
         .doc(user?.userId)
         .collection('reading_books')
         .get();
+
+    // ✓ 캐시 확보
+    await _ensureBookIndexLoaded();
 
     final jsonString = await rootBundle.loadString('assets/book.json');
     final List<dynamic> jsonList = json.decode(jsonString);

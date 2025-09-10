@@ -496,4 +496,72 @@ class BadgeProvider with ChangeNotifier {
       }).toList();
     }
   }
+
+  // 업적 업데이트
+  Future<void> updateAchievements(String userId) async {
+    final fs = FirebaseFirestore.instance;
+    final userRef = fs.collection('users').doc(userId);
+    final achievementsRef = userRef.collection('achievements');
+
+    await _backfillTagsFromBooks(userId);
+    await _backfillTagsFromAssets(userId);
+
+    // 현재 reading_books 수집
+    final rbSnap = await userRef.collection('reading_books').get();
+    final books = rbSnap.docs.map((d) => UserBookModel.fromDocument(d)).toList();
+
+    // 태그별 카운트
+    final Map<String, int> tagCount = {};
+    for (final b in books) {
+      for (final t in b.tags) {
+        tagCount[t] = (tagCount[t] ?? 0) + 1;
+      }
+    }
+
+    final batch = fs.batch();
+
+    for (final entry in tagToPrefix.entries) {
+      final tagName = entry.key;
+      final prefix  = entry.value['prefix']!;
+      final label   = entry.value['label']!;
+      final read    = tagCount[tagName] ?? 0;
+
+      for (final th in thresholds) {
+        final id = '${prefix}_$th';
+        final unlockedNow = read >= th;
+
+        if (unlockedNow) {
+          batch.set(
+            achievementsRef.doc(id),
+            {
+              'id': id,
+              'title': '$label ${th == 1 ? '입문자' : th == 5 ? '베테랑' : '정복자'}',
+              'asset': 'assets/images/records/record_${prefix}_$th.svg',
+              'tag': tagName,
+              'threshold': th,
+              'unlocked': true,
+              'unlockedAt': FieldValue.serverTimestamp(),
+            },
+            SetOptions(merge: true),
+          );
+        }
+      }
+    }
+    final unlockedSnap =
+        await achievementsRef.where('unlocked', isEqualTo: true).get();
+    for (final d in unlockedSnap.docs) {
+      final m = d.data();
+      final tag = (m['tag'] as String?) ?? '';
+      final threshold = (m['threshold'] as num?)?.toInt() ?? 0;
+      if (tag.isEmpty || threshold <= 0) continue;
+
+      final current = tagCount[tag] ?? 0;
+      if (current < threshold) {
+        batch.delete(d.reference);
+      }
+    }
+
+    await batch.commit();
+    notifyListeners();
+  }
 }
