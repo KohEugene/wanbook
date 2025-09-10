@@ -12,7 +12,8 @@ class BookProgress extends StatelessWidget {
   final VoidCallback? onTap;
   final bool isEditingMode;
   final bool isSelected;
-  final ValueChanged<bool?>? onCheckboxChanged;
+  final VoidCallback?  onSelect;
+  //final ValueChanged<bool?>? onCheckboxChanged;
 
   const BookProgress({
     Key? key,
@@ -21,7 +22,8 @@ class BookProgress extends StatelessWidget {
     this.onTap,
     this.isEditingMode = false,
     this.isSelected = false,
-    this.onCheckboxChanged,
+    this.onSelect
+    //this.onCheckboxChanged,
   }) : super(key: key);
 
   String formatElapsedTime(DateTime updatedAt) {
@@ -46,14 +48,19 @@ class BookProgress extends StatelessWidget {
 
     String lastReadTimeStr = formatElapsedTime(readingBook.updatedAt);
 
-    return GestureDetector(
-      onTap: isEditingMode ? null : onTap,
-      child: SizedBox(
-        width: 100,
-        height: 210,
-        child: Stack(
-          children: [
-            Column(
+    return InkWell(
+      onTap: isEditingMode ?  onSelect : onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: AnimatedContainer(
+          duration: Duration(milliseconds: 200),
+          width: 110,
+          height: 225,
+          padding: EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: isSelected ? const Color(0xffCCE4FF) : Colors.white,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
@@ -113,23 +120,7 @@ class BookProgress extends StatelessWidget {
                   ],
                 )
               ],
-            ),
-            if (isEditingMode)
-              Positioned(
-                top: 0,
-                left: 0,
-                child: Checkbox(
-                  value: isSelected,
-                  onChanged: onCheckboxChanged,
-                  activeColor: Color(0xff0077FF),
-                  checkColor: Colors.white,
-                  side: BorderSide(
-                    color: Color(0xff777777)
-                  ),
-                ),
-              ),
-          ]
-        ),
+          ),
       ),
     );
   }
