@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:wanbook/screen/aichat/chatlist_screen.dart';
@@ -934,8 +935,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ]),
           const SizedBox(height: 8),
-          FutureBuilder<List<BadgeItem>>(
-            future: _recentBadgesFuture,
+
+          StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('users')
+                .doc(userId) 
+                .collection('achievements')
+                .where('unlocked', isEqualTo: true)
+                .orderBy('unlockedAt', descending: true)
+                .limit(3)
+                .snapshots(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return GridView.count(
@@ -955,34 +964,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
               if (snapshot.hasError) {
                 return Text(
                   '배지를 불러오는 중 오류가 발생했습니다.\n${snapshot.error}',
-                  style:
-                      const TextStyle(color: Color(0xff777777), fontSize: 12),
+                  style: const TextStyle(color: Color(0xff777777), fontSize: 12),
                 );
               }
 
-              final badges = (snapshot.data ?? const <BadgeItem>[]);
+              final badges = snapshot.data?.docs ?? [];
               if (badges.isEmpty) {
                 return const Text(
                   '아직 획득한 배지가 없어요.',
-                  style:
-                      TextStyle(color: Color(0xff777777), fontSize: 12),
+                  style: TextStyle(color: Color(0xff777777), fontSize: 12),
                 );
               }
 
-              final view = badges.take(3).toList();
-
               return GridView.builder(
-                itemCount: view.length,
+                itemCount: badges.length,
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 gridDelegate:
                     const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: _achieveCross,
-                  mainAxisSpacing: _achieveMainSpace,
-                  crossAxisSpacing: _achieveCrossSpace,
-                  childAspectRatio: _achieveAspect,
+                  crossAxisCount: 3,
+                  mainAxisSpacing: 16.0,
+                  crossAxisSpacing: 14.0,
+                  childAspectRatio: 0.53,
                 ),
-                itemBuilder: (_, i) => _achievementTile(view[i]),
+                itemBuilder: (_, i) {
+                  final m = badges[i].data() as Map<String, dynamic>;
+                  final b = BadgeItem(
+                    id: (m['id'] as String?) ?? badges[i].id,
+                    title: (m['title'] as String?) ?? '',
+                    asset: (m['asset'] as String?) ?? '',
+                    unlocked: true,
+                    tag: (m['tag'] as String?) ?? '',
+                    threshold: (m['threshold'] as num?)?.toInt() ?? 0,
+                  );
+                  return _achievementTile(b);
+                },
               );
             },
           ),
