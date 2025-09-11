@@ -51,12 +51,12 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
     super.dispose();
   }
 
-  void onCheckboxChanged(String bookId, bool isChecked) {
+  void handleSelect(String bookId) {
     setState(() {
-      if (isChecked) {
-        selectedBookIds.add(bookId);
-      } else {
+      if (selectedBookIds.contains(bookId)) {
         selectedBookIds.remove(bookId);
+      } else {
+        selectedBookIds.add(bookId);
       }
     });
   }
@@ -205,17 +205,17 @@ class _LibraryScreenState extends State<LibraryScreen> with SingleTickerProvider
                         AllBookScreen(
                           isEditingMode: isEditingMode,
                           selectedBookIds: selectedBookIds,
-                          onCheckboxChanged: onCheckboxChanged,
+                          onSelect: handleSelect,
                         ),
                         ReadingBookScreen(
                           isEditingMode: isEditingMode,
                           selectedBookIds: selectedBookIds,
-                          onCheckboxChanged: onCheckboxChanged,
+                          onSelect: handleSelect,
                         ),
                         FinishBookScreen(
                           isEditingMode: isEditingMode,
                           selectedBookIds: selectedBookIds,
-                          onCheckboxChanged: onCheckboxChanged,
+                          onSelect: handleSelect,
                         ),
                       ],
                   )

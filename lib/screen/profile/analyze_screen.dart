@@ -364,9 +364,9 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
         automaticallyImplyLeading: false,
         title: const Text('독서 패턴 분석'),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Navigator.pop(context),
-          tooltip: '뒤로가기',
+          icon: const Icon(Icons.chevron_left_rounded),
+          color: Colors.black,
         ),
       ),
       body: _loading
@@ -416,7 +416,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
                       const SizedBox(height: 16),
                       const Text(
                         '정체 시간 상위 구간(Top 3)',
-                        style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
                       ),
                       const SizedBox(height: 8),
                       _topBuckets(),
@@ -449,7 +449,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
                       const SizedBox(width: 6),
                       const Text(
                         '책멍이 코멘트',
-                        style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
                       ),
                     ],
                   ),
@@ -477,7 +477,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
           titleWidget ??
               Text(
                 title,
-                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
               ),
           const SizedBox(height: 12),
           child,
@@ -501,7 +501,8 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
         for (final (value, label) in options)
           DropdownMenuItem<String?>(
             value: value,
-            child: Text(label),
+            child: Text(label,
+              style: const TextStyle(fontWeight: FontWeight.w400, fontSize: 14)),
           ),
       ],
       onChanged: (val) async {
@@ -783,7 +784,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
           padding: const EdgeInsets.only(top: 4, bottom: 6),
           child: Text(
             title,
-            style: const TextStyle(fontWeight: FontWeight.w700),
+            style: const TextStyle(fontWeight: FontWeight.w600),
           ),
         ));
         continue;
@@ -806,7 +807,10 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
                 ),
               ),
               const SizedBox(width: 8),
-              Expanded(child: Text(body)),
+              Expanded(child: Text(
+                body,
+                style: const TextStyle(fontWeight: FontWeight.w400),)
+              ),
             ],
           ),
         ));
@@ -837,12 +841,12 @@ class _LegendLine extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const labelStyle = TextStyle(
-      fontWeight: FontWeight.w700,
+      fontWeight: FontWeight.w600,
       fontSize: 14,
     );
     const valueStyle = TextStyle(
       fontSize: 14,
-      fontWeight: FontWeight.w700,
+      fontWeight: FontWeight.w600,
       color: Color(0xff0077FF),
     );
     const descStyle = TextStyle(
