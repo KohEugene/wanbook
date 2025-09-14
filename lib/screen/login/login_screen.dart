@@ -10,6 +10,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
 import 'package:wanbook/model/user_model.dart';
 import 'package:wanbook/screen/login/join_screen.dart';
+import 'package:wanbook/shared/alarm_service.dart';
 import 'package:wanbook/shared/size_config.dart';
 
 import '../../provider/user_provider.dart';
@@ -239,26 +240,42 @@ class _LoginScreenState extends State<LoginScreen> {
               final userProvider = Provider.of<UserProvider>(context, listen: false);
               userProvider.setUser(userModel);
 
+              await AlarmService.saveFcmToken(userId);
+
               if (saveId) {
                 await storage.write(key: 'keepLogin', value: userModel.userId);
+                await FirebaseFirestore.instance.collection("users")
+                    .doc(userId)
+                    .set({
+                  "keepLoggedIn": true,
+                }, SetOptions(merge: true));
               } else {
                 await storage.delete(key: 'keepLogin');
+                await FirebaseFirestore.instance.collection("users")
+                    .doc(userId)
+                    .set({
+                  "keepLoggedIn": false,
+                }, SetOptions(merge: true));
               }
 
-              await FlutterLocalNotification.scheduleNotifications(userId);
+              //await FlutterLocalNotification.scheduleNotifications(userId);
               Navigator.push(context, MaterialPageRoute(
                 builder: (context) {
                   return MenuBottom();
                 },
               ));
             } on FirebaseAuthException catch (e) {
-              if (e.code == 'user-not-found') {
+              if (e.code == 'invalid-credential') {
                 setState(() {
                   _idError = '아이디가 존재하지 않아요';
                 });
-              } else {
+              } else if (e.code == 'wrong-password') {
                 setState(() {
                   _pwdError = '비밀번호를 잘못 입력했어요';
+                });
+              } else {
+                setState(() {
+                  _pwdError = '로그인 실패: ${e.code}';
                 });
               }
             }

@@ -17,6 +17,7 @@ import '../../model/book_model.dart';
 import '../../provider/badge_provider.dart';
 import '../../provider/user_book_provider.dart';
 import '../../provider/user_provider.dart';
+import '../../shared/alarm_service.dart';
 import '../../shared/size_config.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -296,6 +297,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: OutlinedButton(
                 onPressed: () async {
                   await FirebaseAuth.instance.signOut();
+                  await AlarmService.clearFcmToken(userId);
                   await storage.delete(key: 'keepLogin');
                   if (!mounted) return;
                   Navigator.of(context).pushAndRemoveUntil(
