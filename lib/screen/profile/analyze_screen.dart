@@ -135,7 +135,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
           0,
           (a, s) => a + ((s.data()['total_active_seconds'] ?? 0) as num).toInt(),
         );
-        _sessionCount += sess.docs.length; 
+        _sessionCount += sess.docs.length;
 
         final y = int.parse(d.id.substring(0, 4));
         final m = int.parse(d.id.substring(5, 7));
@@ -265,48 +265,97 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
     _bookAverages.sort((a, b) => b.avgSecs.compareTo(a.avgSecs));
   }
 
-  // 오각형 레이더 계산
-  List<double> _buildHabitScores() {
-    final days = widget.rangeDays.clamp(1, 365);
-    final consist = (_activeDays / days) * 100.0;
+// 오각형 레이더 계산 (개선판)
+List<double> _buildHabitScores() {
+  // 1) 꾸준함: 활동일/기간
+  final days = widget.rangeDays.clamp(1, 365);
+  final consist = (_activeDays / days) * 100.0;
 
-    final copy = List<int>.from(_dwell)..sort((a, b) => b.compareTo(a));
-    final top10 = copy.take(10).toList();
-    final topAvg =
-        top10.isEmpty ? 0.0 : top10.reduce((a, b) => a + b) / top10.length;
-    final focus = (topAvg / 60.0 * 100).clamp(0, 100);
+  final totalDwell = _dwell.fold<int>(0, (a, b) => a + b);
+  final nzDwell = _dwell.where((v) => v > 0).toList();
 
-    final mean =
-        _dwell.isEmpty ? 0.0 : _dwell.reduce((a, b) => a + b) / _dwell.length;
-    final variance = _dwell.isEmpty
-        ? 0.0
-        : _dwell
-                .map((x) => (x - mean) * (x - mean))
-                .reduce((a, b) => a + b) /
-            _dwell.length;
-    final stddev = math.sqrt(variance);
-    final cv = mean == 0 ? 1.0 : (stddev / mean);
-    final stability = (100 * (1 - cv)).clamp(0, 100);
-
-    final sum = _dwell.fold<int>(0, (a, b) => a + b);
-    final top5Sum =
-        copy.take((copy.length * 0.05).ceil()).fold<int>(0, (a, b) => a + b);
-    final reread = sum == 0 ? 0.0 : (top5Sum / sum * 100.0);
-
-    final totalMin = _hours.fold<int>(0, (a, b) => a + b);
-    double entropy = 0;
-    for (final m in _hours) {
-      if (m <= 0) continue;
-      final p = m / (totalMin == 0 ? 1 : totalMin);
-      entropy += -p * (p == 0 ? 0 : math.log(p));
+  // 2) 집중유지: 지속성(전체 평균) × 속도안정 의 조화 평균(기하평균)
+  double sustainScore = 0.0;
+  if (nzDwell.length >= 10) {
+    final sorted = [...nzDwell]..sort();
+    double q(double p) {
+      final i = ((sorted.length - 1) * p).clamp(0, sorted.length - 1).toDouble();
+      final lo = i.floor();
+      final hi = i.ceil();
+      if (lo == hi) return sorted[lo].toDouble();
+      final t = i - lo;
+      return sorted[lo] * (1 - t) + sorted[hi] * t;
     }
-    final maxH = math.log(24);
-    final rhythm = maxH == 0 ? 0 : (entropy / maxH * 100);
+    final p80 = q(0.80), p95 = q(0.95);
+    final slice = sorted.where((x) => x >= p80 && x <= p95).toList();
+    final trimmedMean = slice.isEmpty
+        ? sorted.reduce((a, b) => a + b) / sorted.length
+        : slice.reduce((a, b) => a + b) / slice.length;
 
-    return [consist, focus, stability, reread, rhythm]
-        .map((e) => e.clamp(0, 100).toDouble())
-        .toList();
+    final norm = (trimmedMean / 90.0) * 100.0;
+    sustainScore = math.sqrt(norm.clamp(0.0, 100.0) * 100.0) / 10.0; 
+  } else {
+    sustainScore = 50.0; 
   }
+
+  // 3) 속도 안정: 0 제거 + 5~95% 윈저라이징 + CV 스케일링
+  double stability;
+  if (nzDwell.length < 5) {
+    stability = 50.0;
+  } else {
+    final vals = [...nzDwell]..sort();
+    final n = vals.length;
+    final loIdx = (n * 0.05).floor();
+    final hiIdx = (n * 0.95).ceil() - 1;
+    final lo = vals[loIdx];
+    final hi = vals[hiIdx];
+    final trimmed = vals.map((v) => v.clamp(lo, hi)).toList();
+
+    final mean = trimmed.reduce((a, b) => a + b) / trimmed.length;
+    double varSum = 0.0;
+    for (final v in trimmed) {
+      final d = v - mean;
+      varSum += d * d;
+    }
+    final std = math.sqrt(varSum / trimmed.length);
+    final cv = mean == 0 ? 0.0 : (std / mean);
+
+    const kappa = 1.5; // 1.5~2.0 조정 가능
+    stability = (100.0 * (1.0 - (cv / kappa))).clamp(0.0, 100.0);
+  }
+
+  final focus = math.sqrt(sustainScore * stability);
+
+  // 4) 재독 성향: 분포 쏠림(집중도) 기반 (HHI 정규화)
+  double reread = 0.0;
+  if (totalDwell > 0) {
+    double hhi = 0.0;
+    for (final v in _dwell) {
+      if (v <= 0) continue;
+      final p = v / totalDwell;
+      hhi += p * p;
+    }
+    const hhiMin = 1.0 / 100.0;
+    final normHHI = ((hhi - hhiMin) / (1.0 - hhiMin)).clamp(0.0, 1.0);
+    reread = (math.sqrt(normHHI) * 0.8) * 100.0;
+  }
+
+  // 5) 리듬 다양성: 시간대 분포 엔트로피 정규화(기존 유지)
+  final totalMin = _hours.fold<int>(0, (a, b) => a + b);
+  double entropy = 0;
+  for (final m in _hours) {
+    if (m <= 0) continue;
+    final p = m / (totalMin == 0 ? 1 : totalMin);
+    entropy += -p * (p == 0 ? 0 : math.log(p));
+  }
+  final maxH = math.log(24);
+  final rhythm = maxH == 0 ? 0 : (entropy / maxH * 100);
+
+  return [consist, focus, stability, reread, rhythm]
+      .map((e) => e.clamp(0, 100).toDouble())
+      .toList();
+}
+
 
   String _formatHms(int secs) {
     final h = secs ~/ 3600;
@@ -334,7 +383,6 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
 <책멍이 조언>
 - (사용자에게 도움이 되는 전반적인 조언 2~3줄)
 - "재독 성향"이 높을 경우에도 무조건 긍정으로 단정하지 말고, 이해가 어려워 멈췄을 수 있다는 가능성을 함께 언급해주세요.
-- 마지막 문장은 "모르는 부분이 있으시면 책멍이에게 물어보시는 건 어떨까요?"로 끝내주세요.
 
 데이터:
 - 책: $title
@@ -354,11 +402,11 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
     setState(() {}); // FutureBuilder 갱신
   }
 
-
   @override
   Widget build(BuildContext context) {
     final avgPerActiveDay =
         _activeDays == 0 ? 0 : (_totalSecs ~/ _activeDays);
+    final radarScores = _buildHabitScores();
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -372,7 +420,8 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
       body: _loading
           ? Center(
               child: CircularProgressIndicator(
-                valueColor: const AlwaysStoppedAnimation(Color(0xff0077FF)), backgroundColor: const Color(0xffCCE4FF),                 
+                valueColor: const AlwaysStoppedAnimation(Color(0xff0077FF)),
+                backgroundColor: const Color(0xffCCE4FF),
               ),
             )
           : ListView(
@@ -387,7 +436,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
                   _metricStrip([
                     ('전체 독서 시간', _formatHms(_totalSecs)),
                     ('하루 평균', _formatHms(avgPerActiveDay)),
-                    ('책 펼친 횟수', '$_sessionCount'), 
+                    ('책 펼친 횟수', '$_sessionCount'),
                     ('독서한 날', '$_activeDays일'),
                     ('연속 독서', '$_streak일'),
                   ]),
@@ -429,9 +478,9 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      HabitRadarChart(scores: _buildHabitScores()),
+                      HabitRadarChart(scores: radarScores),
                       const SizedBox(height: 8),
-                      _radarLegend(),
+                      _radarLegend(radarScores),
                     ],
                   ),
                 ),
@@ -583,7 +632,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
     return LayoutBuilder(
       builder: (context, c) {
         final gap = 12.0;
-        final halfW = (c.maxWidth - gap) / 2; 
+        final halfW = (c.maxWidth - gap) / 2;
         return Wrap(
           spacing: gap,
           runSpacing: gap,
@@ -605,7 +654,10 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
                       Container(
                         width: 6,
                         height: 6,
-                        decoration: const BoxDecoration( color: Color(0xff0077FF), shape: BoxShape.circle,),
+                        decoration: const BoxDecoration(
+                          color: Color(0xff0077FF),
+                          shape: BoxShape.circle,
+                        ),
                       ),
                       const SizedBox(width: 8),
                       Expanded(
@@ -618,7 +670,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
                       const SizedBox(width: 8),
                       Text(
                         value,
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: Color(0xff0077FF),),
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: Color(0xff0077FF)),
                       ),
                     ],
                   ),
@@ -672,21 +724,20 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
   }
 
   // 5. 오각형 레이더
-  Widget _radarLegend() {
-    final scores = _buildHabitScores().map((e) => e.toStringAsFixed(0)).toList();
-
+  Widget _radarLegend(List<double> scores) {
+    final s = scores.map((e) => e.toStringAsFixed(0)).toList();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _LegendLine(label: '꾸준', value: scores[0], desc: '얼마나 꾸준히 읽었는지'),
+        _LegendLine(label: '꾸준', value: s[0], desc: '얼마나 꾸준히 읽었는지'),
         const SizedBox(height: 6),
-        _LegendLine(label: '집중', value: scores[1], desc: '읽는 동안 집중을 잘 유지했는지'),
+        _LegendLine(label: '집중', value: s[1], desc: '읽는 동안 집중을 잘 유지했는지'),
         const SizedBox(height: 6),
-        _LegendLine(label: '안정', value: scores[2], desc: '읽는 속도가 균일한지'),
+        _LegendLine(label: '안정', value: s[2], desc: '읽는 속도가 균일한지'),
         const SizedBox(height: 6),
-        _LegendLine(label: '재독', value: scores[3], desc: '같은 부분을 반복해서 읽는 성향이 있는지'),
+        _LegendLine(label: '재독', value: s[3], desc: '같은 부분을 반복해서 읽는 성향이 있는지'),
         const SizedBox(height: 6),
-        _LegendLine(label: '리듬', value: scores[4], desc: '읽는 시간이 얼마나 고르게 분포했는지'),
+        _LegendLine(label: '리듬', value: s[4], desc: '읽는 시간이 얼마나 고르게 분포했는지'),
       ],
     );
   }
@@ -834,9 +885,9 @@ class _LegendLine extends StatelessWidget {
     required this.desc,
   });
 
-  final String label; 
-  final String value; 
-  final String desc;  
+  final String label;
+  final String value;
+  final String desc;
 
   @override
   Widget build(BuildContext context) {

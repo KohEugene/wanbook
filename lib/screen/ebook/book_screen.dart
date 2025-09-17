@@ -143,9 +143,7 @@ class _BookScreenState extends State<BookScreen> with WidgetsBindingObserver {
         'last_position': rounded,
         'update_date': FieldValue.serverTimestamp(),
       });
-      print("Firestore에 진행률 저장됨: $rounded");
     } catch (e) {
-      print("Firestore 저장 실패: $e");
     }
   }
 
@@ -240,7 +238,7 @@ class _BookScreenState extends State<BookScreen> with WidgetsBindingObserver {
         .collection('reading_books')
         .doc(widget.title);
 
-    if (progress >= 0.995) {
+    if (progress >= 0.991) {
       await docRef.update({
         'is_completed': true,
         'end_date': FieldValue.serverTimestamp(),
