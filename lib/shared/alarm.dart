@@ -217,7 +217,7 @@ class FlutterLocalNotification {
             lastNotifiedDate != null && now.difference(lastNotifiedDate).inMinutes < 1;
 
         if (lastReadDate != null &&
-            now.difference(lastReadDate).inMinutes >= 1 &&
+            now.difference(lastReadDate).inMinutes >= 3 &&
             !hasNotifiedRecently) {
 
           final bookId = book['bookId'] as String;
