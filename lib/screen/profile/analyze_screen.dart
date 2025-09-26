@@ -1,15 +1,11 @@
 // 사용자 독서 패턴 분석 화면
-import 'dart:math' as math;
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wanbook/provider/user_provider.dart';
-import 'package:wanbook/provider/user_book_provider.dart';
-import 'package:wanbook/model/book_model.dart';
-import 'package:wanbook/model/user_book_model.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:wanbook/shared/openai_shared.dart';
 import 'package:wanbook/screen/profile/analyze_chart.dart';
+import 'package:wanbook/screen/profile/analyze_value.dart';
 
 class AnalyzeScreen extends StatefulWidget {
   const AnalyzeScreen({
@@ -41,6 +37,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
   List<_BookAvgRow> _bookAverages = [];
 
   Future<String>? _coachFuture;
+  bool _showRadarDetails = false;
 
   @override
   void initState() {
@@ -54,9 +51,32 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
   Future<void> _bootstrap() async {
     setState(() => _loading = true);
     try {
-      await _loadBooksFromLibrary();
-      await _loadMetricsFor(_selectedBookId);
-      await _loadBookAverages();
+      final loadedBooks = await AnalyzeValue.loadBooks(context);
+      _books
+        ..clear()
+        ..addAll(loadedBooks);
+
+      final m = await AnalyzeValue.loadMetrics(
+        context: context,
+        selectedBookId: _selectedBookId,
+        books: _books,
+        rangeDays: widget.rangeDays,
+      );
+      _applyMetrics(m);
+
+      final avgs = await AnalyzeValue.loadBookAverages(
+        context: context,
+        books: _books,
+        rangeDays: widget.rangeDays,
+      );
+      _bookAverages = avgs.map((r) => _BookAvgRow(
+        bookId: r.bookId,
+        title: r.title,
+        avgSecs: r.avgSecs,
+        activeDays: r.activeDays,
+        totalSecs: r.totalSecs,
+      )).toList();
+
       _refreshCoachNote();
     } catch (e) {
       debugPrint('Analyze bootstrap error: $e');
@@ -65,305 +85,64 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
     }
   }
 
-  // 책 목록 가져오기
-  Future<void> _loadBooksFromLibrary() async {
-    _books.clear();
-    final list =
-        await context.read<UserBookProvider>().fetchReadingBooks(context);
-
-    for (final m in list) {
-      final book = m['book'] as BookModel;
-      final userBook = m['userBook'] as UserBookModel;
-      _books[userBook.bookId] = book.title;
-    }
-    if (_books.isEmpty) {
-      final uid = _uid();
-      final snap = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(uid)
-          .collection('reading_books')
-          .get();
-      for (final d in snap.docs) {
-        _books[d.id] = (d.data()['title'] ?? d.id).toString();
-      }
-    }
+  void _applyMetrics(AnalyzeMetrics m) {
+    _totalSecs = m.totalSecs;
+    _activeDays = m.activeDays;
+    _sessionCount = m.sessionCount;
+    _streak = m.streak;
+    _hours = m.hours;
+    _dwell = m.dwell;
+    _clickByRoute = m.clickByRoute;
+    _clickByEntry = m.clickByEntry;
   }
 
   // reading_metrics 합산
   Future<void> _loadMetricsFor(String? bookId) async {
-    _totalSecs = 0;
-    _activeDays = 0;
-    _sessionCount = 0;
-    _streak = 0;
-    _hours = List<int>.filled(24, 0);
-    _dwell = List<int>.filled(100, 0);
-    _clickByRoute = {};
-    _clickByEntry = {};
-
-    final uid = _uid();
-    final now = DateTime.now();
-    final start = DateTime(now.year, now.month, now.day)
-        .subtract(Duration(days: widget.rangeDays - 1));
-    final dailyMap = <DateTime, int>{};
-    final targetIds = bookId != null ? [bookId] : _books.keys.toList();
-
-    for (final bId in targetIds) {
-      final col = FirebaseFirestore.instance
-          .collection('users')
-          .doc(uid)
-          .collection('reading_books')
-          .doc(bId)
-          .collection('reading_metrics');
-
-      final all = await col.get();
-
-      final docs = all.docs.where((d) {
-        final id = d.id;
-        if (id.length < 10) return false;
-        final y = int.tryParse(id.substring(0, 4));
-        final m = int.tryParse(id.substring(5, 7));
-        final dd = int.tryParse(id.substring(8, 10));
-        if (y == null || m == null || dd == null) return false;
-        final day = DateTime(y, m, dd);
-        return !day.isBefore(start) && !day.isAfter(now);
-      }).toList()
-        ..sort((a, b) => a.id.compareTo(b.id));
-
-      for (final d in docs) {
-        final sess = await d.reference.collection('sessions').get();
-        final daySum = sess.docs.fold<int>(
-          0,
-          (a, s) => a + ((s.data()['total_active_seconds'] ?? 0) as num).toInt(),
-        );
-        _sessionCount += sess.docs.length;
-
-        final y = int.parse(d.id.substring(0, 4));
-        final m = int.parse(d.id.substring(5, 7));
-        final dd = int.parse(d.id.substring(8, 10));
-        final dayKey = DateTime(y, m, dd);
-
-        // 활동 일자
-        _totalSecs += daySum;
-        if (daySum > 0) _activeDays++;
-        dailyMap[dayKey] = (dailyMap[dayKey] ?? 0) + daySum;
-
-        // 시간대 분포
-        final arrHours =
-            List<int>.from(d.data()['hour_histogram'] ?? List.filled(24, 0));
-        for (int h = 0; h < 24; h++) {
-          _hours[h] += (h < arrHours.length ? arrHours[h] : 0);
-        }
-
-        // 진행률 0~99% 정체
-        final arrDwell = List<num>.from(
-            d.data()['dwell_seconds_by_bucket'] ?? List.filled(100, 0));
-        for (int i = 0; i < 100; i++) {
-          _dwell[i] += (i < arrDwell.length ? arrDwell[i].round() : 0);
-        }
-      }
-      await _loadChatbotClicksForBook(uid, bId, start);
-    }
-    _streak = _calcStreak(dailyMap, start, DateTime.now());
+    final m = await AnalyzeValue.loadMetrics(
+      context: context,
+      selectedBookId: bookId,
+      books: _books,
+      rangeDays: widget.rangeDays,
+    );
+    _applyMetrics(m);
   }
 
-  // chatbot_clicks 횟수
-  Future<void> _loadChatbotClicksForBook(
-      String uid, String bookId, DateTime start) async {
-    try {
-      final q = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(uid)
-          .collection('reading_books')
-          .doc(bookId)
-          .collection('chatbot_clicks')
-          .where('ts', isGreaterThanOrEqualTo: Timestamp.fromDate(start))
-          .get();
-
-      for (final c in q.docs) {
-        final data = c.data();
-        final route = (data['route'] ?? 'unknown').toString();
-        final entry = (data['entry_id'] ?? 'unknown').toString();
-        _clickByRoute[route] = (_clickByRoute[route] ?? 0) + 1;
-        _clickByEntry[entry] = (_clickByEntry[entry] ?? 0) + 1;
-      }
-    } catch (e) {
-      debugPrint('chatbot_clicks read error: $e');
-    }
+  // 오각형 레이더 계산
+  List<double> _buildHabitScores() {
+    return AnalyzeValue.buildHabitScores(
+      m: AnalyzeMetrics(
+        totalSecs: _totalSecs,
+        activeDays: _activeDays,
+        sessionCount: _sessionCount,
+        streak: _streak,
+        hours: _hours,
+        dwell: _dwell,
+        clickByRoute: _clickByRoute,
+        clickByEntry: _clickByEntry,
+      ),
+      rangeDays: widget.rangeDays,
+    );
   }
 
-  // 연속 읽은 일수 계산
-  int _calcStreak(Map<DateTime, int> daily, DateTime start, DateTime now) {
-    int streak = 0;
-    DateTime cur = DateTime(now.year, now.month, now.day);
-    for (int i = 0; i < widget.rangeDays; i++) {
-      final key = DateTime(cur.year, cur.month, cur.day);
-      final sum = daily[key] ?? 0;
-      if (sum > 0) {
-        streak++;
-        cur = cur.subtract(const Duration(days: 1));
-      } else {
-        break;
-      }
-    }
-    return streak;
+  // 오각형 설명 텍스트
+  List<HabitDetail> _buildHabitDetails() {
+    return AnalyzeValue.buildHabitDetails(
+      m: AnalyzeMetrics(
+        totalSecs: _totalSecs,
+        activeDays: _activeDays,
+        sessionCount: _sessionCount,
+        streak: _streak,
+        hours: _hours,
+        dwell: _dwell,
+        clickByRoute: _clickByRoute,
+        clickByEntry: _clickByEntry,
+      ),
+      rangeDays: widget.rangeDays,
+    );
   }
-
-  // 책별 평균
-  Future<void> _loadBookAverages() async {
-    _bookAverages = [];
-    final uid = _uid();
-    final now = DateTime.now();
-    final start = DateTime(now.year, now.month, now.day)
-        .subtract(Duration(days: widget.rangeDays - 1));
-
-    for (final e in _books.entries) {
-      final bId = e.key;
-      final title = e.value;
-
-      final col = FirebaseFirestore.instance
-          .collection('users')
-          .doc(uid)
-          .collection('reading_books')
-          .doc(bId)
-          .collection('reading_metrics');
-
-      final all = await col.get();
-      final docs = all.docs.where((d) {
-        final id = d.id;
-        if (id.length < 10) return false;
-        final y = int.tryParse(id.substring(0, 4));
-        final m = int.tryParse(id.substring(5, 7));
-        final dd = int.tryParse(id.substring(8, 10));
-        if (y == null || m == null || dd == null) return false;
-        final day = DateTime(y, m, dd);
-        return !day.isBefore(start) && !day.isAfter(now);
-      });
-
-      int totalSecs = 0;
-      int activeDays = 0;
-
-      for (final d in docs) {
-        final sess = await d.reference.collection('sessions').get();
-        final daySum = sess.docs.fold<int>(
-          0,
-          (a, s) => a + ((s.data()['total_active_seconds'] ?? 0) as num).toInt(),
-        );
-        totalSecs += daySum;
-        if (daySum > 0) activeDays++;
-      }
-
-      final avgSecs = activeDays == 0 ? 0 : totalSecs ~/ activeDays;
-      _bookAverages.add(_BookAvgRow(
-        bookId: bId,
-        title: title,
-        avgSecs: avgSecs,
-        activeDays: activeDays,
-        totalSecs: totalSecs,
-      ));
-    }
-
-    _bookAverages.sort((a, b) => b.avgSecs.compareTo(a.avgSecs));
-  }
-
-// 오각형 레이더 계산 (개선판)
-List<double> _buildHabitScores() {
-  // 1) 꾸준함: 활동일/기간
-  final days = widget.rangeDays.clamp(1, 365);
-  final consist = (_activeDays / days) * 100.0;
-
-  final totalDwell = _dwell.fold<int>(0, (a, b) => a + b);
-  final nzDwell = _dwell.where((v) => v > 0).toList();
-
-  // 2) 집중유지: 지속성(전체 평균) × 속도안정 의 조화 평균(기하평균)
-  double sustainScore = 0.0;
-  if (nzDwell.length >= 10) {
-    final sorted = [...nzDwell]..sort();
-    double q(double p) {
-      final i = ((sorted.length - 1) * p).clamp(0, sorted.length - 1).toDouble();
-      final lo = i.floor();
-      final hi = i.ceil();
-      if (lo == hi) return sorted[lo].toDouble();
-      final t = i - lo;
-      return sorted[lo] * (1 - t) + sorted[hi] * t;
-    }
-    final p80 = q(0.80), p95 = q(0.95);
-    final slice = sorted.where((x) => x >= p80 && x <= p95).toList();
-    final trimmedMean = slice.isEmpty
-        ? sorted.reduce((a, b) => a + b) / sorted.length
-        : slice.reduce((a, b) => a + b) / slice.length;
-
-    final norm = (trimmedMean / 90.0) * 100.0;
-    sustainScore = math.sqrt(norm.clamp(0.0, 100.0) * 100.0) / 10.0; 
-  } else {
-    sustainScore = 50.0; 
-  }
-
-  // 3) 속도 안정: 0 제거 + 5~95% 윈저라이징 + CV 스케일링
-  double stability;
-  if (nzDwell.length < 5) {
-    stability = 50.0;
-  } else {
-    final vals = [...nzDwell]..sort();
-    final n = vals.length;
-    final loIdx = (n * 0.05).floor();
-    final hiIdx = (n * 0.95).ceil() - 1;
-    final lo = vals[loIdx];
-    final hi = vals[hiIdx];
-    final trimmed = vals.map((v) => v.clamp(lo, hi)).toList();
-
-    final mean = trimmed.reduce((a, b) => a + b) / trimmed.length;
-    double varSum = 0.0;
-    for (final v in trimmed) {
-      final d = v - mean;
-      varSum += d * d;
-    }
-    final std = math.sqrt(varSum / trimmed.length);
-    final cv = mean == 0 ? 0.0 : (std / mean);
-
-    const kappa = 1.5; // 1.5~2.0 조정 가능
-    stability = (100.0 * (1.0 - (cv / kappa))).clamp(0.0, 100.0);
-  }
-
-  final focus = math.sqrt(sustainScore * stability);
-
-  // 4) 재독 성향: 분포 쏠림(집중도) 기반 (HHI 정규화)
-  double reread = 0.0;
-  if (totalDwell > 0) {
-    double hhi = 0.0;
-    for (final v in _dwell) {
-      if (v <= 0) continue;
-      final p = v / totalDwell;
-      hhi += p * p;
-    }
-    const hhiMin = 1.0 / 100.0;
-    final normHHI = ((hhi - hhiMin) / (1.0 - hhiMin)).clamp(0.0, 1.0);
-    reread = (math.sqrt(normHHI) * 0.8) * 100.0;
-  }
-
-  // 5) 리듬 다양성: 시간대 분포 엔트로피 정규화(기존 유지)
-  final totalMin = _hours.fold<int>(0, (a, b) => a + b);
-  double entropy = 0;
-  for (final m in _hours) {
-    if (m <= 0) continue;
-    final p = m / (totalMin == 0 ? 1 : totalMin);
-    entropy += -p * (p == 0 ? 0 : math.log(p));
-  }
-  final maxH = math.log(24);
-  final rhythm = maxH == 0 ? 0 : (entropy / maxH * 100);
-
-  return [consist, focus, stability, reread, rhythm]
-      .map((e) => e.clamp(0, 100).toDouble())
-      .toList();
-}
-
 
   String _formatHms(int secs) {
-    final h = secs ~/ 3600;
-    final m = (secs % 3600) ~/ 60;
-    final s = secs % 60;
-    if (h > 0) return '${h}h ${m}m';
-    if (m > 0) return '${m}m ${s}s';
-    return '${s}s';
+    return AnalyzeValue.formatHms(secs);
   }
 
   // 책멍이 코멘트 프롬포트
@@ -373,25 +152,23 @@ List<double> _buildHabitScores() {
         : (_books[_selectedBookId] ?? '선택한 책');
 
     final radar = _buildHabitScores();
-    final prompt = '''
-아래 데이터를 바탕으로 간결하고 정중한 한국어로 작성해주세요.
-
-요청 형식(그대로 지켜주세요):
-<분석 요약>
-- (핵심 수치 위주로 3~4줄)
-
-<책멍이 조언>
-- (사용자에게 도움이 되는 전반적인 조언 2~3줄)
-- "재독 성향"이 높을 경우에도 무조건 긍정으로 단정하지 말고, 이해가 어려워 멈췄을 수 있다는 가능성을 함께 언급해주세요.
-
-데이터:
-- 책: $title
-- 기간: 최근 ${widget.rangeDays}일
-- 총 읽은 시간: ${_formatHms(_totalSecs)}, 세션 수: $_sessionCount, 활동일: $_activeDays, 연속일: $_streak
-- 시간대 분포(분): ${_hours.join(',')}
-- 정체(버킷별 체류 초): ${_dwell.join(',')}
-- 레이더 점수 [꾸준함, 집중 유지, 속도 안정, 재독 성향, 리듬 다양성]: ${radar.map((e)=>e.toStringAsFixed(0)).join(', ')}
-''';
+    final prompt = AnalyzeValue.buildCoachPrompt(
+      title: title,
+      rangeDays: widget.rangeDays,
+      m: AnalyzeMetrics(
+        totalSecs: _totalSecs,
+        activeDays: _activeDays,
+        sessionCount: _sessionCount,
+        streak: _streak,
+        hours: _hours,
+        dwell: _dwell,
+        clickByRoute: _clickByRoute,
+        clickByEntry: _clickByEntry,
+      ),
+      radar: radar,
+      hours: _hours,
+      dwell: _dwell,
+    );
 
     _coachFuture = OpenAIShared.chatWithBook(
       bookTitle: title,
@@ -399,7 +176,7 @@ List<double> _buildHabitScores() {
       allowRecommendations: false,
       temperature: 0.2,
     ).then((r) => r.reply);
-    setState(() {}); // FutureBuilder 갱신
+    setState(() {});
   }
 
   @override
@@ -407,6 +184,8 @@ List<double> _buildHabitScores() {
     final avgPerActiveDay =
         _activeDays == 0 ? 0 : (_totalSecs ~/ _activeDays);
     final radarScores = _buildHabitScores();
+    final details = _buildHabitDetails();
+
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -481,6 +260,35 @@ List<double> _buildHabitScores() {
                       HabitRadarChart(scores: radarScores),
                       const SizedBox(height: 8),
                       _radarLegend(radarScores),
+                      const SizedBox(height: 8),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton(
+                          onPressed: () => setState(() => _showRadarDetails = !_showRadarDetails),
+                          style: TextButton.styleFrom(
+                            foregroundColor: const Color(0xff777777),
+                            textStyle: const TextStyle(fontSize: 12),
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          ).copyWith(
+                            overlayColor: WidgetStateProperty.all(Colors.transparent),
+                            splashFactory: NoSplash.splashFactory,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(_showRadarDetails ? '자세한 설명 접기' : '자세한 설명 보기'),
+                              const SizedBox(width: 4),
+                              Icon(_showRadarDetails ? Icons.chevron_left_rounded : Icons.chevron_right_rounded, size: 12,),
+                            ],
+                          ),
+                        ),
+                      ),
+                      AnimatedCrossFade(
+                        crossFadeState: _showRadarDetails ? CrossFadeState.showFirst : CrossFadeState.showSecond,
+                        duration: const Duration(milliseconds: 180),
+                        firstChild: _radarDetails(details),
+                        secondChild: const SizedBox.shrink(),
+                      ),
                     ],
                   ),
                 ),
@@ -614,9 +422,9 @@ List<double> _buildHabitScores() {
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text('하루 평균 독서 시간: ${_formatHms(row.avgSecs)}'),
+                Text('하루 평균 독서 시간: ${AnalyzeValue.formatHms(row.avgSecs)}'),
                 const SizedBox(height: 2),
-                Text('독서한 날: ${row.activeDays}일 · 총 ${_formatHms(row.totalSecs)}',
+                Text('독서한 날: ${row.activeDays}일 · 총 ${AnalyzeValue.formatHms(row.totalSecs)}',
                     style: const TextStyle(
                         color: Color(0xff777777), fontSize: 12)),
               ],
@@ -723,7 +531,7 @@ List<double> _buildHabitScores() {
     );
   }
 
-  // 5. 오각형 레이더
+  // 5-1. 오각형 레이더
   Widget _radarLegend(List<double> scores) {
     final s = scores.map((e) => e.toStringAsFixed(0)).toList();
     return Column(
@@ -738,6 +546,38 @@ List<double> _buildHabitScores() {
         _LegendLine(label: '재독', value: s[3], desc: '같은 부분을 반복해서 읽는 성향이 있는지'),
         const SizedBox(height: 6),
         _LegendLine(label: '리듬', value: s[4], desc: '읽는 시간이 얼마나 고르게 분포했는지'),
+      ],
+    );
+  }
+
+  // 5-2. 오각형 상세 설명
+  Widget _radarDetails(List<HabitDetail> details) {
+    const labelStyle = TextStyle(
+      fontWeight: FontWeight.w600,
+      fontSize: 14,
+      color: Colors.black,
+    );
+    const descStyle = TextStyle(
+      fontSize: 12,
+      color: Color(0xff777777),
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (final d in details) ...[
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(d.label, style: labelStyle),
+                const SizedBox(height: 6),
+                Text(d.methodText, style: descStyle),
+              ],
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -876,7 +716,7 @@ List<double> _buildHabitScores() {
   }
 }
 
-// 오각형 레이더 설명용
+// 오각형 레이더용 클래스
 class _LegendLine extends StatelessWidget {
   const _LegendLine({
     super.key,

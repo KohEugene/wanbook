@@ -212,7 +212,7 @@ class ReadingHeartbeat {
     final dwellHere = _dwellSecondsByBucket[_currentBucket] ?? 0.0;
     final rereadPattern = dwellAvg > 0 && dwellHere > dwellAvg * _hintConfig.rereadMultiplier;
 
-    // 분기점 근처(±1%p)
+    // 분기점 근처(+1%p or -1%p)
     final nearMilestone = _hintConfig.milestones.any((m) => (progress - m).abs() < 0.01);
 
     // 점수 계산(가중치는 필요하면 조절 가능)
